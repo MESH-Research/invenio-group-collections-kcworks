@@ -17,7 +17,7 @@ from flask import Flask
 from invenio_celery import InvenioCelery
 from invenio_db import InvenioDB
 from invenio_i18n import InvenioI18N
-from invenio_groups import InvenioGroups
+# from invenio_groups import InvenioGroups
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.schema import DropConstraint, DropSequence, DropTable
 
@@ -31,6 +31,32 @@ def celery_config():
     """
     return {}
 
+test_config = {
+
+    'SQLALCHEMY_DATABASE_URI': "postgresql+psycopg2://invenio:invenio@localhost:5432/invenio",
+    'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+    'INVENIO_WTF_CSRF_ENABLED': False,
+    'INVENIO_WTF_CSRF_METHODS': [],
+    'APP_DEFAULT_SECURE_HEADERS':
+        {'content_security_policy': {'default-src': []},
+                                     'force_https': False},
+    'BROKER_URL': 'amqp://guest:guest@localhost:5672//',
+    'CELERY_CACHE_BACKEND': 'memory',
+    'CELERY_RESULT_BACKEND': 'cache',
+    'CELERY_TASK_ALWAYS_EAGER': True,
+    'CELERY_TASK_EAGER_PROPAGATES_EXCEPTIONS': True,
+    'RATELIMIT_ENABLED': False,
+    'SECRET_KEY': 'test-secret-key',
+    'SECURITY_PASSWORD_SALT': 'test-secret-key',
+    'TESTING': True,
+}
+
+
+@pytest.fixture(scope='module')
+def app_config(app_config) -> dict:
+    for k, v in test_config.items():
+        app_config[k] = v
+    return app_config
 
 
 @compiles(DropTable, "postgresql")

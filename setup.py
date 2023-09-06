@@ -35,7 +35,8 @@ for reqs in extras_require.values():
     extras_require['all'].extend(reqs)
 
 packages = find_packages(include=['invenio_groups',
-                                  'invenio_groups.*'])
+                                  'invenio_groups.*',
+                                  'invenio_groups/alembic'])
 
 setup(
     name='invenio-groups',
