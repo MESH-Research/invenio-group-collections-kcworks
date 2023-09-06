@@ -1,0 +1,18 @@
+# -*- coding: utf-8 -*-
+#
+# This file is part of the invenio-groups package.
+# Copyright (C) 2023, MESH Research.
+#
+# invenio-groups is free software; you can redistribute it
+# and/or modify it under the terms of the MIT License; see
+# LICENSE file for more details.
+
+"""Unit tests for the invenio-groups alembic migrations.
+"""
+
+import pytest
+
+def test_alembic(testapp, db):
+    """Test alembic migrations.
+    """
+    assert True

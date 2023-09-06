@@ -11,10 +11,53 @@
 """
 
 from invenio_db import db
+from invenio_records.models import RecordMetadataBase
 
-class Group(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    group_name = db.Column(db.String(255), unique=True, nullable=False)
-    description = db.Column(db.String(255), nullable=True)
-    slug = db.Column(db.String(255), unique=True, nullable=False)
-    invenio_role = db.Column(db.String(255), nullable=True)
+class Group(db.Model, RecordMetadataBase):
+    """SQLAlchemy model for a group.
+
+    Metadata about a group is stored in the ``json`` field. The ``json`` field
+    is a JSONB field in PostgreSQL and a TEXT field in SQLite. This metadata is decoded and available through the ``data`` property.
+
+    A subclass depending on the basic record model defined in invenio_records.models. This base model provides the following fields:
+
+    :id: UUID identifier for the record.
+    :created: Timestamp for when the record was created. Inherted from
+              RecordMetadataBase and set automatically.
+    :updated: Timestamp for when the record was last updated. Inherted from
+              RecordMetadataBase and set automatically.
+    :json: JSON field for storing the record metadata.
+    :version_id: Enables SQLAlchemy version counter (not the same as SQLAlchemy-Continuum)
+
+    When you create a new ``Group`` the ``json`` field value should never be
+    ``NULL``. Default value is an empty dict. ``NULL`` value means that the
+    record metadata has been deleted.
+
+    The ``json`` field includes the following properties common to all records:
+
+    :is_deleted: Boolean flag to determine if a record is soft deleted.
+                 Inherted from RecordMetadataBase and set automatically.
+
+    The ``json`` field also includes the following properties holding metadata from the commons:
+
+    :commons_id
+    :group_name
+    :group_url
+    :privacy :public, private, or hidden
+    :description
+    :site_url
+    :profile_image
+    :who_can_upload :anyone, mods and admins, or admins only
+
+    Finally, the ``json`` field includes one property with internal Invenio information:
+
+    :invenio_roles :dictionary of commons group roles and their matching
+                    Invenio roles
+
+    The ``encoder`` Class-level attribute can be used to set a JSON data
+    encoder/decoder. This allows you to, e.g., convert specific entries to
+    complex Python objects. For instance you could convert ISO-formatted
+    datetime objects into Python datetime objects.
+    """
+
+    __tablename__ = "groups_metadata"
