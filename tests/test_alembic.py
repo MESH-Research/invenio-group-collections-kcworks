@@ -12,11 +12,12 @@
 
 import pytest
 from invenio_db.utils import drop_alembic_version_table
+from sqlalchemy import inspect
 
 def test_alembic(testapp, db):
     """Test alembic migrations.
     """
-    ext = testapp.extensions['invenio-groups']
+    ext = testapp.extensions['invenio-db']
 
     if db.engine.name == 'sqlite':
         pytest.skip("SQLite does not support ALTER TABLE operations.")
@@ -26,6 +27,10 @@ def test_alembic(testapp, db):
     drop_alembic_version_table()
     ext.alembic.upgrade()
 
+    # SessionActivity table is in the database
+    inspector = inspect(db.engine)
+    assert "groups_metadata" in inspector.get_table_names()
+
     assert not ext.alembic.compare_metadata()
     ext.alembic.stamp()
     ext.alembic.downgrade()
@@ -33,3 +38,4 @@ def test_alembic(testapp, db):
 
     assert not ext.alembic.compare_metadata()
     drop_alembic_version_table()
+

@@ -17,7 +17,7 @@ from flask import Flask
 from invenio_celery import InvenioCelery
 from invenio_db import InvenioDB
 from invenio_i18n import InvenioI18N
-# from invenio_groups import InvenioGroups
+from invenio_groups.ext import InvenioGroups
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.schema import DropConstraint, DropSequence, DropTable
 
@@ -86,7 +86,7 @@ def create_app(instance_path):
         app_.config.update(config)
         InvenioCelery(app_)
         InvenioDB(app_)
-        # InvenioRecords(app_)
+        InvenioGroups(app_)
         InvenioI18N(app_)
         return app_
 
