@@ -61,3 +61,6 @@ class Group(db.Model, RecordMetadataBase):
     """
 
     __tablename__ = "groups_metadata"
+
+    def __repr__(self) -> str:
+        return f"<{self.__tablename__} {self.id}, json: {self.json}, created: {self.created}, updated: {self.updated}, version_id: {self.version_id}>"
