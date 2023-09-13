@@ -16,6 +16,8 @@ docker-services-cli = "*"
 check-manifest = "*"
 pytest-invenio = "*"
 psycopg2 = "*"
+invenio-jsonschemas = "*"
+invenio-records-resources = "*"
 
 [dev-packages]
 

@@ -1,16 +1,8 @@
-from jsonschema import FormatChecker
-from jsonschema.validators import Draft4Validator
-checker = FormatChecker()
-f = checker.checks('isLowercase')(lambda x: x == x.lower())
 
-validator = Draft4Validator({"format": "isLowercase"},
-                            format_checker=checker)
-
-# FIXME: how to serve this from "local://groups-metadata-v1.0.0.json"?
-groups_metadata_schema = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "id": "local://groups-metadata-v1.0.0.json",
-    # "additionalProperties": False,
+    "additionalProperties": false,
     "title": "Invenio Groups Metadata Schema v1.0.0",
     "type": "object",
     "properties": {
@@ -43,7 +35,7 @@ groups_metadata_schema = {
                 "moderator": {"type": "string"},
                 "member": {"type": "string"}
             },
-            "required": ["administrator", "moderator", "member"]
+            "required": ["adminstrator", "moderator", "member"]
         },
         "has_community": {"type": "boolean"}
     },
