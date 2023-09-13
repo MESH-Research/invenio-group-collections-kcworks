@@ -48,6 +48,7 @@ class GroupsMetadata(db.Model, RecordMetadataBase):
     :site_url
     :profile_image
     :who_can_upload :anyone, mods and admins, or admins only
+    :who_can_accept :anyone, mods and admins, or admins only
 
     Finally, the ``json`` field includes one property with internal Invenio information:
 
