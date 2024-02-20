@@ -7,7 +7,7 @@
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
-from invenio_records_resources import RecordService
+from invenio_records_resources.services.records.service import RecordService
 
 class GroupsMetadataService(RecordService):
     """Service for managing group metadata records."""

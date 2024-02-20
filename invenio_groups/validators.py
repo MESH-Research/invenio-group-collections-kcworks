@@ -14,27 +14,47 @@ groups_metadata_schema = {
     "title": "Invenio Groups Metadata Schema v1.0.0",
     "type": "object",
     "properties": {
-        "commons_group_id": {"type": "string",
-                             "format": "isLowercase"},
-        "group_name": {"type": "string"},
-        "group_url": {"type": "string"},
-        "group_privacy": {"type": "string"},
-        "community_privacy": {"type": "string"},
-        "group_description": {"type": "string"},
-        "profile_image": {"type": "string"},
-        "who_can_upload": {
-            "type": "array",
-            "items": {
-                "type": "string",
-                "enum": ["members", "moderators", "administrators"]
-            }
+        "access": {
+            "type": "object",
+            "properties": {
+                "group_privacy": {
+                    "type": "string",
+                    "enum": ["public", "private", "hidden"]
+                },
+                "community_privacy": {
+                    "type": "string",
+                    "enum": ["public", "private", "hidden"]
+                },
+                "can_upload": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": ["members", "moderators", "administrators"]
+                    }
+                },
+                "can_accept": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": ["members", "moderators", "administrators"]
+                    }
+                },
+            },
+            "required": ["group_privacy", "community_privacy", "can_upload",
+                         "can_accept"]
         },
-        "who_can_accept": {
-            "type": "array",
-            "items": {
-                "type": "string",
-                "enum": ["members", "moderators", "administrators"]
-            }
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "group_id": {"type": "string",
+                             "format": "isLowercase"},
+                "group_name": {"type": "string"},
+                "group_url": {"type": "string"},
+                "group_description": {"type": "string"},
+                "profile_image": {"type": "string"},
+                "has_community": {"type": "boolean"}
+            },
+            "required": ["group_id", "group_name", "has_community"]
         },
         "invenio_roles": {
             "type": "object",
@@ -45,9 +65,6 @@ groups_metadata_schema = {
             },
             "required": ["administrator", "moderator", "member"]
         },
-        "has_community": {"type": "boolean"}
     },
-    "required": ["commons_id", "group_name", "group_description",
-                 "group_privacy", "who_can_upload",
-                 "who_can_accept", "invenio_roles", "has_community"]
+    "required": ["access", "metadata", "invenio_roles"]
 }

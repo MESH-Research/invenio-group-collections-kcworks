@@ -2,8 +2,7 @@
 #
 # Copyright (C) 2023 MESH Research
 #
-# invenio-groups is free software; you can redistribute it and/or
-# modify it under the terms of the MIT License; see LICENSE file for more
+# invenio-groups is free software; you can redistribute it and/or # modify it under the terms of the MIT License; see LICENSE file for more
 # details.
 
 """Pytest configuration.
@@ -14,12 +13,21 @@ fixtures are available.
 
 import pytest
 from flask import Flask
+from flask_security import Security
+from flask_security.utils import hash_password
+from invenio_access import InvenioAccess
+from invenio_access.models import ActionRoles, Role
+from invenio_access.permissions import superuser_access, system_identity
+from invenio_administration.permissions import administration_access_action
+from invenio_app.factory import create_api
 from invenio_celery import InvenioCelery
 from invenio_db import InvenioDB
 from invenio_records import InvenioRecords
 from invenio_i18n import InvenioI18N
 from invenio_groups.ext import InvenioGroups
 from invenio_jsonschemas import InvenioJSONSchemas
+from invenio_search import InvenioSearch
+from pytest_invenio.fixtures import UserFixture
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.schema import DropConstraint, DropSequence, DropTable
 
@@ -76,26 +84,32 @@ def _compile_drop_sequence(element, compiler, **kwargs):
     return compiler.visit_drop_sequence(element) + " CASCADE"
 
 
+# @pytest.fixture(scope="module")
+# def create_app(instance_path):
+#     """Application factory fixture for use with pytest-invenio."""
+
+#     def _create_app(**config):
+#         app_ = Flask(
+#             __name__,
+#             instance_path=instance_path,
+#         )
+#         app_.config.update(config)
+#         InvenioCelery(app_)
+#         InvenioDB(app_)
+#         InvenioSearch(app_)
+#         InvenioRecords(app_)
+#         Security(app_)
+#         InvenioAccess(app_)
+#         InvenioJSONSchemas(app_)
+#         InvenioGroups(app_)
+#         InvenioI18N(app_)
+#         return app_
+
+#     return _create_app
+
 @pytest.fixture(scope="module")
-def create_app(instance_path):
-    """Application factory fixture for use with pytest-invenio."""
-
-    def _create_app(**config):
-        app_ = Flask(
-            __name__,
-            instance_path=instance_path,
-        )
-        app_.config.update(config)
-        InvenioCelery(app_)
-        InvenioDB(app_)
-        InvenioRecords(app_)
-        InvenioJSONSchemas(app_)
-        InvenioGroups(app_)
-        InvenioI18N(app_)
-        return app_
-
-    return _create_app
-
+def create_app():
+    return create_api
 
 @pytest.fixture(scope="module")
 def testapp(base_app, database):
@@ -103,4 +117,100 @@ def testapp(base_app, database):
 
     Pytest-Invenio also initialises ES with the app fixture.
     """
+    InvenioGroups(base_app)
     yield base_app
+
+
+@pytest.fixture()
+def users(UserFixture, testapp, db) -> list:
+    """Create example user."""
+    # user1 = UserFixture(
+    #     email="scottia4@msu.edu",
+    #     password="password"
+    # )
+    # user1.create(app, db)
+    # user2 = UserFixture(
+    #     email="scottianw@gmail.com",
+    #     password="password"
+    # )
+    # user2.create(app, db)
+    with db.session.begin_nested():
+        datastore = testapp.extensions["security"].datastore
+        user1 = datastore.create_user(
+            email="info@inveniosoftware.org",
+            password=hash_password("password"),
+            active=True,
+        )
+        user2 = datastore.create_user(
+            email="ser-testalot@inveniosoftware.org",
+            password=hash_password("beetlesmasher"),
+            active=True,
+        )
+
+    db.session.commit()
+    return [user1, user2]
+
+@pytest.fixture()
+def admin_role_need(db):
+    """Store 1 role with 'superuser-access' ActionNeed.
+
+    WHY: This is needed because expansion of ActionNeed is
+         done on the basis of a User/Role being associated with that Need.
+         If no User/Role is associated with that Need (in the DB), the
+         permission is expanded to an empty list.
+    """
+    role = Role(name="administration-access")
+    db.session.add(role)
+
+    action_role = ActionRoles.create(action=administration_access_action, role=role)
+    db.session.add(action_role)
+
+    db.session.commit()
+
+    return action_role.need
+
+
+@pytest.fixture()
+def admin(UserFixture, app, db, admin_role_need):
+    """Admin user for requests."""
+    u = UserFixture(
+        email="admin@inveniosoftware.org",
+        password="admin",
+    )
+    u.create(app, db)
+
+    datastore = app.extensions["security"].datastore
+    _, role = datastore._prepare_role_modify_args(u.user, "administration-access")
+
+    datastore.add_role_to_user(u.user, role)
+    db.session.commit()
+    return u
+
+
+
+@pytest.fixture()
+def superuser_role_need(db):
+    """Store 1 role with 'superuser-access' ActionNeed.
+
+    WHY: This is needed because expansion of ActionNeed is
+         done on the basis of a User/Role being associated with that Need.
+         If no User/Role is associated with that Need (in the DB), the
+         permission is expanded to an empty list.
+    """
+    role = Role(name="superuser-access")
+    db.session.add(role)
+
+    action_role = ActionRoles.create(action=superuser_access, role=role)
+    db.session.add(action_role)
+
+    db.session.commit()
+
+    return action_role.need
+
+
+@pytest.fixture()
+def superuser_identity(admin, superuser_role_need):
+    """Superuser identity fixture."""
+    identity = admin.identity
+    identity.provides.add(superuser_role_need)
+    return identity

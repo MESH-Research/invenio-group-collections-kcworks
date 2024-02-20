@@ -10,6 +10,7 @@
 """Configuration class and helper classes for the groups_metadata service."""
 
 from .api import GroupsMetadataAPI
+from .components import AccessComponent, InvenioRolesComponent
 from .schema import GroupsMetadataSchema
 from invenio_records_permissions.generators import (
     AnyUser,
@@ -105,7 +106,7 @@ class GroupsMetadataServiceConfig(RecordServiceConfig, ConfiguratorMixin):
     record_cls = GroupsMetadataAPI
     result_item_cls = GroupsMetadataItem
     result_list_cls = RecordList
-    indexer_queue_name = "groups_metadata"
+    indexer_queue_name = "groups-metadata-v1.0.0"
 
     # Search configuration
     search = FromConfigSearchOptions(
@@ -123,15 +124,12 @@ class GroupsMetadataServiceConfig(RecordServiceConfig, ConfiguratorMixin):
         "GROUPS_METADATA_SERVICE_COMPONENTS", default=[
             DataComponent,
             MetadataComponent,
+            AccessComponent,
+            InvenioRolesComponent,
 
             # CustomFieldsComponent,
-            # PIDComponent,
             # RelationsComponent,
-            # CommunityAccessComponent,
-            # OwnershipComponent,
-            # FeaturedCommunityComponent,
             # OAISetComponent,
-            # DefaultGroupsMetadataComponents
         ]
     )
 

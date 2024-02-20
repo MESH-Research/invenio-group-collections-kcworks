@@ -18,6 +18,9 @@ pytest-invenio = "*"
 psycopg2 = "*"
 invenio-jsonschemas = "*"
 invenio-records-resources = "*"
+invenio-search = "*"
+opensearch-dsl = "*"
+invenio-administration = "*"
 
 [dev-packages]
 

@@ -20,20 +20,13 @@ include *.txt
 include Pipfile
 exclude .DS_Store
 exclude invenio_groups/alembic/script.py.mako
-include tests/data/*.marcxml.zip
-exclude tests/downloads/*.marcxml.zip
 recursive-include tests .gitkeep
 recursive-include tests *.py
 recursive-exclude tests .DS_Store
-recursive-exclude tests *.marcxml
-recursive-exclude tests *.jsonl
 recursive-include invenio_groups .gitkeep
 recursive-include invenio_groups *.py
-recursive-include invenio_groups *.jsonl
-recursive-include invenio_groups *.yaml
+recursive-include invenio_groups *.json
 recursive-exclude invenio_groups .DS_Store
-recursive-exclude invenio_groups *.marcxml
-recursive-exclude invenio_groups *.marcxml.zip
 
 # added by check-manifest
 recursive-include tests *.lock
