@@ -517,6 +517,8 @@ must be provided in the "Authorization" request header.
 """
 
 # from flask import render_template
+import collections
+import re
 from flask import (
     Blueprint,
     jsonify,
@@ -525,8 +527,19 @@ from flask import (
     current_app as app,
 )
 from flask.views import MethodView
+from flask_resources import (
+    request_parser,
+    request_body_parser,
+    Resource,
+    ResourceConfig,
+    route,
+    resource_requestctx,
+)
+from invenio_access.permissions import system_identity
 from invenio_accounts.models import UserIdentity
+from invenio_communities.proxies import current_communities
 from invenio_queues.proxies import current_queues
+import marshmallow as ma
 from werkzeug.exceptions import (
     BadRequest,
     Forbidden,
@@ -538,6 +551,208 @@ import os
 
 from .utils import logger
 from .signals import remote_data_updated
+
+from flask import Flask, request, jsonify
+from flask.views import MethodView
+
+app = Flask(__name__)
+
+
+class GroupCollectionsResourceConfig(ResourceConfig):
+    blueprint_name = "group_collections"
+
+    url_prefix = "/group_collections"
+
+    error_handlers = {}
+
+    default_accept_mimetype = "application/json"
+
+    default_content_type = "application/json"
+
+
+# request_data = request_body_parser(
+#     parsers=from_conf("request_body_parsers"),
+#     default_content_type=from_conf("default_content_type"),
+# )
+
+# request_view_args = request_parser(
+#     from_conf("request_view_args"), location="view_args"
+# )
+
+# request_headers = request_parser(
+#     {"if_match": ma.fields.Int()}, location="headers"
+# )
+
+
+class GroupCollectionsResource(Resource):
+
+    def __init__(self, config, service):
+        super().__init__(config)
+        self.service = service
+
+    request_parsed_args = request_parser(
+        {
+            "commons_instance": ma.fields.String(
+                validate=ma.validate.OneOf(["knowledgeCommons"])
+            ),
+            "commons_group_id": ma.fields.String(),
+            "collection": ma.fields.String(),
+            "page": ma.fields.Integer(),
+            "size": ma.fields.Integer(
+                validate=ma.validate.Range(min=10, max=1000), default=10
+            ),
+            "sort": ma.fields.String(
+                validate=ma.validate.OneOf(
+                    [
+                        "title",
+                        "created",
+                        "updated",
+                        "commons_group_id",
+                        "commons_group_title",
+                        "size",
+                    ]
+                ),
+                default="updated",
+            ),
+            "order": ma.fields.String(
+                validate=ma.validate.OneOf(["ascending", "descending"])
+            ),
+        },
+        location="view_args",
+    )
+
+    def create_url_rules(self):
+        """Create the URL rules for the record resource."""
+        return [
+            route("POST", "/", self.create),
+            route("GET", "/<slug>", self.read),
+            route("DELETE", "/<slug>", self.delete),
+            route("PATCH", "/<slug>", self.update),
+        ]
+
+    @request_parsed_args
+    def read(self):
+        commons_instance = resource_requestctx.args["commons_instance"]
+        commons_group_id = resource_requestctx.args["commons_group_id"]
+        collection_slug = resource_requestctx.args["collection"]
+        page = resource_requestctx.args["page"]
+        size = resource_requestctx.args["size"]
+        sort = resource_requestctx.args["sort"]
+        order = resource_requestctx.args["order"]
+
+        query_params = {}
+        if commons_instance:
+            query_params["custom_fields.kcr:commons_instance"] = (
+                commons_instance
+            )
+        if commons_group_id:
+            query_params["custom_fields.kcr:commons_group_id"] = (
+                commons_group_id
+            )
+        if collection_slug:
+            query_params["slug"] = collection_slug
+
+        community_list = current_communities.search_user_communities(
+            system_identity, params=query_params
+        )
+
+        if len(community_list) == 0:
+            raise NotFound(
+                "No Commons group found matching the parameters "
+                f"{query_params}"
+            )
+        elif len(community_list) == 1:
+            collections_data = [
+                {
+                    "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
+                    "created": "2024-01-01T00:00:00Z",
+                    "updated": "2024-01-01T00:00:00Z",
+                    # ... (other fields)
+                },
+            ]
+        else:
+            collections_data = []
+            for c in collections_data:
+                collections_data.append(
+                    {
+                        "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
+                        "created": "2024-01-01T00:00:00Z",
+                        "updated": "2024-01-01T00:00:00Z",
+                        # ... (other fields)
+                    }
+                )
+
+        # Paginate the results
+        start_index = (page - 1) * size
+        end_index = start_index + size
+        paginated_collections = filtered_collections[start_index:end_index]
+
+        # Construct the response
+        response_data = {
+            "hits": {
+                "hits": paginated_collections,
+                "total": len(filtered_collections),
+            },
+            "links": {
+                "self": request.url,
+                # ... (other pagination links)
+            },
+            "sortBy": sort,
+            "order": order,
+        }
+
+        return jsonify(response_data), 200
+
+    def create(self):
+        # Implement the logic for handling POST requests
+        # Replace the following dummy data with your actual data processing logic
+        request_data = request.get_json()
+        commons_instance = request_data.get("commons_instance")
+        commons_group_id = request_data.get("commons_group_id")
+        commons_group_name = request_data.get("commons_group_name")
+        commons_group_visibility = request_data.get("commons_group_visibility")
+
+        # Implement logic to create a new collection
+        # ...
+
+        # Construct the response
+        response_data = {
+            "commons_group_id": commons_group_id,
+            "collection": "new-collection-slug",
+        }
+
+        return jsonify(response_data), 201
+
+    def update(self, collection_slug):
+        # Implement the logic for handling PATCH requests
+        # Replace the following dummy data with your actual data processing logic
+        request_data = request.get_json()
+        old_commons_group_id = request_data.get("old_commons_group_id")
+        new_commons_group_id = request_data.get("new_commons_group_id")
+        new_commons_group_name = request_data.get("new_commons_group_name")
+        new_commons_group_visibility = request_data.get(
+            "new_commons_group_visibility"
+        )
+
+        # Implement logic to modify an existing collection
+        # ...
+
+        # Construct the response
+        response_data = {
+            "collection": collection_slug,
+            "old_commons_group_id": old_commons_group_id,
+            "new_commons_group_id": new_commons_group_id,
+        }
+
+        return jsonify(response_data), 200
+
+    def delete(self, collection_slug):
+        # Implement the logic for handling DELETE requests
+        # Replace the following dummy data with your actual data processing logic
+        # ...
+
+        # Return appropriate response status
+        return "", 204
 
 
 class IDPUpdateWebhook(MethodView):
@@ -698,27 +913,33 @@ class IDPUpdateWebhook(MethodView):
 
 def create_api_blueprint(app):
     """Register blueprint on api app."""
-    blueprint = Blueprint("invenio_remote_user_data", __name__)
 
-    # routes = app.config.get("APP_RDM_ROUTES")
+    return GroupCollectionsResource.as_blueprint()
 
-    blueprint.add_url_rule(
-        "/webhooks/idp_data_update",
-        view_func=IDPUpdateWebhook.as_view("ipd_update_webhook"),
-    )
 
-    # Register error handlers
-    blueprint.register_error_handler(
-        Forbidden,
-        lambda e: make_response(
-            jsonify({"error": "Forbidden", "status": 403}), 403
-        ),
-    )
-    blueprint.register_error_handler(
-        MethodNotAllowed,
-        lambda e: make_response(
-            jsonify({"message": "Method not allowed", "status": 405}), 405
-        ),
-    )
+# def create_api_blueprint(app):
+#     """Register blueprint on api app."""
+#     blueprint = Blueprint("invenio_remote_user_data", __name__)
 
-    return blueprint
+#     # routes = app.config.get("APP_RDM_ROUTES")
+
+#     blueprint.add_url_rule(
+#         "/webhooks/idp_data_update",
+#         view_func=IDPUpdateWebhook.as_view("ipd_update_webhook"),
+#     )
+
+#     # Register error handlers
+#     blueprint.register_error_handler(
+#         Forbidden,
+#         lambda e: make_response(
+#             jsonify({"error": "Forbidden", "status": 403}), 403
+#         ),
+#     )
+#     blueprint.register_error_handler(
+#         MethodNotAllowed,
+#         lambda e: make_response(
+#             jsonify({"message": "Method not allowed", "status": 405}), 405
+#         ),
+#     )
+
+#     return blueprint

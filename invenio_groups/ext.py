@@ -7,9 +7,12 @@
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
-"""Groups extension for Invenio.
-"""
+"""Groups extension for Invenio."""
 
+from invenio_groups.views import (
+    GroupCollectionsResource,
+    GroupCollectionsResourceConfig,
+)
 from . import config
 from .service_config import GroupsMetadataServiceConfig
 from .service import GroupsMetadataService
@@ -30,11 +33,14 @@ class InvenioGroups(object):
         """
         self.init_config(app)
         self.init_service(app)
+        self.init_resources(app)
         app.extensions["invenio-groups"] = self
 
     def init_service(self, app):
         """Initialize service."""
-        self.service = GroupsMetadataService(GroupsMetadataServiceConfig.build(app))
+        self.service = GroupsMetadataService(
+            GroupsMetadataServiceConfig.build(app)
+        )
 
     def init_config(self, app):
         """Initialize configuration.
@@ -44,3 +50,9 @@ class InvenioGroups(object):
         for k in dir(config):
             if k.startswith("GROUPS_"):
                 app.config.setdefault(k, getattr(config, k))
+
+    def init_resources(self, app):
+        """Initialize resources."""
+        self.resource = GroupCollectionsResource(
+            GroupCollectionsResourceConfig(), service=self.service
+        )

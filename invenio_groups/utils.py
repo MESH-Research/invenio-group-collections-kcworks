@@ -16,7 +16,9 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s:%(levelname)s : %(message)s")
 
-log_file_path = Path(__file__).parent / "logs" / "invenio-groups.log"
+log_file_path = (
+    Path(__file__).parent / "logs" / "invenio-group-collections.log"
+)
 
 if not log_file_path.exists():
     log_file_path.parent.mkdir(parents=True, exist_ok=True)
