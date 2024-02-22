@@ -517,14 +517,14 @@ must be provided in the "Authorization" request header.
 """
 
 # from flask import render_template
-import collections
-import re
+from urllib import response
 from flask import (
     Blueprint,
     jsonify,
     make_response,
     request,
     current_app as app,
+    jsonify,
 )
 from flask.views import MethodView
 from flask_resources import (
@@ -550,12 +550,6 @@ from werkzeug.exceptions import (
 import os
 
 from .utils import logger
-from .signals import remote_data_updated
-
-from flask import Flask, request, jsonify
-from flask.views import MethodView
-
-app = Flask(__name__)
 
 
 class GroupCollectionsResourceConfig(ResourceConfig):
@@ -599,7 +593,7 @@ class GroupCollectionsResource(Resource):
             "collection": ma.fields.String(),
             "page": ma.fields.Integer(),
             "size": ma.fields.Integer(
-                validate=ma.validate.Range(min=10, max=1000), default=10
+                validate=ma.validate.Range(min=10, max=1000), load_default=10
             ),
             "sort": ma.fields.String(
                 validate=ma.validate.OneOf(
@@ -612,35 +606,36 @@ class GroupCollectionsResource(Resource):
                         "size",
                     ]
                 ),
-                default="updated",
+                load_default="updated",
             ),
             "order": ma.fields.String(
                 validate=ma.validate.OneOf(["ascending", "descending"])
             ),
         },
-        location="view_args",
+        location="args",
     )
 
     def create_url_rules(self):
         """Create the URL rules for the record resource."""
         return [
             route("POST", "/", self.create),
-            route("GET", "/<slug>", self.read),
+            route("GET", "/", self.read),
+            # route("GET", "/<slug>", self.read),
             route("DELETE", "/<slug>", self.delete),
             route("PATCH", "/<slug>", self.update),
         ]
 
     @request_parsed_args
     def read(self):
-        commons_instance = resource_requestctx.args["commons_instance"]
-        commons_group_id = resource_requestctx.args["commons_group_id"]
-        collection_slug = resource_requestctx.args["collection"]
-        page = resource_requestctx.args["page"]
-        size = resource_requestctx.args["size"]
-        sort = resource_requestctx.args["sort"]
-        order = resource_requestctx.args["order"]
+        commons_instance = resource_requestctx.args.get("commons_instance")
+        commons_group_id = resource_requestctx.args.get("commons_group_id")
+        collection_slug = resource_requestctx.args.get("collection")
+        page = resource_requestctx.args.get("page")
+        size = resource_requestctx.args.get("size")
+        sort = resource_requestctx.args.get("sort")
+        order = resource_requestctx.args.get("order")
 
-        query_params = {}
+        query_params = ""
         if commons_instance:
             query_params["custom_fields.kcr:commons_instance"] = (
                 commons_instance
@@ -650,10 +645,13 @@ class GroupCollectionsResource(Resource):
                 commons_group_id
             )
         if collection_slug:
-            query_params["slug"] = collection_slug
+            query_params += f"slug:{collection_slug} "
 
-        community_list = current_communities.search_user_communities(
-            system_identity, params=query_params
+        # community_list = current_communities.service.search_user_communities(
+        #     system_identity, q="slug:community-3"
+        # )
+        community_list = current_communities.service.search(
+            identity=system_identity, q=""
         )
 
         if len(community_list) == 0:
@@ -671,37 +669,37 @@ class GroupCollectionsResource(Resource):
                 },
             ]
         else:
-            collections_data = []
-            for c in collections_data:
-                collections_data.append(
-                    {
-                        "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
-                        "created": "2024-01-01T00:00:00Z",
-                        "updated": "2024-01-01T00:00:00Z",
-                        # ... (other fields)
-                    }
-                )
+            collections_data = community_list.to_dict()
+            # for c in collections_data:
+            #     collections_data.append(
+            #         {
+            #             "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
+            #             "created": "2024-01-01T00:00:00Z",
+            #             "updated": "2024-01-01T00:00:00Z",
+            #             # ... (other fields)
+            #         }
+            #     )
 
         # Paginate the results
-        start_index = (page - 1) * size
-        end_index = start_index + size
-        paginated_collections = filtered_collections[start_index:end_index]
+        # start_index = (page - 1) * size
+        # end_index = start_index + size
+        # paginated_collections = filtered_collections[start_index:end_index]
 
-        # Construct the response
-        response_data = {
-            "hits": {
-                "hits": paginated_collections,
-                "total": len(filtered_collections),
-            },
-            "links": {
-                "self": request.url,
-                # ... (other pagination links)
-            },
-            "sortBy": sort,
-            "order": order,
-        }
+        # # Construct the response
+        # response_data = {
+        #     "hits": {
+        #         "hits": paginated_collections,
+        #         "total": len(filtered_collections),
+        #     },
+        #     "links": {
+        #         "self": request.url,
+        #         # ... (other pagination links)
+        #     },
+        #     "sortBy": sort,
+        #     "order": order,
+        # }
 
-        return jsonify(response_data), 200
+        return jsonify(collections_data), 200
 
     def create(self):
         # Implement the logic for handling POST requests
@@ -914,7 +912,11 @@ class IDPUpdateWebhook(MethodView):
 def create_api_blueprint(app):
     """Register blueprint on api app."""
 
-    return GroupCollectionsResource.as_blueprint()
+    ext = app.extensions["invenio-groups"]
+    blueprint = ext.group_collections_resource.as_blueprint()
+    print(blueprint)
+
+    return blueprint
 
 
 # def create_api_blueprint(app):

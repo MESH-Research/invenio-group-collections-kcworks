@@ -53,6 +53,6 @@ class InvenioGroups(object):
 
     def init_resources(self, app):
         """Initialize resources."""
-        self.resource = GroupCollectionsResource(
+        self.group_collections_resource = GroupCollectionsResource(
             GroupCollectionsResourceConfig(), service=self.service
         )
