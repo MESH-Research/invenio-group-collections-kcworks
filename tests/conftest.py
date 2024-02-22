@@ -20,6 +20,18 @@ from invenio_administration.permissions import administration_access_action
 from invenio_app.factory import create_app as create_ui_api
 from invenio_communities.proxies import current_communities
 from invenio_communities.communities.records.api import Community
+from invenio_records_resources.services.custom_fields import TextCF
+from invenio_records_resources.services.custom_fields.errors import (
+    CustomFieldsException,
+)
+from invenio_records_resources.services.custom_fields.mappings import Mapping
+from invenio_records_resources.services.custom_fields.validate import (
+    validate_custom_fields,
+)
+from invenio_search import current_search_client
+from invenio_search.engine import dsl
+from invenio_search.engine import search as search_engine
+from invenio_search.utils import build_alias_name
 from invenio_vocabularies.proxies import current_service as vocabulary_service
 from invenio_vocabularies.records.api import Vocabulary
 import marshmallow as ma
@@ -27,6 +39,11 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.schema import DropConstraint, DropSequence, DropTable
 
 pytest_plugins = ("celery.contrib.pytest",)
+
+
+@pytest.fixture(scope="module")
+def communities_service(app):
+    return current_communities.service
 
 
 @pytest.fixture(scope="module")
@@ -39,7 +56,8 @@ def celery_config():
 
 
 test_config = {
-    "SQLALCHEMY_DATABASE_URI": "postgresql+psycopg2://invenio:invenio@localhost:5432/invenio",
+    "SQLALCHEMY_DATABASE_URI": "postgresql+psycopg2://"
+    "invenio:invenio@localhost:5432/invenio",
     "SQLALCHEMY_TRACK_MODIFICATIONS": False,
     "INVENIO_WTF_CSRF_ENABLED": False,
     "INVENIO_WTF_CSRF_METHODS": [],
@@ -57,6 +75,89 @@ test_config = {
     "SECURITY_PASSWORD_SALT": "test-secret-key",
     "TESTING": True,
 }
+
+# FIXME: provide proper namespace url
+test_config["COMMUNITIES_NAMESPACES"] = {
+    "kcr": "https://invenio-dev.hcommons-staging.org/terms/"
+}
+
+test_config["COMMUNITIES_CUSTOM_FIELDS"] = [
+    TextCF(name="kcr:commons_instance"),
+    TextCF(name="kcr:commons_group_id"),
+    TextCF(name="kcr:commons_group_name"),
+    TextCF(name="kcr:commons_group_description"),
+    TextCF(name="kcr:commons_group_visibility"),
+]
+
+test_config["COMMUNITIES_CUSTOM_FIELDS_UI"] = [
+    {
+        "section": "Linked Commons Group",
+        "hidden": False,
+        "description": (
+            "Information about a Commons group that owns the collection"
+        ),
+        "fields": [
+            {
+                "field": "kcr:commons_group_name",
+                "ui_widget": "Input",
+                "props": {
+                    "label": "Commons Group Name",
+                    "placeholder": "",
+                    "icon": "",
+                    "description": ("Name of the Commons group."),
+                    "disabled": True,
+                },
+            },
+            {
+                "field": "kcr:commons_group_id",
+                "ui_widget": "Input",
+                "props": {
+                    "label": "Commons Group ID",
+                    "placeholder": "",
+                    "icon": "",
+                    "description": ("ID of the Commons group"),
+                    "disabled": True,
+                },
+            },
+            {
+                "field": "kcr:commons_instance",
+                "ui_widget": "Input",
+                "props": {
+                    "label": "Commons Instance",
+                    "placeholder": "",
+                    "icon": "",
+                    "description": (
+                        "The Commons to which the group belongs (e.g., "
+                        "STEMEd+ Commons, MLA Commons, Humanities Commons)"
+                    ),
+                    "disabled": True,
+                },
+            },
+            {
+                "field": "kcr:commons_group_description",
+                "ui_widget": "Input",
+                "props": {
+                    "label": "Commons Group Description",
+                    "placeholder": "",
+                    "icon": "",
+                    "description": ("Description of the Commons group."),
+                    "disabled": True,
+                },
+            },
+            {
+                "field": "kcr:commons_group_visibility",
+                "ui_widget": "Input",
+                "props": {
+                    "label": "Commons Group Visibility",
+                    "placeholder": "",
+                    "icon": "",
+                    "description": ("Visibility of the Commons group."),
+                    "disabled": True,
+                },
+            },
+        ],
+    }
+]
 
 
 @pytest.fixture(scope="module")
@@ -136,11 +237,45 @@ def community_type_v(app, community_type_type):
     Vocabulary.index.refresh()
 
 
-@pytest.fixture(scope="function")
-def sample_communities(app) -> list:
+def create_communities_custom_fields(app):
+    """Creates one or all custom fields for communities.
+
+    $ invenio custom-fields communities create [field].
+    """
+    available_fields = app.config.get("COMMUNITIES_CUSTOM_FIELDS")
+    namespaces = set(app.config.get("COMMUNITIES_NAMESPACES").keys())
+    try:
+        validate_custom_fields(
+            given_fields=None,
+            available_fields=available_fields,
+            namespaces=namespaces,
+        )
+    except CustomFieldsException as e:
+        print(f"Custom fields configuration is not valid. {e.description}")
+    print("Creating communities custom fields...")
+    # multiple=True makes it an iterable
+    properties = Mapping.properties_for_fields(None, available_fields)
 
     try:
-        current_communities.service.create(
+        communities_index = dsl.Index(
+            build_alias_name(
+                current_communities.service.config.record_cls.index._name
+            ),
+            using=current_search_client,
+        )
+        communities_index.put_mapping(body={"properties": properties})
+        print("Created all communities custom fields!")
+    except search_engine.RequestError as e:
+        print("An error occured while creating custom fields.")
+        print(e.info["error"]["reason"])
+
+
+@pytest.fixture(scope="function")
+def sample_communities(app, communities_service) -> list:
+
+    try:
+        create_communities_custom_fields(app)
+        communities_service.create(
             identity=system_identity,
             data={
                 "access": {
@@ -164,9 +299,16 @@ def sample_communities(app) -> list:
                         }
                     ],
                 },
+                "custom_fields": {
+                    "kcr:commons_group_id": "123",
+                    "kcr:commons_group_name": "Commons Group 1",
+                    "kcr:commons_group_description": "Commons Group 1"
+                    " description",
+                    "kcr:commons_group_visibility": "public",
+                },
             },
         )
-        current_communities.service.create(
+        communities_service.create(
             identity=system_identity,
             data={
                 "access": {
@@ -190,6 +332,14 @@ def sample_communities(app) -> list:
                         }
                     ],
                 },
+                "custom_fields": {
+                    "kcr:commons_group_id": "456",
+                    "kcr:commons_group_name": "Commons Group 2",
+                    "kcr:commons_group_description": (
+                        "Commons Group 2 description"
+                    ),
+                    "kcr:commons_group_visibility": "public",
+                },
             },
         )
         Community.index.refresh()
@@ -203,6 +353,7 @@ def testapp(app):
 
     Pytest-Invenio also initialises ES with the app fixture.
     """
+    print(app.config["COMMUNITIES_CUSTOM_FIELDS"])
     yield app
 
 

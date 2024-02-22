@@ -26,6 +26,7 @@ recursive-exclude tests .DS_Store
 recursive-include invenio_groups .gitkeep
 recursive-include invenio_groups *.py
 recursive-include invenio_groups *.json
+recursive-include invenio_groups *.log
 recursive-exclude invenio_groups .DS_Store
 
 # added by check-manifest

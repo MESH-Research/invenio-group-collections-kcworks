@@ -1,6 +1,4 @@
 import pytest
-from invenio_communities.proxies import current_communities
-from invenio_access.permissions import system_identity
 
 
 @pytest.mark.parametrize(
@@ -53,24 +51,55 @@ from invenio_access.permissions import system_identity
                             },
                             "children": {"allow": False},
                             "created": "2024-02-22T00:32:33.660458+00:00",
-                            "custom_fields": {},
+                            "custom_fields": {
+                                "kcr:commons_group_id": "456",
+                                "kcr:commons_group_name": "Commons Group 2",
+                                "kcr:commons_group_description": (
+                                    "Commons Group 2 description"
+                                ),
+                                "kcr:commons_group_visibility": "public",
+                            },
                             "deletion_status": {
                                 "is_deleted": False,
                                 "status": "P",
                             },
                             "id": "b3f00322-c724-40e2-88e3-da0a62756c5d",
                             "links": {
-                                "featured": "https://127.0.0.1:5000/api/communities/b3f00322-c724-40e2-88e3-da0a62756c5d/featured",
-                                "invitations": "https://127.0.0.1:5000/api/communities/b3f00322-c724-40e2-88e3-da0a62756c5d/invitations",
-                                "logo": "https://127.0.0.1:5000/api/communities/b3f00322-c724-40e2-88e3-da0a62756c5d/logo",
-                                "members": "https://127.0.0.1:5000/api/communities/b3f00322-c724-40e2-88e3-da0a62756c5d/members",
-                                "public_members": "https://127.0.0.1:5000/api/communities/b3f00322-c724-40e2-88e3-da0a62756c5d/members/public",
-                                "records": "https://127.0.0.1:5000/api/communities/b3f00322-c724-40e2-88e3-da0a62756c5d/records",
-                                "rename": "https://127.0.0.1:5000/api/communities/b3f00322-c724-40e2-88e3-da0a62756c5d/rename",
-                                "requests": "https://127.0.0.1:5000/api/communities/b3f00322-c724-40e2-88e3-da0a62756c5d/requests",
-                                "self": "https://127.0.0.1:5000/api/communities/b3f00322-c724-40e2-88e3-da0a62756c5d",
-                                "self_html": "https://127.0.0.1:5000/communities/community-2",
-                                "settings_html": "https://127.0.0.1:5000/communities/community-2/settings",
+                                "featured": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b3f00322-c724-40e2-88e3-da0a62756c5d/"
+                                "featured",
+                                "invitations": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b3f00322-c724-40e2-88e3-da0a62756c5d/"
+                                "invitations",
+                                "logo": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b3f00322-c724-40e2-88e3-da0a62756c5d/logo",
+                                "members": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b3f00322-c724-40e2-88e3-da0a62756c5d/members",
+                                "public_members": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b3f00322-c724-40e2-88e3-da0a62756c5d/members/"
+                                "public",
+                                "records": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b3f00322-c724-40e2-88e3-da0a62756c5d/records",
+                                "rename": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b3f00322-c724-40e2-88e3-da0a62756c5d/rename",
+                                "requests": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b3f00322-c724-40e2-88e3-da0a62756c5d/"
+                                "requests",
+                                "self": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b3f00322-c724-40e2-88e3-da0a62756c5d",
+                                "self_html": "https://127.0.0.1:5000/"
+                                "communities/community-2",
+                                "settings_html": "https://127.0.0.1:5000/"
+                                "communities/community-2/settings",
                             },
                             "metadata": {
                                 "curation_policy": "Curation policy",
@@ -97,24 +126,54 @@ from invenio_access.permissions import system_identity
                             },
                             "children": {"allow": False},
                             "created": "2024-02-22T00:32:33.621409+00:00",
-                            "custom_fields": {},
+                            "custom_fields": {
+                                "kcr:commons_group_id": "123",
+                                "kcr:commons_group_name": "Commons Group 1",
+                                "kcr:commons_group_description": "Commons "
+                                "Group 1 description",
+                                "kcr:commons_group_visibility": "public",
+                            },
                             "deletion_status": {
                                 "is_deleted": False,
                                 "status": "P",
                             },
                             "id": "b0409cce-dc7e-4299-895f-fd0fab1c2f9b",
                             "links": {
-                                "featured": "https://127.0.0.1:5000/api/communities/b0409cce-dc7e-4299-895f-fd0fab1c2f9b/featured",
-                                "invitations": "https://127.0.0.1:5000/api/communities/b0409cce-dc7e-4299-895f-fd0fab1c2f9b/invitations",
-                                "logo": "https://127.0.0.1:5000/api/communities/b0409cce-dc7e-4299-895f-fd0fab1c2f9b/logo",
-                                "members": "https://127.0.0.1:5000/api/communities/b0409cce-dc7e-4299-895f-fd0fab1c2f9b/members",
-                                "public_members": "https://127.0.0.1:5000/api/communities/b0409cce-dc7e-4299-895f-fd0fab1c2f9b/members/public",
-                                "records": "https://127.0.0.1:5000/api/communities/b0409cce-dc7e-4299-895f-fd0fab1c2f9b/records",
-                                "rename": "https://127.0.0.1:5000/api/communities/b0409cce-dc7e-4299-895f-fd0fab1c2f9b/rename",
-                                "requests": "https://127.0.0.1:5000/api/communities/b0409cce-dc7e-4299-895f-fd0fab1c2f9b/requests",
-                                "self": "https://127.0.0.1:5000/api/communities/b0409cce-dc7e-4299-895f-fd0fab1c2f9b",
-                                "self_html": "https://127.0.0.1:5000/communities/community-1",
-                                "settings_html": "https://127.0.0.1:5000/communities/community-1/settings",
+                                "featured": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b0409cce-dc7e-4299-895f-fd0fab1c2f9b/"
+                                "featured",
+                                "invitations": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b0409cce-dc7e-4299-895f-fd0fab1c2f9b/"
+                                "invitations",
+                                "logo": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b0409cce-dc7e-4299-895f-fd0fab1c2f9b/logo",
+                                "members": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b0409cce-dc7e-4299-895f-fd0fab1c2f9b/members",
+                                "public_members": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b0409cce-dc7e-4299-895f-fd0fab1c2f9b/"
+                                "members/public",
+                                "records": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b0409cce-dc7e-4299-895f-fd0fab1c2f9b/records",
+                                "rename": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b0409cce-dc7e-4299-895f-fd0fab1c2f9b/rename",
+                                "requests": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b0409cce-dc7e-4299-895f-fd0fab1c2f9b/"
+                                "requests",
+                                "self": "https://127.0.0.1:5000/api/"
+                                "communities/"
+                                "b0409cce-dc7e-4299-895f-fd0fab1c2f9b",
+                                "self_html": "https://127.0.0.1:5000/"
+                                "communities/community-1",
+                                "settings_html": "https://127.0.0.1:5000/"
+                                "communities/community-1/settings",
                             },
                             "metadata": {
                                 "curation_policy": "Curation policy",
@@ -136,7 +195,8 @@ from invenio_access.permissions import system_identity
                     "total": 2,
                 },
                 "links": {
-                    "self": "https://127.0.0.1:5000/api/communities?page=1&q=&size=25&sort=newest"
+                    "self": "https://127.0.0.1:5000/api/communities"
+                    "?page=1&q=&size=25&sort=newest"
                 },
                 "sortBy": "newest",
             },
