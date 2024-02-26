@@ -1,12 +1,4 @@
-# -*- coding: utf-8 -*-
-#
-# This file is part of the invenio-groups package.
-# Copyright (C) 2023-2024, MESH Research.
-#
-# invenio-groups is free software; you can redistribute it
-# and/or modify it under the terms of the MIT License; see
-# LICENSE file for more details.
-
+# -*- coding: utf-8 -*- # # This file is part of the invenio-groups package.  # Copyright (C) 2023-2024, MESH Research.  # # invenio-groups is free software; you can redistribute it # and/or modify it under the terms of the MIT License; see # LICENSE file for more details.
 """Views for Commons group collections API endpoints.
 
 Two endpoints are exposed by this file:
@@ -45,24 +37,20 @@ Four optional query parameters can be used to filter the results:
 | `page` | the page number of the results |
 | `size` | the number of results to include on each page |
 | `sort` | the field to sort the results by |
-| `order` | the order to sort the results in |
 
 #### Sorting
 
-The results can be sorted by the following fields:
+The `sort` parameter can be set to one of the following sort types:
 
 | Field name | Description |
 | -----------|-------------|
-| `title` | the title of the collection |
-| `created` | the date the collection was created |
-| `updated` | the date the collection was last updated |
-| `commons_group_id` | the ID of the Commons group that owns the collection |
-| `commons_group_title` | the title of the Commons group that owns the collection |
-| `size` | the number of records in the collection |
+| newest | |
+| oldest | |
+| version | |
+| updated-desc | |
+| updated-asc | |
 
-By default the results are sorted by `updated`
-
-Sort order is descending by default, unless "ascending" is provided as a value for the `order` query parameter.
+By default the results are sorted by `updated-desc`
 
 #### Pagination
 
@@ -84,10 +72,47 @@ GET https://example.org/api/group_collections HTTP/1.1
 
 ```json
 {
+    "aggregations": {
+        "type": {
+            "buckets": [
+                {
+                    "doc_count": 50,
+                    "is_selected": False,
+                    "key": "event",
+                    "label": "Event",
+                },
+                {
+                    "doc_count": 50,
+                    "is_selected": False,
+                    "key": "organization",
+                    "label": "Organization",
+                },
+            ],
+            "label": "Type",
+        },
+        "visibility": {
+            "buckets": [
+                {
+                    "doc_count": 100,
+                    "is_selected": False,
+                    "key": "public",
+                    "label": "Public",
+                }
+            ],
+            "label": "Visibility",
+        },
+    },
     "hits": {
         "hits": [
             {
                 "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
+                "access": {
+                    "member_policy": "open",
+                    "record_policy": "open",
+                    "review_policy": "closed",
+                    "visibility": "public",
+                },
+                "children": {"allow": False},
                 "created": "2024-01-01T00:00:00Z",
                 "updated": "2024-01-01T00:00:00Z",
                 "links": {
@@ -100,12 +125,18 @@ GET https://example.org/api/group_collections HTTP/1.1
                     "public_members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members/public",
                     "invitations": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/invitations",
                     "requests": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/requests",
-                    "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records"
+                    "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records",
+                    "featured": "https://example.org/api/"
+                                "communities/"
+                                "5402d72b-b144-4891-aa8e-1038515d68f7/"
+                                "featured",
                 },
                 "revision_id": 1,
                 "slug": "panda-group-collection",
                 "metadata": {
                     "title": "The Panda Group Collection",
+                    "curation_policy": "Curation policy",
+                    "page": "Information for the panda group collection",
                     "description": "This is a collection about pandas.",
                     "website": "https://example.org/pandas",
                     "organizations": [
@@ -114,6 +145,10 @@ GET https://example.org/api/group_collections HTTP/1.1
                         }
                     ],
                     "size": 100,
+                },
+                "deletion_status": {
+                    "is_deleted": False,
+                    "status": "P",
                 },
                 "custom_fields": {
                     "kcr:commons_instance": "knowledgeCommons",
@@ -168,10 +203,47 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons 
 
 ```json
 {
+    "aggregations": {
+        "type": {
+            "buckets": [
+                {
+                    "doc_count": 45,
+                    "is_selected": False,
+                    "key": "event",
+                    "label": "Event",
+                },
+                {
+                    "doc_count": 45,
+                    "is_selected": False,
+                    "key": "organization",
+                    "label": "Organization",
+                },
+            ],
+            "label": "Type",
+        },
+        "visibility": {
+            "buckets": [
+                {
+                    "doc_count": 90,
+                    "is_selected": False,
+                    "key": "public",
+                    "label": "Public",
+                }
+            ],
+            "label": "Visibility",
+        },
+    },
     "hits": {
         "hits": [
             {
                 "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
+                "access": {
+                    "member_policy": "open",
+                    "record_policy": "open",
+                    "review_policy": "closed",
+                    "visibility": "public",
+                },
+                "children": {"allow": False},
                 "created": "2024-01-01T00:00:00Z",
                 "updated": "2024-01-01T00:00:00Z",
                 "links": {
@@ -184,12 +256,18 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons 
                     "public_members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members/public",
                     "invitations": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/invitations",
                     "requests": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/requests",
-                    "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records"
+                    "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records",
+                    "featured": "https://example.org/api/"
+                                "communities/"
+                                "5402d72b-b144-4891-aa8e-1038515d68f7/"
+                                "featured",
                 },
                 "revision_id": 1,
                 "slug": "panda-group-collection",
                 "metadata": {
                     "title": "The Panda Group Collection",
+                    "curation_policy": "Curation policy",
+                    "page": "Information for the panda group collection",
                     "description": "This is a collection about pandas.",
                     "website": "https://example.org/pandas",
                     "organizations": [
@@ -198,6 +276,10 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons 
                         }
                     ],
                     "size": 100,
+                },
+                "deletion_status": {
+                    "is_deleted": False,
+                    "status": "P",
                 },
                 "custom_fields": {
                     "kcr:commons_instance": "knowledgeCommons",
@@ -253,10 +335,47 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
 
 ```json
 {
+    "aggregations": {
+        "type": {
+            "buckets": [
+                {
+                    "doc_count": 2,
+                    "is_selected": False,
+                    "key": "event",
+                    "label": "Event",
+                },
+                {
+                    "doc_count": 2,
+                    "is_selected": False,
+                    "key": "organization",
+                    "label": "Organization",
+                },
+            ],
+            "label": "Type",
+        },
+        "visibility": {
+            "buckets": [
+                {
+                    "doc_count": 4,
+                    "is_selected": False,
+                    "key": "public",
+                    "label": "Public",
+                }
+            ],
+            "label": "Visibility",
+        },
+    },
     "hits": {
         "hits": [
             {
                 "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
+                "access": {
+                    "member_policy": "open",
+                    "record_policy": "open",
+                    "review_policy": "closed",
+                    "visibility": "public",
+                },
+                "children": {"allow": False},
                 "created": "2024-01-01T00:00:00Z",
                 "updated": "2024-01-01T00:00:00Z",
                 "links": {
@@ -269,12 +388,18 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
                     "public_members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members/public",
                     "invitations": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/invitations",
                     "requests": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/requests",
-                    "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records"
+                    "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records",
+                    "featured": "https://example.org/api/"
+                                "communities/"
+                                "5402d72b-b144-4891-aa8e-1038515d68f7/"
+                                "featured",
                 },
                 "revision_id": 1,
                 "slug": "panda-group-collection",
                 "metadata": {
                     "title": "The Panda Group Collection",
+                    "curation_policy": "Curation policy",
+                    "page": "Information for the panda group collection",
                     "description": "This is a collection about pandas.",
                     "website": "https://example.org/pandas",
                     "organizations": [
@@ -283,6 +408,10 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
                         }
                     ],
                     "size": 2,
+                },
+                "deletion_status": {
+                    "is_deleted": False,
+                    "status": "P",
                 },
                 "custom_fields": {
                     "kcr:commons_instance": "knowledgeCommons",
@@ -300,7 +429,7 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
             },
             ...
         ],
-        "total": 100,
+        "total": 4,
     },
     "links": {
         "self": "https://example.org/api/group_collections",
@@ -350,12 +479,18 @@ GET https://example.org/api/group_collections/my-collection-slug HTTP/1.1
         "public_members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members/public",
         "invitations": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/invitations",
         "requests": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/requests",
-        "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records"
+        "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records",
+        "featured": "https://example.org/api/"
+                    "communities/"
+                    "5402d72b-b144-4891-aa8e-1038515d68f7/"
+                    "featured",
     },
     "revision_id": 1,
     "slug": "panda-group-collection",
     "metadata": {
         "title": "The Panda Group Collection",
+        "curation_policy": "Curation policy",
+        "page": "Information for the panda group collection",
         "description": "This is a collection about pandas.",
         "website": "https://example.org/pandas",
         "organizations": [
@@ -364,6 +499,10 @@ GET https://example.org/api/group_collections/my-collection-slug HTTP/1.1
             }
         ],
         "size": 100,
+    },
+    "deletion_status": {
+        "is_deleted": False,
+        "status": "P",
     },
     "custom_fields": {
         "kcr:commons_instance": "knowledgeCommons",
@@ -416,7 +555,7 @@ POST https://example.org/api/group_collections HTTP/1.1
 ```json
 {
     "commons_group_id": "12345",
-    "collection": "new-collection-slug"
+    "collection_slug": "new-collection-slug"
 }
 ```
 
@@ -528,8 +667,13 @@ from flask import (
 )
 from flask.views import MethodView
 from flask_resources import (
+    from_conf,
+    JSONSerializer,
+    JSONDeserializer,
     request_parser,
     request_body_parser,
+    RequestBodyParser,
+    ResponseHandler,
     Resource,
     ResourceConfig,
     route,
@@ -537,19 +681,23 @@ from flask_resources import (
 )
 from invenio_access.permissions import system_identity
 from invenio_accounts.models import UserIdentity
+from invenio_accounts.proxies import current_datastore as accounts_datastore
 from invenio_communities.proxies import current_communities
 from invenio_queues.proxies import current_queues
 import marshmallow as ma
+import requests
 from werkzeug.exceptions import (
     BadRequest,
     Forbidden,
     MethodNotAllowed,
     NotFound,
+    UnprocessableEntity,
     # Unauthorized,
 )
 import os
 
 from .utils import logger
+from .errors import CommonsGroupNotFoundError
 
 
 class GroupCollectionsResourceConfig(ResourceConfig):
@@ -563,15 +711,20 @@ class GroupCollectionsResourceConfig(ResourceConfig):
 
     default_content_type = "application/json"
 
+    response_handlers = {
+        # Define JSON serializer for "application/json"
+        "application/json": ResponseHandler(JSONSerializer())
+    }
 
-# request_data = request_body_parser(
-#     parsers=from_conf("request_body_parsers"),
-#     default_content_type=from_conf("default_content_type"),
-# )
+    request_body_parsers = {
+        "application/json": RequestBodyParser(JSONDeserializer())
+    }
 
-# request_view_args = request_parser(
-#     from_conf("request_view_args"), location="view_args"
-# )
+    # request_data = request_body_parser(
+    #     parsers=from_conf("request_body_parsers"),
+    #     default_content_type=from_conf("default_content_type"),
+    # )
+
 
 # request_headers = request_parser(
 #     {"if_match": ma.fields.Int()}, location="headers"
@@ -584,32 +737,68 @@ class GroupCollectionsResource(Resource):
         super().__init__(config)
         self.service = service
 
+    error_handlers = {
+        MethodNotAllowed: lambda e: (
+            {"message": str(e.description), "status": 405},
+            405,
+        ),
+        NotFound: lambda e: (
+            {"message": str(e.description), "status": 404},
+            404,
+        ),
+        BadRequest: lambda e: (
+            {"message": str(e.description), "status": 400},
+            400,
+        ),
+        Forbidden: lambda e: (
+            {"message": str(e.description), "status": 403},
+            403,
+        ),
+        ma.ValidationError: lambda e: (
+            {"message": str(e.messages), "status": 400},
+            400,
+        ),
+        UnprocessableEntity: lambda e: (
+            {"message": str(e.description), "status": 422},
+            422,
+        ),
+        RuntimeError: lambda e: (
+            {"message": str(e.description), "status": 500},
+            500,
+        ),
+    }
+
+    request_data = request_body_parser(
+        parsers=from_conf("request_body_parsers"),
+        default_content_type=from_conf("default_content_type"),
+    )
+
+    request_parsed_view_args = request_parser(
+        {
+            "slug": ma.fields.String(),
+        },
+        location="view_args",
+    )
+
     request_parsed_args = request_parser(
         {
-            "commons_instance": ma.fields.String(
-                validate=ma.validate.OneOf(["knowledgeCommons"])
-            ),
+            "commons_instance": ma.fields.String(),
             "commons_group_id": ma.fields.String(),
             "collection": ma.fields.String(),
-            "page": ma.fields.Integer(),
+            "page": ma.fields.Integer(load_default=1),
             "size": ma.fields.Integer(
-                validate=ma.validate.Range(min=10, max=1000), load_default=10
+                validate=ma.validate.Range(min=4, max=1000), load_default=25
             ),
             "sort": ma.fields.String(
                 validate=ma.validate.OneOf(
                     [
-                        "title",
-                        "created",
-                        "updated",
-                        "commons_group_id",
-                        "commons_group_title",
-                        "size",
+                        "newest",
+                        "oldest",
+                        "updated-desc",
+                        "updated-asc",
                     ]
                 ),
-                load_default="updated",
-            ),
-            "order": ma.fields.String(
-                validate=ma.validate.OneOf(["ascending", "descending"])
+                load_default="updated-desc",
             ),
         },
         location="args",
@@ -619,99 +808,204 @@ class GroupCollectionsResource(Resource):
         """Create the URL rules for the record resource."""
         return [
             route("POST", "/", self.create),
-            route("GET", "/", self.read),
-            # route("GET", "/<slug>", self.read),
+            route("GET", "/", self.search),
+            route("GET", "/<slug>", self.read),
             route("DELETE", "/<slug>", self.delete),
             route("PATCH", "/<slug>", self.update),
         ]
 
-    @request_parsed_args
+    @request_parsed_view_args
     def read(self):
+        collection_slug = resource_requestctx.view_args.get("slug")
+        print(f"collection_slug: {collection_slug}")
+        if collection_slug:
+            community_list = current_communities.service.search(
+                identity=system_identity, q=f"slug:{collection_slug}"
+            )
+
+            if community_list.to_dict()["hits"]["total"] == 0:
+                raise NotFound(
+                    f"No collection found with the slug {collection_slug}"
+                )
+            return jsonify(community_list.to_dict()["hits"]["hits"][0]), 200
+        else:
+            raise BadRequest("No collection slug provided")
+
+    @request_parsed_args
+    def search(self):
         commons_instance = resource_requestctx.args.get("commons_instance")
         commons_group_id = resource_requestctx.args.get("commons_group_id")
-        collection_slug = resource_requestctx.args.get("collection")
         page = resource_requestctx.args.get("page")
         size = resource_requestctx.args.get("size")
-        sort = resource_requestctx.args.get("sort")
-        order = resource_requestctx.args.get("order")
+        sort = resource_requestctx.args.get("sort", "updated-desc")
 
         query_params = ""
         if commons_instance:
-            query_params["custom_fields.kcr:commons_instance"] = (
-                commons_instance
+            query_params += (
+                f"+custom_fields.kcr\:commons_instance:{commons_instance} "
             )
         if commons_group_id:
-            query_params["custom_fields.kcr:commons_group_id"] = (
-                commons_group_id
+            query_params += (
+                f"+custom_fields.kcr\:commons_group_id:{commons_group_id}"
             )
-        if collection_slug:
-            query_params += f"slug:{collection_slug} "
-
-        # community_list = current_communities.service.search_user_communities(
-        #     system_identity, q="slug:community-3"
-        # )
         community_list = current_communities.service.search(
-            identity=system_identity, q=""
+            identity=system_identity,
+            q=query_params,
+            sort=sort,
+            size=size,
+            page=page,
         )
 
-        if len(community_list) == 0:
+        if community_list.to_dict()["hits"]["total"] == 0:
             raise NotFound(
-                "No Commons group found matching the parameters "
+                "No Works collection found matching the parameters "
                 f"{query_params}"
             )
-        elif len(community_list) == 1:
-            collections_data = [
-                {
-                    "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
-                    "created": "2024-01-01T00:00:00Z",
-                    "updated": "2024-01-01T00:00:00Z",
-                    # ... (other fields)
-                },
-            ]
         else:
             collections_data = community_list.to_dict()
-            # for c in collections_data:
-            #     collections_data.append(
-            #         {
-            #             "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
-            #             "created": "2024-01-01T00:00:00Z",
-            #             "updated": "2024-01-01T00:00:00Z",
-            #             # ... (other fields)
-            #         }
-            #     )
-
-        # Paginate the results
-        # start_index = (page - 1) * size
-        # end_index = start_index + size
-        # paginated_collections = filtered_collections[start_index:end_index]
-
-        # # Construct the response
-        # response_data = {
-        #     "hits": {
-        #         "hits": paginated_collections,
-        #         "total": len(filtered_collections),
-        #     },
-        #     "links": {
-        #         "self": request.url,
-        #         # ... (other pagination links)
-        #     },
-        #     "sortBy": sort,
-        #     "order": order,
-        # }
 
         return jsonify(collections_data), 200
 
+    @request_data
     def create(self):
-        # Implement the logic for handling POST requests
-        # Replace the following dummy data with your actual data processing logic
-        request_data = request.get_json()
-        commons_instance = request_data.get("commons_instance")
-        commons_group_id = request_data.get("commons_group_id")
-        commons_group_name = request_data.get("commons_group_name")
-        commons_group_visibility = request_data.get("commons_group_visibility")
+        print("starting create****")
+        print(resource_requestctx)
+        commons_instance = resource_requestctx.data.get("commons_instance")
+        commons_group_id = resource_requestctx.data.get("commons_group_id")
+        commons_group_name = resource_requestctx.data.get("commons_group_name")
+        commons_group_visibility = resource_requestctx.data.get(
+            "commons_group_visibility"
+        )
+        slug = commons_group_name.lower().replace(" ", "-")
 
-        # Implement logic to create a new collection
-        # ...
+        instance_name = app.config["SSO_SAML_IDPS"][commons_instance]["title"]
+
+        # make API request to commons instance to get group metadata
+        commons_group_description = ""
+        commons_group_url = ""
+        commons_avatar_url = ""
+        commons_upload_roles = []
+        commons_moderate_roles = []
+        meta_response = requests.get(
+            app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
+                commons_instance
+            ],
+        )
+        if meta_response.status_code == 200:
+            commons_group_description = meta_response.json["description"]
+            commons_group_url = meta_response.json["url"]
+            commons_avatar_url = meta_response.json["avatar"]
+            commons_upload_roles = meta_response.json["upload_roles"]
+            commons_moderate_roles = meta_response.json["moderate_roles"]
+        else:
+            raise UnprocessableEntity(
+                f"No such group could be found on {instance_name}"
+            )
+
+        # create roles for the new collection's group members
+        remote_roles = app.config["GROUP_COLLECTIONS_REMOTE_ROLES"][
+            commons_instance
+        ]
+        for role in remote_roles:
+            group_name = f"{commons_instance}|{commons_group_id}|{role}"
+            my_group_role = accounts_datastore.find_or_create_role(
+                name=group_name
+            )
+            accounts_datastore.commit()
+
+            if my_group_role is not None:
+                logger.info(f'Role "{group_name}" created successfully.')
+            else:
+                raise RuntimeError(f'Role "{group_name}" not created.')
+
+        # create the new collection
+        new_record = current_communities.service.create(
+            identity=system_identity,
+            data={
+                "access": {
+                    "visibility": "restricted",
+                    "member_policy": "closed",
+                    "record_policy": "closed",
+                    # "owned_by": [group_admins],
+                },
+                "slug": slug,
+                "metadata": {
+                    "title": f"{commons_group_name} Collection "
+                    "({instance_name})",
+                    "description": f"A collection managed by the"
+                    f"{commons_group_name} group of {instance_name}",
+                    "type": {
+                        "id": "event",
+                    },
+                    "curation_policy": "",
+                    "page": f"Information about {commons_group_name}"
+                    "Collection",
+                    "website": commons_group_url,
+                    "organizations": [
+                        {
+                            "name": commons_group_name,
+                        },
+                        {"name": commons_instance},
+                    ],
+                },
+                "custom_fields": {
+                    "kcr:commons_instance": commons_instance,
+                    "kcr:commons_group_id": commons_group_id,
+                    "kcr:commons_group_name": commons_group_name,
+                    "kcr:commons_group_description": commons_group_description,
+                    "kcr:commons_group_visibility": commons_group_visibility,
+                },
+            },
+        )
+        if not new_record:
+            raise RuntimeError("Failed to create new collection")
+
+        # assign the group roles as members of the new collection
+        manage_payload = [
+            {"id": f"{commons_instance}|{commons_group_id}|{role}"}
+            for role in commons_upload_roles
+        ]
+        manage_members = current_communities.members_service.add(
+            identity=system_identity,
+            id=new_record.id,
+            data={"members": manage_payload, "role": "manager"},
+        )
+
+        moderate_payload = [
+            {"id": f"{commons_instance}|{commons_group_id}|{role}"}
+            for role in commons_moderate_roles
+        ]
+        moderate_members = current_communities.members_service.add(
+            identity=system_identity,
+            id=new_record.id,
+            data={"members": moderate_payload, "role": "moderator"},
+        )
+
+        member_payload = [
+            {"id": f"{commons_instance}|{commons_group_id}|member"}
+            for role in remote_roles
+        ]
+        members = current_communities.members_service.add(
+            identity=system_identity,
+            id=new_record.id,
+            data={"members": member_payload, "role": "member"},
+        )
+
+        # download the group avatar and upload it to the Invenio instance
+        avatar_response = requests.get(commons_avatar_url)
+        if avatar_response.status_code == 200:
+            # with open(f"{slug}.png", "wb") as f:
+            #     f.write(avatar_response.content)
+            # upload the avatar to the Invenio instance
+            logo_result = current_communities.service.upload_logo(
+                identity=system_identity,
+                _id=new_record.id,
+                stream=avatar_response.content,
+            )
+            if logo_result is not None:
+                logger.info("Logo uploaded successfully.")
+            else:
+                raise RuntimeError("Logo upload failed.")
 
         # Construct the response
         response_data = {

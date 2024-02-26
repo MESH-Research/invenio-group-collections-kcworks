@@ -1,0 +1,2 @@
+class CommonsGroupNotFoundError(Exception):
+    pass

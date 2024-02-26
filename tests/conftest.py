@@ -12,6 +12,8 @@ See https://pytest-invenio.readthedocs.io/ for documentation on which test
 fixtures are available.
 """
 
+from traceback import format_exc
+import traceback
 import pytest
 from flask_security.utils import hash_password
 from invenio_access.models import ActionRoles, Role
@@ -44,15 +46,6 @@ pytest_plugins = ("celery.contrib.pytest",)
 @pytest.fixture(scope="module")
 def communities_service(app):
     return current_communities.service
-
-
-@pytest.fixture(scope="module")
-def celery_config():
-    """Override pytest-invenio fixture.
-
-    TODO: Remove this fixture if you add Celery support.
-    """
-    return {}
 
 
 test_config = {
@@ -234,6 +227,15 @@ def community_type_v(app, community_type_type):
         },
     )
 
+    vocabulary_service.create(
+        system_identity,
+        {
+            "id": "group",
+            "title": {"en": "Group"},
+            "type": "communitytypes",
+        },
+    )
+
     Vocabulary.index.refresh()
 
 
@@ -252,7 +254,6 @@ def create_communities_custom_fields(app):
         )
     except CustomFieldsException as e:
         print(f"Custom fields configuration is not valid. {e.description}")
-    print("Creating communities custom fields...")
     # multiple=True makes it an iterable
     properties = Mapping.properties_for_fields(None, available_fields)
 
@@ -264,91 +265,119 @@ def create_communities_custom_fields(app):
             using=current_search_client,
         )
         communities_index.put_mapping(body={"properties": properties})
-        print("Created all communities custom fields!")
     except search_engine.RequestError as e:
         print("An error occured while creating custom fields.")
         print(e.info["error"]["reason"])
 
 
 @pytest.fixture(scope="function")
-def sample_communities(app, communities_service) -> list:
+def sample_communities(testapp, db, search):
+    create_communities_custom_fields(testapp)
 
-    try:
-        create_communities_custom_fields(app)
-        communities_service.create(
-            identity=system_identity,
-            data={
-                "access": {
-                    "visibility": "public",
-                    "member_policy": "open",
-                    "record_policy": "open",
-                },
-                "slug": "community-1",
-                "metadata": {
-                    "title": "Community 1",
-                    "description": "Community 1 description",
-                    "type": {
-                        "id": "event",
-                    },
-                    "curation_policy": "Curation policy",
-                    "page": "Information for community 1",
-                    "website": "https://community1.com",
-                    "organizations": [
-                        {
-                            "name": "Organization 1",
-                        }
-                    ],
-                },
-                "custom_fields": {
-                    "kcr:commons_group_id": "123",
-                    "kcr:commons_group_name": "Commons Group 1",
-                    "kcr:commons_group_description": "Commons Group 1"
-                    " description",
-                    "kcr:commons_group_visibility": "public",
-                },
-            },
+    def create_communities(testapp, communities_service) -> None:
+        communities = communities_service.read_all(
+            identity=system_identity, fields=["slug"]
         )
-        communities_service.create(
-            identity=system_identity,
-            data={
-                "access": {
-                    "visibility": "public",
-                    "member_policy": "open",
-                    "record_policy": "open",
-                },
-                "slug": "community-2",
-                "metadata": {
-                    "title": "Community 2",
-                    "description": "Community 2 description",
-                    "type": {
-                        "id": "organization",
-                    },
-                    "curation_policy": "Curation policy",
-                    "page": "Information for community 2",
-                    "website": "https://community2.com",
-                    "organizations": [
-                        {
-                            "name": "Organization 2",
-                        }
-                    ],
-                },
-                "custom_fields": {
-                    "kcr:commons_group_id": "456",
-                    "kcr:commons_group_name": "Commons Group 2",
-                    "kcr:commons_group_description": (
-                        "Commons Group 2 description"
-                    ),
-                    "kcr:commons_group_visibility": "public",
-                },
-            },
-        )
-        Community.index.refresh()
-    except ma.exceptions.ValidationError:
-        pass
+        if communities.total > 0:
+            print("Communities already exist.")
+            return
+        communities_data = {
+            "knowledgeCommons": [
+                (
+                    "123",
+                    "Commons Group 1",
+                    "Community 1",
+                ),
+                (
+                    "456",
+                    "Commons Group 2",
+                    "Community 2",
+                ),
+                (
+                    "789",
+                    "Commons Group 3",
+                    "Community 3",
+                ),
+                (
+                    "101112",
+                    "Commons Group 4",
+                    "Community 4",
+                ),
+            ],
+            "msuCommons": [
+                (
+                    "131415",
+                    "MSU Group 1",
+                    "MSU Community 1",
+                ),
+                (
+                    "161718",
+                    "MSU Group 2",
+                    "MSU Community 2",
+                ),
+                (
+                    "181920",
+                    "MSU Group 3",
+                    "MSU Community 3",
+                ),
+                (
+                    "212223",
+                    "MSU Group 4",
+                    "MSU Community 4",
+                ),
+            ],
+        }
+        try:
+            for instance in communities_data.keys():
+                for c in communities_data[instance]:
+                    slug = c[2].lower().replace("-", "").replace(" ", "")
+                    print(slug)
+                    rec = communities_service.create(
+                        identity=system_identity,
+                        data={
+                            "access": {
+                                "visibility": "public",
+                                "member_policy": "open",
+                                "record_policy": "open",
+                            },
+                            "slug": c[2].lower().replace(" ", "-"),
+                            "metadata": {
+                                "title": c[2],
+                                "description": c[2] + " description",
+                                "type": {
+                                    "id": "event",
+                                },
+                                "curation_policy": "Curation policy",
+                                "page": f"Information for {c[2].lower()}",
+                                "website": f"https://{slug}.com",
+                                "organizations": [
+                                    {
+                                        "name": "Organization 1",
+                                    }
+                                ],
+                            },
+                            "custom_fields": {
+                                "kcr:commons_instance": instance,
+                                "kcr:commons_group_id": c[0],
+                                "kcr:commons_group_name": c[1],
+                                "kcr:commons_group_description": (
+                                    f"{c[1]} description"
+                                ),
+                                "kcr:commons_group_visibility": "public",
+                            },
+                        },
+                    )
+            Community.index.refresh()
+        except ma.exceptions.ValidationError:
+            print("Error creating communities.")
+            print(traceback.format_exc())
+            pass
+
+    return create_communities
 
 
 @pytest.fixture(scope="module")
-def testapp(app):
+def testapp(app, location):
     """Application with just a database.
 
     Pytest-Invenio also initialises ES with the app fixture.
@@ -425,6 +454,8 @@ def admin(UserFixture, app, db, admin_role_need):
 
     datastore.add_role_to_user(u.user, role)
     db.session.commit()
+    print("admin user created")
+    print(u.user)
     return u
 
 
