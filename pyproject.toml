@@ -60,3 +60,6 @@ invenio_groups = "invenio_groups.ext:InvenioGroups"
 
 [project.entry-points."invenio_base.api_blueprints"]
 invenio_groups = "invenio_groups.views:create_api_blueprint"
+
+[project.entry-points."invenio_jsonschemas.schemas"]
+invenio_groups = "invenio_groups.jsonschemas"

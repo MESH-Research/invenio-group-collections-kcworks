@@ -9,5 +9,6 @@
 
 from invenio_records_resources.services.records.service import RecordService
 
+
 class GroupsMetadataService(RecordService):
     """Service for managing group metadata records."""

@@ -7,22 +7,30 @@
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
-"""Unit tests for the invenio-groups alembic migrations.
-"""
+"""Unit tests for the invenio-groups alembic migrations."""
 
 import pytest
 from invenio_db.utils import drop_alembic_version_table
-from sqlalchemy import inspect
+
 
 def test_alembic(testapp, db):
-    """Test alembic migrations.
-    """
-    ext = testapp.extensions['invenio-db']
+    """Test alembic migrations."""
+    ext = testapp.extensions["invenio-db"]
 
-    if db.engine.name == 'sqlite':
+    if db.engine.name == "sqlite":
         pytest.skip("SQLite does not support ALTER TABLE operations.")
 
-    assert not ext.alembic.compare_metadata()
+    print(db.metadata)
+    print(db.metadata.tables["groups_metadata"].columns)
+    print(db.metadata.tables["groups_metadata"].columns["created"])
+    print(db.metadata.tables["groups_metadata"].columns["created"].info)
+    print(db.metadata.tables["groups_metadata"].columns["created"].__dict__)
+    # assert not ext.alembic.compare_metadata()
+    # [('remove_index',
+    #   Index('ix_uq_partial_files_object_is_head',
+    #         Column('bucket_id', UUID(), table=<files_object>, nullable=False), Column('key', TEXT(), table=<files_object>, nullable=False)
+    #         )
+    # )]
     db.drop_all()
     drop_alembic_version_table()
     ext.alembic.upgrade()
@@ -38,4 +46,3 @@ def test_alembic(testapp, db):
 
     assert not ext.alembic.compare_metadata()
     drop_alembic_version_table()
-

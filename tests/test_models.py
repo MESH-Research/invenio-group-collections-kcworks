@@ -7,8 +7,7 @@
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
-"""Unit tests for invenio-groups models.
-"""
+"""Unit tests for invenio-groups models."""
 
 import pytest
 from invenio_groups.models import GroupsMetadata
@@ -17,6 +16,7 @@ from jsonschema.exceptions import ValidationError
 import sqlalchemy
 from sqlalchemy import select
 from uuid import UUID
+
 
 def test_groups_metadata_model(testapp, db):
     """invenio-groups metadata model test."""
@@ -44,12 +44,12 @@ def test_groups_metadata_model(testapp, db):
         assert retrieved_group.id == mygroup_id
         assert retrieved_group.data == {"name": "Test Group"}
         assert retrieved_group.version_id == 1
-        assert retrieved_group.is_deleted == False
+        assert retrieved_group.is_deleted is False
 
-        assert type(retrieved_group.decode(retrieved_group.json)) == dict
-        assert type(retrieved_group.json) == dict
+        assert isinstance(retrieved_group.decode(retrieved_group.json), dict)
+        assert isinstance(retrieved_group.json, dict)
 
-        assert retrieved_group.encoder == None
+        assert retrieved_group.encoder is None
 
         # test record update
         retrieved_group.data = {"name": "Test Group revised"}
@@ -73,37 +73,38 @@ def test_groups_metadata_api(testapp, db):
 
         # first test schema validation
         with pytest.raises(ValidationError) as exc_validate:
-            my_group = GroupsMetadataAPI.create(
-                {"group_name": "Test Group"}
-            )
+            my_group = GroupsMetadataAPI.create({"group_name": "Test Group"})
         assert "'access' is a required property" in str(exc_validate.value)
 
         # then valid record creation
-        my_group = GroupsMetadataAPI.create({
-            "metadata": {
-                "group_name": "Test Group",
-                "group_id": "testgroup",
-                "group_description": "test group description",
-                "has_community": True
-            },
-            "access": {
-                "group_privacy": "public",
-                "community_privacy": "public",
-                "can_upload": ["members", "moderators", "administrators"],
-                "can_accept": ["administrators"],
-            },
-            "invenio_roles": {
-                "administrator": "testgroup-admin",
-                "moderator": "testgroup-mod",
-                "member": "testgroup-member"
-            },
-        })
+        my_group = GroupsMetadataAPI.create(
+            {
+                "metadata": {
+                    "group_name": "Test Group",
+                    "group_id": "testgroup",
+                    "group_description": "test group description",
+                    "has_community": True,
+                },
+                "access": {
+                    "group_privacy": "public",
+                    "community_privacy": "public",
+                    "can_upload": ["members", "moderators", "administrators"],
+                    "can_accept": ["administrators"],
+                },
+                "invenio_roles": {
+                    "administrator": "testgroup-admin",
+                    "moderator": "testgroup-mod",
+                    "member": "testgroup-member",
+                },
+            }
+        )
         from pprint import pprint
-        pprint({k:v for k, v in my_group.items()})
+
+        pprint({k: v for k, v in my_group.items()})
         assert my_group.revision_id == 0
-        assert type(my_group.id) == UUID
+        assert isinstance(my_group.id, UUID)
         db.session.commit()
-        print('my_group')
+        print("my_group")
         print(my_group)
         print(my_group.id)
         print(my_group.created)
@@ -113,101 +114,129 @@ def test_groups_metadata_api(testapp, db):
 
         json_dump = my_group.dumps()
         print(json_dump)
-        assert json_dump['id'] == json_dump['uuid'] == str(my_group.id)
-        assert json_dump['version_id'] == my_group.revision_id + 1
-        json_vals = {k: v for k, v in json_dump.items() if k not in
-                     ['id', 'uuid', 'created', 'updated']}
-        assert json_vals =={'$schema': {
-            "$schema": "http://json-schema.org/draft-04/schema#",
-            "id": "local://groups-metadata-v1.0.0.json",
-            # "additionalProperties": False,
-            "title": "Invenio Groups Metadata Schema v1.0.0",
-            "type": "object",
-            "properties": {
-                "access": {
-                    "type": "object",
-                    "properties": {
-                        "group_privacy": {
-                            "type": "string",
-                            "enum": ["public", "private", "hidden"]
-                        },
-                        "community_privacy": {
-                            "type": "string",
-                            "enum": ["public", "private", "hidden"]
-                        },
-                        "can_upload": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "enum": ["members", "moderators", "administrators"]
-                            }
-                        },
-                        "can_accept": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "enum": ["members", "moderators", "administrators"]
-                            }
-                        },
-                    },
-                    "required": ["group_privacy", "community_privacy", "can_upload",
-                                "can_accept"]
-                },
-                "metadata": {
-                    "type": "object",
-                    "properties": {
-                        "group_id": {"type": "string",
-                                            "format": "isLowercase"},
-                        "group_name": {"type": "string"},
-                        "group_url": {"type": "string"},
-                        "group_description": {"type": "string"},
-                        "profile_image": {"type": "string"},
-                        "has_community": {"type": "boolean"}
-                    },
-                    "required": ["group_id", "group_name", "has_community"]
-                },
-                "invenio_roles": {
-                    "type": "object",
-                    "properties": {
-                        "administrator": {"type": "string"},
-                        "moderator": {"type": "string"},
-                        "member": {"type": "string"}
-                    },
-                    "required": ["administrator", "moderator", "member"]
-                },
-            },
-            "required": ["access", "metadata", "invenio_roles"]
-        },
-        'access': {
-            'group_privacy': 'public',
-            'community_privacy': 'public',
-            'can_accept': ['administrators'],
-            'can_upload': ['members', 'moderators', 'administrators']
-        },
-        'metadata': {
-            'group_id': 'testgroup',
-            'group_description': 'test group description',
-            'group_name': 'Test Group',
-            'has_community': True,
-        },
-        'invenio_roles': {'administrator': 'testgroup-admin',
-                            'member': 'testgroup-member',
-                            'moderator': 'testgroup-mod'
-        },
-        'version_id': 1
+        assert json_dump["id"] == json_dump["uuid"] == str(my_group.id)
+        assert json_dump["version_id"] == my_group.revision_id + 1
+        json_vals = {
+            k: v
+            for k, v in json_dump.items()
+            if k not in ["id", "uuid", "created", "updated"]
         }
-        assert my_group['metadata']['group_name'] == "Test Group"
+        assert json_vals == {
+            "$schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "id": "local://groups-metadata-v1.0.0.json",
+                # "additionalProperties": False,
+                "title": "Invenio Groups Metadata Schema v1.0.0",
+                "type": "object",
+                "properties": {
+                    "access": {
+                        "type": "object",
+                        "properties": {
+                            "group_privacy": {
+                                "type": "string",
+                                "enum": ["public", "private", "hidden"],
+                            },
+                            "community_privacy": {
+                                "type": "string",
+                                "enum": ["public", "private", "hidden"],
+                            },
+                            "can_upload": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "members",
+                                        "moderators",
+                                        "administrators",
+                                    ],
+                                },
+                            },
+                            "can_accept": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "members",
+                                        "moderators",
+                                        "administrators",
+                                    ],
+                                },
+                            },
+                        },
+                        "required": [
+                            "group_privacy",
+                            "community_privacy",
+                            "can_upload",
+                            "can_accept",
+                        ],
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "properties": {
+                            "group_id": {
+                                "type": "string",
+                                "format": "isLowercase",
+                            },
+                            "group_name": {"type": "string"},
+                            "group_url": {"type": "string"},
+                            "group_description": {"type": "string"},
+                            "profile_image": {"type": "string"},
+                            "has_community": {"type": "boolean"},
+                        },
+                        "required": [
+                            "group_id",
+                            "group_name",
+                            "has_community",
+                        ],
+                    },
+                    "invenio_roles": {
+                        "type": "object",
+                        "properties": {
+                            "administrator": {"type": "string"},
+                            "moderator": {"type": "string"},
+                            "member": {"type": "string"},
+                        },
+                        "required": ["administrator", "moderator", "member"],
+                    },
+                },
+                "required": ["access", "metadata", "invenio_roles"],
+            },
+            "access": {
+                "group_privacy": "public",
+                "community_privacy": "public",
+                "can_accept": ["administrators"],
+                "can_upload": ["members", "moderators", "administrators"],
+            },
+            "metadata": {
+                "group_id": "testgroup",
+                "group_description": "test group description",
+                "group_name": "Test Group",
+                "has_community": True,
+            },
+            "invenio_roles": {
+                "administrator": "testgroup-admin",
+                "member": "testgroup-member",
+                "moderator": "testgroup-mod",
+            },
+            "version_id": 1,
+        }
+        assert my_group["metadata"]["group_name"] == "Test Group"
         assert {k: v for k, v in my_group.items()} == {
-            k: v for k, v in json_dump.items() if k not in ['created', 'id', 'updated', 'uuid', 'version_id']}  # because using default dumper that's deepcopy
+            k: v
+            for k, v in json_dump.items()
+            if k not in ["created", "id", "updated", "uuid", "version_id"]
+        }  # because using default dumper that's deepcopy
 
         # test record revision
-        my_group['metadata']['group_name'] = "Test Group revised"
+        my_group["metadata"]["group_name"] = "Test Group revised"
         my_group_updated = my_group.commit()
         db.session.commit()
-        assert my_group_updated['metadata']['group_name'] == "Test Group revised"
+        assert (
+            my_group_updated["metadata"]["group_name"] == "Test Group revised"
+        )
 
         my_group_fetched = GroupsMetadataAPI.get_record(my_group.id)
-        assert type(my_group_fetched) == GroupsMetadataAPI
+        assert isinstance(my_group_fetched, GroupsMetadataAPI)
         assert my_group_fetched.revision_id == 1
 
         # soft delete and test that still exists in db
@@ -218,24 +247,33 @@ def test_groups_metadata_api(testapp, db):
         assert str(exc.value) == "No row was found when one was required"
         my_groups_fetched = GroupsMetadataAPI.get_records([my_group.id])
         assert len(my_groups_fetched) == 0  # not accessible from api anymore
-        assert type(db.session.get(GroupsMetadata, my_group.id)
-                    ) == GroupsMetadata  # still exists in db
-        my_group_soft_deleted = GroupsMetadataAPI.get_record(my_group.id,
-                                                             with_deleted=True)
-        assert type(my_group_soft_deleted) == GroupsMetadataAPI
-        assert my_group_soft_deleted.is_deleted == True
+        assert (
+            type(db.session.get(GroupsMetadata, my_group.id)) == GroupsMetadata
+        )  # still exists in db
+        my_group_soft_deleted = GroupsMetadataAPI.get_record(
+            my_group.id, with_deleted=True
+        )
+        assert isinstance(my_group_soft_deleted, GroupsMetadataAPI)
+        assert my_group_soft_deleted.is_deleted is True
 
         # undelete and test that accessible again
         my_group_soft_deleted.undelete()
         my_group_soft_deleted.commit()
         db.session.commit()
         my_group_fetched = GroupsMetadataAPI.get_record(my_group.id)
-        assert type(my_group_fetched) == GroupsMetadataAPI
+        assert isinstance(my_group_fetched, GroupsMetadataAPI)
 
         # hard delete and test that no longer exists in db
         my_group_fetched.delete(force=True)
         db.session.commit()
         with pytest.raises(sqlalchemy.exc.NoResultFound) as after_delete_exc:
-            fetched_after_delete = GroupsMetadataAPI.get_record(my_group.id)
-        assert str(after_delete_exc.value) == "No row was found when one was required"
-        assert db.session.get(GroupsMetadata, my_group.id) == None  # no longer exists in db
+            fetched_after_delete = GroupsMetadataAPI.get_record(  # noqa
+                my_group.id
+            )
+        assert (
+            str(after_delete_exc.value)
+            == "No row was found when one was required"
+        )
+        assert (
+            db.session.get(GroupsMetadata, my_group.id) is None
+        )  # no longer exists in db

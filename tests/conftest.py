@@ -239,13 +239,13 @@ def community_type_v(app, community_type_type):
     Vocabulary.index.refresh()
 
 
-def create_communities_custom_fields(app):
+def create_communities_custom_fields(testapp):
     """Creates one or all custom fields for communities.
 
     $ invenio custom-fields communities create [field].
     """
-    available_fields = app.config.get("COMMUNITIES_CUSTOM_FIELDS")
-    namespaces = set(app.config.get("COMMUNITIES_NAMESPACES").keys())
+    available_fields = testapp.config.get("COMMUNITIES_CUSTOM_FIELDS")
+    namespaces = set(testapp.config.get("COMMUNITIES_NAMESPACES").keys())
     try:
         validate_custom_fields(
             given_fields=None,

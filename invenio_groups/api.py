@@ -17,13 +17,16 @@ from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError
 from invenio_records.api import Record
 from invenio_records.dumpers import SearchDumper
 from invenio_records.systemfields import (
-    ModelField, SystemField, SystemFieldsMixin, SystemFieldContext
+    ConstantField,
+    ModelField,
+    SystemField,
+    SystemFieldsMixin,
+    SystemFieldContext,
 )
-from invenio_records_resources.records.systemfields import (
-    IndexField, PIDField
-)
+from invenio_records_resources.records.systemfields import IndexField, PIDField
 from invenio_records_resources.records.api import PersistentIdentifierWrapper
 from uuid import UUID
+
 
 class GroupPIDFieldContext(SystemFieldContext):
     """PID Slug Field Context."""
@@ -51,7 +54,9 @@ class GroupPIDFieldContext(SystemFieldContext):
                 raise PIDDoesNotExistError("comid", str(pid_value))
             record = self.record_cls(model.data, model=model)
             if record.is_deleted:
-                raise PIDDeletedError(PersistentIdentifierWrapper(pid_value), record)
+                raise PIDDeletedError(
+                    PersistentIdentifierWrapper(pid_value), record
+                )
             return record
 
 
@@ -86,9 +91,9 @@ class GroupPIDField(SystemField):
         # record.
         record.pop(self._id_field, None)
 
+
 class GroupsMetadataAPI(Record, SystemFieldsMixin):
-    """API class for interacting with group metadata records.
-    """
+    """API class for interacting with group metadata records."""
 
     id = ModelField()
     pid = GroupPIDField("id")
@@ -101,6 +106,8 @@ class GroupsMetadataAPI(Record, SystemFieldsMixin):
     # FIXME: This is a hack to get around the fact that the service _create
     # method tries to instantiate an API object with empty data before calling
     # the components which load the data that would validate against the schema.
-    # schema = ConstantField("$schema", groups_metadata_schema)
+    schema = ConstantField("$schema", groups_metadata_schema)
     # schema = ConstantField("$schema", "local://groups-metadata-v1.0.0.json")
-    index = IndexField("groups-metadata-v1.0.0", search_alias="groups-metadata-v1.0.0")
+    index = IndexField(
+        "groups-metadata-v1.0.0", search_alias="groups-metadata"
+    )
