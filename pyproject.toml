@@ -63,3 +63,6 @@ invenio_groups = "invenio_groups.views:create_api_blueprint"
 
 [project.entry-points."invenio_jsonschemas.schemas"]
 invenio_groups = "invenio_groups.jsonschemas"
+
+[project.entry-points."invenio_search.mappings"]
+invenio_groups = "invenio_groups.mappings"

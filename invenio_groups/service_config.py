@@ -9,6 +9,7 @@
 
 """Configuration class and helper classes for the groups_metadata service."""
 
+from invenio_i18n import gettext as _
 from .api import GroupsMetadataAPI
 from .components import AccessComponent, InvenioRolesComponent
 from .schema import GroupsMetadataSchema
@@ -20,7 +21,7 @@ from invenio_records_permissions.generators import (
 )
 from invenio_records_permissions.policies import BasePermissionPolicy
 from invenio_records_resources.services.records.config import (
-    SearchOptions as SearchOptionsBase
+    SearchOptions as SearchOptionsBase,
 )
 from invenio_records_resources.services.base import Link
 from invenio_records_resources.services.base.config import (
@@ -30,14 +31,22 @@ from invenio_records_resources.services.base.config import (
     SearchOptionsMixin,
 )
 from invenio_records_resources.services.records.config import (
-    RecordServiceConfig
+    RecordServiceConfig,
 )
 from invenio_records_resources.services.records.components import (
     DataComponent,
-    MetadataComponent
+    MetadataComponent,
+)
+from invenio_records_resources.services.records.links import pagination_links
+from invenio_records_resources.services.records.params import (
+    FacetsParam,
+    PaginationParam,
+    QueryStrParam,
+    SortParam,
 )
 from invenio_records_resources.services.records.results import (
-    RecordItem, RecordList
+    RecordItem,
+    RecordList,
 )
 
 
@@ -64,25 +73,43 @@ class SearchOptions(SearchOptionsBase, SearchOptionsMixin):
     #     ],
     # }
 
+    sort_options = {
+        "bestmatch": dict(
+            title=_("Best match"),
+            fields=["_score"],  # ES defaults to desc on `_score` field
+        ),
+        "newest": dict(
+            title=_("Newest"),
+            fields=["-created"],
+        ),
+        "oldest": dict(
+            title=_("Oldest"),
+            fields=["created"],
+        ),
+    }
+    facets = {}
+    pagination_options = {
+        "default_results_per_page": 25,
+        "default_max_results": 10000,
+    }
+
     # facets = {"type": facets.type, "visibility": facets.visibility}
-    # params_interpreters_cls = [
-    #     QueryStrParam,
-    #     PaginationParam,
-    #     CommunitiesSortParam,
-    #     FacetsParam,
-    # ]
+    params_interpreters_cls = [
+        QueryStrParam,
+        PaginationParam,
+        SortParam,
+        FacetsParam,
+    ]
+
 
 class GroupsMetadataLink(Link):
-    """Link variables setter for Community Members links."""
+    """Link variables setter for GroupsMetadata links."""
 
     @staticmethod
     def vars(record, vars):
         """Variables for the URI template."""
-        vars.update(
-            {
-                "id": record.id
-            }
-        )
+        vars.update({"id": record.id})
+
 
 class GroupsMetadataItem(RecordItem):
     """Result record item for groups metadata."""
@@ -91,6 +118,12 @@ class GroupsMetadataItem(RecordItem):
     def id(self):
         """Get the record's id."""
         return self._record.id
+
+
+class GroupCollectionsServiceConfig(RecordServiceConfig, ConfiguratorMixin):
+    """Community collections service configuration."""
+
+    service_id = "group_collections"
 
 
 class GroupsMetadataServiceConfig(RecordServiceConfig, ConfiguratorMixin):
@@ -106,7 +139,10 @@ class GroupsMetadataServiceConfig(RecordServiceConfig, ConfiguratorMixin):
     record_cls = GroupsMetadataAPI
     result_item_cls = GroupsMetadataItem
     result_list_cls = RecordList
-    indexer_queue_name = "groups-metadata-v1.0.0"
+    indexer_queue_name = "groups-groups-v1.0.0"
+
+    index_dumper = None
+    # use default index dumper defined on record class ???
 
     # Search configuration
     search = FromConfigSearchOptions(
@@ -121,21 +157,24 @@ class GroupsMetadataServiceConfig(RecordServiceConfig, ConfiguratorMixin):
 
     # Service components: where actual record operations are implemented
     components = FromConfig(
-        "GROUPS_METADATA_SERVICE_COMPONENTS", default=[
+        "GROUPS_METADATA_SERVICE_COMPONENTS",
+        default=[
             DataComponent,
             MetadataComponent,
             AccessComponent,
             InvenioRolesComponent,
-
             # CustomFieldsComponent,
             # RelationsComponent,
             # OAISetComponent,
-        ]
+        ],
     )
 
     links_item = {
         "self": GroupsMetadataLink("{+api}/groups/{id}"),
     }
+
+    links_search = pagination_links("{+api}/records{?args*}")
+
     # links_item = {
     #     "self": CommunityLink("{+api}/communities/{id}"),
     #     "self_html": CommunityLink("{+ui}/communities/{slug}"),

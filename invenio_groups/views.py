@@ -928,7 +928,7 @@ class GroupCollectionsResource(Resource):
                     "record_policy": "closed",
                     # "owned_by": [group_admins],
                 },
-                "slug": slug,
+                # "slug": slug,
                 "metadata": {
                     "title": f"{commons_group_name} Collection "
                     "({instance_name})",

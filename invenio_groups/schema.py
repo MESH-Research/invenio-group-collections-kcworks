@@ -10,78 +10,95 @@
 """Marshmallow schema for groups metadata records."""
 
 from invenio_i18n import lazy_gettext as _
-from invenio_records_resources.services.records.schema import (
-    BaseRecordSchema
-)
+from invenio_records_resources.services.records.schema import BaseRecordSchema
 from marshmallow import EXCLUDE, fields, Schema, validate
 from marshmallow.fields import Boolean, Url
 from marshmallow_utils.fields import (
-    NestedAttribute, SanitizedHTML, SanitizedUnicode
+    NestedAttribute,
+    SanitizedHTML,
+    SanitizedUnicode,
 )
+
 
 def _not_blank(**kwargs):
     """Returns a non-blank validation rule."""
     max_ = kwargs.get("max", "")
     return validate.Length(
         error=_(
-            "Field cannot be blank or longer than {max_} characters.".format(max_=max_)
+            "Field cannot be blank or longer than {max_} characters.".format(
+                max_=max_
+            )
         ),
         min=1,
-        **kwargs
+        **kwargs,
     )
 
 
 def no_longer_than(max, **kwargs):
     """Returns a character limit validation rule."""
     return validate.Length(
-        error=_("Field cannot be longer than {max} characters.".format(max=max)),
+        error=_(
+            "Field cannot be longer than {max} characters.".format(max=max)
+        ),
         max=max,
-        **kwargs
+        **kwargs,
     )
 
 
 class GroupsMetadataAccessSchema(Schema):
-    """
-    """
-    group_privacy = fields.Str(required=True,
-        validate=validate.OneOf(["public", "private", "hidden"])
+    """ """
+
+    group_privacy = fields.Str(
+        required=True, validate=validate.OneOf(["public", "private", "hidden"])
     )
-    community_privacy = fields.Str(required=True,
-        validate=validate.OneOf(["public", "private", "hidden", "none"])
+    community_privacy = fields.Str(
+        required=True,
+        validate=validate.OneOf(["public", "private", "hidden", "none"]),
     )
-    can_upload = fields.List(fields.Str(required=True,
-        validate=validate.OneOf(["members", "moderators", "administrators", "none"])
+    can_upload = fields.List(
+        fields.Str(
+            required=True,
+            validate=validate.OneOf(
+                ["members", "moderators", "administrators", "none"]
+            ),
         ),
-        required=True)
-    can_accept = fields.List(fields.Str(required=True,
-        validate=validate.OneOf(["members", "moderators", "administrators", "none"])
+        required=True,
+    )
+    can_accept = fields.List(
+        fields.Str(
+            required=True,
+            validate=validate.OneOf(
+                ["members", "moderators", "administrators", "none"]
+            ),
         ),
-        required=True)
+        required=True,
+    )
+
 
 class GroupsMetadataMetadataSchema(Schema):
-    """
-    """
-    group_id = SanitizedUnicode(required=True,
-                                validate=_not_blank(max=250))
-    group_name = SanitizedUnicode(required=True,
-                                  validate=_not_blank(max=2000))
-    group_description = SanitizedHTML(required=False,
-                                      validate=no_longer_than(max=2000))
+    """ """
+
+    group_id = SanitizedUnicode(required=True, validate=_not_blank(max=250))
+    group_name = SanitizedUnicode(required=True, validate=_not_blank(max=2000))
+    group_description = SanitizedHTML(
+        required=False, validate=no_longer_than(max=2000)
+    )
     group_url = Url(required=False, validate=_not_blank())
-    profile_image = SanitizedUnicode(required=False,
-                                     validate=no_longer_than(max=250))
+    profile_image = SanitizedUnicode(
+        required=False, validate=no_longer_than(max=250)
+    )
     has_community = Boolean(required=True)
 
 
 class GroupsMetadataInvenioRolesSchema(Schema):
-    """
-    """
-    administrator = SanitizedUnicode(required=True,
-                                     validate=_not_blank(max=250))
-    moderator = SanitizedUnicode(required=True,
-                                 validate=_not_blank(max=250))
-    member = SanitizedUnicode(required=True,
-                              validate=_not_blank(max=250))
+    """ """
+
+    administrator = SanitizedUnicode(
+        required=True, validate=_not_blank(max=250)
+    )
+    moderator = SanitizedUnicode(required=True, validate=_not_blank(max=250))
+    member = SanitizedUnicode(required=True, validate=_not_blank(max=250))
+
 
 class GroupsMetadataSchema(BaseRecordSchema):
     """Marshmallow schema for groups metadata records.
@@ -103,5 +120,6 @@ class GroupsMetadataSchema(BaseRecordSchema):
 
     metadata = NestedAttribute(GroupsMetadataMetadataSchema, required=True)
     access = NestedAttribute(GroupsMetadataAccessSchema, required=True)
-    invenio_roles = NestedAttribute(GroupsMetadataInvenioRolesSchema,
-                                    required=True)
+    invenio_roles = NestedAttribute(
+        GroupsMetadataInvenioRolesSchema, required=True
+    )

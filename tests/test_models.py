@@ -18,9 +18,9 @@ from sqlalchemy import select
 from uuid import UUID
 
 
-def test_groups_metadata_model(testapp, db):
+def test_groups_metadata_model(app, db):
     """invenio-groups metadata model test."""
-    with testapp.app_context():
+    with app.app_context():
         # confirm that the table exists
         assert "groups_metadata" in db.metadata.tables
 
@@ -66,9 +66,9 @@ def test_groups_metadata_model(testapp, db):
         assert db.session.execute(select(GroupsMetadata)).all() == []
 
 
-def test_groups_metadata_api(testapp, db):
+def test_groups_metadata_api(app, db):
     """invenio-groups metadata api test."""
-    with testapp.app_context():
+    with app.app_context():
         # test record creation and commit
 
         # first test schema validation
@@ -119,7 +119,7 @@ def test_groups_metadata_api(testapp, db):
         json_vals = {
             k: v
             for k, v in json_dump.items()
-            if k not in ["id", "uuid", "created", "updated"]
+            if k not in ["id", "uuid", "created", "updated", "indexed_at"]
         }
         assert json_vals == {
             "$schema": {
@@ -224,7 +224,15 @@ def test_groups_metadata_api(testapp, db):
         assert {k: v for k, v in my_group.items()} == {
             k: v
             for k, v in json_dump.items()
-            if k not in ["created", "id", "updated", "uuid", "version_id"]
+            if k
+            not in [
+                "created",
+                "id",
+                "updated",
+                "uuid",
+                "version_id",
+                "indexed_at",
+            ]
         }  # because using default dumper that's deepcopy
 
         # test record revision

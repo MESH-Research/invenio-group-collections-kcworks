@@ -13,18 +13,24 @@
 from .models import GroupsMetadata
 from invenio_db import db
 from invenio_groups.validators import groups_metadata_schema
+from invenio_groups.dumpers import IndexedAtDumperExt
 from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError
-from invenio_records.api import Record
 from invenio_records.dumpers import SearchDumper
 from invenio_records.systemfields import (
     ConstantField,
+    DictField,
     ModelField,
     SystemField,
     SystemFieldsMixin,
     SystemFieldContext,
 )
-from invenio_records_resources.records.systemfields import IndexField, PIDField
-from invenio_records_resources.records.api import PersistentIdentifierWrapper
+from invenio_records_resources.records.systemfields import (
+    IndexField,
+)  # , PIDField
+from invenio_records_resources.records.api import (
+    PersistentIdentifierWrapper,
+    Record,
+)
 from uuid import UUID
 
 
@@ -37,7 +43,7 @@ class GroupPIDFieldContext(SystemFieldContext):
             return value
         try:
             return UUID(value)
-        except (TypeError, ValueError) as e:
+        except (TypeError, ValueError):
             return value
 
     def resolve(self, pid_value, registered_only=True):
@@ -93,15 +99,16 @@ class GroupPIDField(SystemField):
 
 
 class GroupsMetadataAPI(Record, SystemFieldsMixin):
-    """API class for interacting with group metadata records."""
+    """API class for interacting with group metadata records.
+
+    `metadata` system field created by Record
+    """
 
     id = ModelField()
-    pid = GroupPIDField("id")
+    pid = GroupPIDField("id")  # removed from stored record data?
     model_cls = GroupsMetadata
-    # format_checker = None
-    # validator = None
-    dumper = SearchDumper()
-    # loader = None
+    access = DictField(clear_none=True, create_if_missing=True)
+    invenio_roles = DictField(clear_none=True, create_if_missing=True)
 
     # FIXME: This is a hack to get around the fact that the service _create
     # method tries to instantiate an API object with empty data before calling
@@ -109,5 +116,14 @@ class GroupsMetadataAPI(Record, SystemFieldsMixin):
     schema = ConstantField("$schema", groups_metadata_schema)
     # schema = ConstantField("$schema", "local://groups-metadata-v1.0.0.json")
     index = IndexField(
-        "groups-metadata-v1.0.0", search_alias="groups-metadata"
+        "groups-groups-v1.0.0", search_alias="groups-groups-v1.0.0"
     )
+
+    # format_checker = None
+    # validator = None
+    dumper = SearchDumper(
+        extensions=[
+            IndexedAtDumperExt(),
+        ]
+    )
+    # loader = None

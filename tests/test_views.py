@@ -232,22 +232,22 @@ sample_communities_data = {
     ],
 )
 def test_group_collections_resource_search(
-    testapp,
+    app,
     client,
     sample_communities,
     community_type_v,
+    location,
     communities_service,
     idx,
     url,
     expected_json_base,
     expected_response_code,
 ):
-    sample_communities(testapp, communities_service)
+    sample_communities(app, communities_service)
     expected_json = deepcopy(expected_json_base)
     actual = client.get(url, follow_redirects=True)
     assert actual.status_code == expected_response_code
     if expected_response_code == 200:
-        print("base hits", [h["slug"] for h in expected_json["hits"]["hits"]])
 
         if idx == 3:
             expected_json["links"][
@@ -350,16 +350,17 @@ def test_group_collections_resource_search(
     ],
 )
 def test_group_collections_resource_read(
-    testapp,
+    app,
     client,
     sample_communities,
     community_type_v,
+    location,
     communities_service,
     url,
     expected_json,
     expected_response_code,
 ):
-    sample_communities(testapp, communities_service)
+    sample_communities(app, communities_service)
     actual_resp = client.get(url, follow_redirects=True)
     assert actual_resp.status_code == expected_response_code
     actual = actual_resp.json
@@ -400,10 +401,11 @@ def test_group_collections_resource_read(
     ],
 )
 def test_group_collections_resource_create(
-    testapp,
+    app,
     db,
     admin,
     client,
+    location,
     request_payload,
     expected_json,
     expected_response_code,
@@ -419,7 +421,7 @@ def test_group_collections_resource_create(
     headers = {"Authorization": f"Bearer {token_actual.client_id}"}
 
     actual_resp = client.post(
-        "/api/group_collections",
+        "api/group_collections",
         json=request_payload,
         follow_redirects=True,
         headers=headers,

@@ -12,3 +12,11 @@ from invenio_records_resources.services.records.service import RecordService
 
 class GroupsMetadataService(RecordService):
     """Service for managing group metadata records."""
+
+    def __init__(self, config={}, **kwargs):
+        """Constructor."""
+        super().__init__(config=config, **kwargs)
+
+
+class GroupCollectionsService(RecordService):
+    """Service for managing group collections."""

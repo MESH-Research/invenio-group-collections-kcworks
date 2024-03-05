@@ -1,0 +1,79 @@
+{
+  "mappings": {
+    "dynamic": "strict",
+    "numeric_detection": false,
+    "properties": {
+      "$schema": {
+        "type": "keyword",
+        "index": false
+      },
+      "uuid": {
+        "type": "keyword",
+        "index": false
+      },
+      "created": {
+        "type": "date"
+      },
+      "updated": {
+        "type": "date"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "access": {
+        "properties": {
+          "group_privacy": {
+            "type": "keyword"
+          },
+          "community_privacy": {
+            "type": "keyword"
+          },
+          "can_upload": {
+            "type": "keyword"
+          },
+          "can_accept": {
+            "type": "keyword"
+          }
+        }
+      },
+      "metadata": {
+        "properties": {
+          "group_id": {
+            "type": "keyword"
+          },
+          "group_name": {
+            "type": "text"
+          },
+          "group_description": {
+            "type": "text"
+          },
+          "group_url": {
+            "type": "keyword"
+          },
+          "profile_image": {
+            "type": "text"
+          },
+          "has_community": {
+            "type": "boolean"
+          }
+        }
+      },
+      "invenio_roles": {
+        "properties": {
+            "administrator": {
+              "type": "boolean"
+            },
+            "moderator": {
+                "type": "text"
+            },
+            "member": {
+                "type": "text"
+            }
+        }
+      },
+      "version_id": {
+        "type": "long"
+      }
+    }
+  }
+}

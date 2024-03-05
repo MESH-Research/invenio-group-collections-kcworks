@@ -14,8 +14,11 @@ from invenio_groups.views import (
     GroupCollectionsResourceConfig,
 )
 from . import config
-from .service_config import GroupsMetadataServiceConfig
-from .service import GroupsMetadataService
+from .service_config import (
+    GroupCollectionsServiceConfig,
+    GroupsMetadataServiceConfig,
+)
+from .service import GroupCollectionsService, GroupsMetadataService
 
 
 class InvenioGroups(object):
@@ -41,6 +44,9 @@ class InvenioGroups(object):
         self.service = GroupsMetadataService(
             GroupsMetadataServiceConfig.build(app)
         )
+        self.collections_service = GroupCollectionsService(
+            GroupCollectionsServiceConfig.build(app)
+        )
 
     def init_config(self, app):
         """Initialize configuration.
@@ -54,5 +60,5 @@ class InvenioGroups(object):
     def init_resources(self, app):
         """Initialize resources."""
         self.group_collections_resource = GroupCollectionsResource(
-            GroupCollectionsResourceConfig(), service=self.service
+            GroupCollectionsResourceConfig(), service=self.collections_service
         )
