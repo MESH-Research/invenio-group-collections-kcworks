@@ -1,4 +1,5 @@
 from copy import deepcopy
+from invenio_oauth2server.models import Token
 import pytest
 
 communities_data = {
@@ -172,33 +173,33 @@ sample_communities_data = {
     [
         (
             0,
-            "/api/group_collections/?sort=newest",
+            "/group_collections/?sort=newest",
             200,
             sample_communities_data,
         ),
         (
             1,
-            "/api/group_collections?commons_instance=knowledgeCommons"
+            "/group_collections?commons_instance=knowledgeCommons"
             "&sort=newest",
             200,
             sample_communities_data,
         ),
         (
             2,
-            "/api/group_collections?commons_instance=knowledgeCommons"
+            "/group_collections?commons_instance=knowledgeCommons"
             "&commons_group_id=456&sort=newest",
             200,
             sample_communities_data,
         ),
         (
             3,
-            "/api/group_collections?sort=newest&size=4&page=2",
+            "/group_collections?sort=newest&size=4&page=2",
             200,
             sample_communities_data,
         ),
         (
             4,
-            "/api/group_collections?commons_instance=nonexistentCommons"
+            "/group_collections?commons_instance=nonexistentCommons"
             "&sort=newest",
             404,
             {
@@ -209,7 +210,7 @@ sample_communities_data = {
         ),
         (
             5,
-            "/api/group_collections?commons_instance=msuCommons"
+            "/group_collections?commons_instance=msuCommons"
             "&commons_group_id=77777&sort=newest",
             404,
             {
@@ -221,7 +222,7 @@ sample_communities_data = {
         ),
         (
             6,
-            "/api/group_collections?size=1&sort=newest",
+            "/group_collections?size=1&sort=newest",
             400,
             {
                 "message": "{'size': ['Must be greater than or equal to "
@@ -330,7 +331,7 @@ def test_group_collections_resource_search(
     "url,expected_response_code,expected_json",
     [
         (
-            "/api/group_collections/collection-nonexistent",
+            "/group_collections/collection-nonexistent",
             404,
             {
                 "message": "No collection found with the slug "
@@ -339,7 +340,7 @@ def test_group_collections_resource_search(
             },
         ),
         (
-            "/api/group_collections/community-1",
+            "/group_collections/community-1",
             200,
             [
                 c
@@ -410,18 +411,17 @@ def test_group_collections_resource_create(
     expected_json,
     expected_response_code,
 ):
-    from invenio_oauth2server.models import Token
-
     token_actual = Token.create_personal(
-        "webhook", admin.id, scopes=[], is_internal=False
+        "webhook", admin.id, scopes=[], is_internal=True
     )
     db.session.commit()
+    db.session.flush()
     print(f"token_actual: {token_actual.client_id}")
 
     headers = {"Authorization": f"Bearer {token_actual.client_id}"}
 
     actual_resp = client.post(
-        "api/group_collections",
+        "/group_collections",
         json=request_payload,
         follow_redirects=True,
         headers=headers,

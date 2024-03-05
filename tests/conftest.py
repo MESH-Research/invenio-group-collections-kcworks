@@ -52,8 +52,8 @@ test_config = {
     "SQLALCHEMY_DATABASE_URI": "postgresql+psycopg2://"
     "invenio:invenio@localhost:5432/invenio",
     # "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-    # "INVENIO_WTF_CSRF_ENABLED": False,
-    # "INVENIO_WTF_CSRF_METHODS": [],
+    "INVENIO_WTF_CSRF_ENABLED": False,
+    "INVENIO_WTF_CSRF_METHODS": [],
     "APP_DEFAULT_SECURE_HEADERS": {
         "content_security_policy": {"default-src": []},
         "force_https": False,
