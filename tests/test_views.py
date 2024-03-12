@@ -1,4 +1,5 @@
 from copy import deepcopy
+from celery import shared_task
 from invenio_oauth2server.models import Token
 import pytest
 
@@ -402,28 +403,40 @@ def test_group_collections_resource_read(
     ],
 )
 def test_group_collections_resource_create(
-    app,
+    appctx,
+    broker_uri,
+    # celery_session_app,
+    client,
     db,
     admin,
-    client,
     location,
     request_payload,
     expected_json,
     expected_response_code,
+    search_clear,
 ):
+    # from pprint import pprint
+
+    # pprint(broker_uri)
+    # pprint(celery_session_app.broker_connection)
+    # pprint(celery_session_app.conf)
+
     token_actual = Token.create_personal(
-        "webhook", admin.id, scopes=[], is_internal=True
+        "webhook", admin.id, is_internal=False
     )
     db.session.commit()
-    db.session.flush()
     print(f"token_actual: {token_actual.client_id}")
 
-    headers = {"Authorization": f"Bearer {token_actual.client_id}"}
+    headers = {
+        "Authorization": f"Bearer {token_actual.client_id}",
+        "content-type": "application/json",
+        "accept": "application/json",
+    }
 
     actual_resp = client.post(
         "/group_collections",
         json=request_payload,
-        follow_redirects=True,
+        # follow_redirects=True,
         headers=headers,
     )
     print(actual_resp.json)

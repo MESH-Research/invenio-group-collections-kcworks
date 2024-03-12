@@ -51,21 +51,22 @@ def communities_service(app):
 test_config = {
     "SQLALCHEMY_DATABASE_URI": "postgresql+psycopg2://"
     "invenio:invenio@localhost:5432/invenio",
-    # "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+    "SQLALCHEMY_TRACK_MODIFICATIONS": True,
     "INVENIO_WTF_CSRF_ENABLED": False,
     "INVENIO_WTF_CSRF_METHODS": [],
     "APP_DEFAULT_SECURE_HEADERS": {
         "content_security_policy": {"default-src": []},
         "force_https": False,
     },
-    # "BROKER_URL": "amqp://guest:guest@localhost:5672//",
+    "BROKER_URL": "amqp://guest:guest@localhost:5672//",
+    "CELERY_BROKER_URL": "amqp://guest:guest@localhost:5672//",
     # "BROKER_URL": "redis://localhost:6379/0",
     # "BROKER_URL": "amqp://invenio:invenio@localhost:5672//",
     # "CELERY_BROKER_URL": "amqp://invenio:invenio@localhost:5672//",
     # "CELERY_CACHE_BACKEND": "memory",
     # "CELERY_RESULT_BACKEND": "cache",
-    # "CELERY_TASK_ALWAYS_EAGER": True,
-    # "CELERY_TASK_EAGER_PROPAGATES_EXCEPTIONS": True,
+    "CELERY_TASK_ALWAYS_EAGER": True,
+    "CELERY_TASK_EAGER_PROPAGATES_EXCEPTIONS": True,
     "RATELIMIT_ENABLED": False,
     "SECRET_KEY": "test-secret-key",
     "SECURITY_PASSWORD_SALT": "test-secret-key",
@@ -167,6 +168,18 @@ test_config["COMMUNITIES_CUSTOM_FIELDS_UI"] = [
         ],
     }
 ]
+
+
+# @pytest.fixture(scope="session")
+# def broker_uri():
+#     yield "amqp://guest:guest@localhost:5672//"
+
+
+@pytest.fixture(scope="session")
+def celery_config(celery_config):
+    # celery_config["broker_url"] = broker_uri
+    celery_config["broker_url"] = "amqp://guest:guest@localhost:5672//"
+    return celery_config
 
 
 @pytest.fixture(scope="module")
@@ -449,7 +462,6 @@ def admin_role_need(db):
     db.session.add(action_role)
 
     db.session.commit()
-
     return action_role.need
 
 

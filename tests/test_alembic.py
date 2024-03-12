@@ -11,11 +11,12 @@
 
 import pytest
 from invenio_db.utils import drop_alembic_version_table
+from sqlalchemy.inspection import inspect
 
 
-def test_alembic(testapp, db):
+def test_alembic(app, db):
     """Test alembic migrations."""
-    ext = testapp.extensions["invenio-db"]
+    ext = app.extensions["invenio-db"]
 
     if db.engine.name == "sqlite":
         pytest.skip("SQLite does not support ALTER TABLE operations.")
