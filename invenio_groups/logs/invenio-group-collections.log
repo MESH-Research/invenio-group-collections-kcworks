@@ -1,0 +1,971 @@
+2024-03-12 09:38:47,547:ERROR : Failed to get metadata for group 1004290 on Knowledge Commons
+2024-03-12 09:38:47,549:ERROR : Response: {"code":"rest_forbidden","message":"Authorization header not set.","data":{"status":403}}
+2024-03-12 09:52:57,955:ERROR : Failed to get metadata for group 1004290 on Knowledge Commons
+2024-03-12 09:52:57,959:ERROR : Response: {"code":"rest_no_route","message":"No route was found matching the URL and request method.","data":{"status":404}}
+2024-03-12 09:55:34,133:ERROR : Failed to get metadata for group 1004290 on Knowledge Commons
+2024-03-12 09:55:34,135:ERROR : Response: {"code":"rest_forbidden","message":"Invalid authorization header.","data":{"status":403}}
+2024-03-12 10:01:41,835:ERROR : Failed to get metadata for group 1004290 on Knowledge Commons
+2024-03-12 10:01:41,836:ERROR : Response: {"code":"rest_forbidden","message":"Invalid authorization header.","data":{"status":403}}
+2024-03-12 10:01:41,836:ERROR : {'Authorization': 'Bearer COMMONS_API_TOKEN'}
+2024-03-12 10:03:06,451:ERROR : Failed to get metadata for group 1004290 on Knowledge Commons
+2024-03-12 10:03:06,455:ERROR : Response: {"code":"rest_forbidden","message":"Invalid authorization header.","data":{"status":403}}
+2024-03-12 10:03:06,457:ERROR : {'Authorization': 'Bearer COMMONS_API_TOKEN'}
+2024-03-12 10:06:51,036:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 10:06:51,051:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 10:06:51,071:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 10:16:18,897:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 10:16:18,900:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 10:16:18,905:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 10:20:59,742:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 10:20:59,748:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 10:20:59,752:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 10:23:01,629:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 10:23:01,669:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 10:23:01,683:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 10:28:12,235:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 10:28:12,238:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 10:28:12,241:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 10:36:06,539:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 10:36:06,543:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 10:36:06,545:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 10:36:06,804:ERROR : New record: {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-12T14:36:06.601786+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'For scholars interested '
+                                                    'in J.R.R. Tolkien, C. S. '
+                                                    'Lewis, Charles Williams, '
+                                                    'and other writers '
+                                                    'associated with the '
+                                                    'Inklings.',
+                   'kcr:commons_group_id': '1004290',
+                   'kcr:commons_group_name': 'The Inklings',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': 'd0ccfa09-4a04-450d-bfb9-094c28350951',
+ 'links': {'featured': 'https://localhost/api/communities/d0ccfa09-4a04-450d-bfb9-094c28350951/featured',
+           'invitations': 'https://localhost/api/communities/d0ccfa09-4a04-450d-bfb9-094c28350951/invitations',
+           'logo': 'https://localhost/api/communities/d0ccfa09-4a04-450d-bfb9-094c28350951/logo',
+           'members': 'https://localhost/api/communities/d0ccfa09-4a04-450d-bfb9-094c28350951/members',
+           'public_members': 'https://localhost/api/communities/d0ccfa09-4a04-450d-bfb9-094c28350951/members/public',
+           'records': 'https://localhost/api/communities/d0ccfa09-4a04-450d-bfb9-094c28350951/records',
+           'rename': 'https://localhost/api/communities/d0ccfa09-4a04-450d-bfb9-094c28350951/rename',
+           'requests': 'https://localhost/api/communities/d0ccfa09-4a04-450d-bfb9-094c28350951/requests',
+           'self': 'https://localhost/api/communities/d0ccfa09-4a04-450d-bfb9-094c28350951',
+           'self_html': 'https://localhost/communities/the-inklings',
+           'settings_html': 'https://localhost/communities/the-inklings/settings'},
+ 'metadata': {'curation_policy': '',
+              'description': 'A collection managed by theThe Inklings group of '
+                             'Knowledge Commons',
+              'organizations': [{'name': 'The Inklings'},
+                                {'name': 'knowledgeCommons'}],
+              'page': 'Information about The InklingsCollection',
+              'title': 'The Inklings Collection ({instance_name})',
+              'type': {'id': 'event', 'title': {'de': 'Event', 'en': 'Event'}},
+              'website': 'https://hcommons-dev.org/groups/the-inklings/'},
+ 'revision_id': 2,
+ 'slug': 'the-inklings',
+ 'updated': '2024-03-12T14:36:06.660959+00:00'}
+2024-03-12 10:42:23,284:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 10:42:23,288:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 10:42:23,297:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 10:42:33,500:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 10:42:33,509:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 10:42:33,516:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 11:06:49,922:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 11:06:49,932:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 11:06:49,938:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 11:28:35,340:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 11:31:31,694:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 11:31:31,695:INFO : <Role knowledgeCommons|1004290|administrator>
+2024-03-12 11:31:31,698:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 11:31:31,699:INFO : <Role knowledgeCommons|1004290|member>
+2024-03-12 11:31:31,701:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 11:31:31,702:INFO : <Role knowledgeCommons|1004290|moderator>
+2024-03-12 11:32:29,715:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 11:32:29,716:INFO : ['__abstract__',
+ '__class__',
+ '__delattr__',
+ '__dict__',
+ '__dir__',
+ '__doc__',
+ '__eq__',
+ '__format__',
+ '__ge__',
+ '__getattribute__',
+ '__gt__',
+ '__hash__',
+ '__init__',
+ '__init_subclass__',
+ '__le__',
+ '__lt__',
+ '__mapper__',
+ '__mapper_args__',
+ '__module__',
+ '__ne__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ '__table__',
+ '__tablename__',
+ '__weakref__',
+ '_sa_class_manager',
+ '_sa_instance_state',
+ '_sa_registry',
+ 'actionusers',
+ 'created',
+ 'description',
+ 'id',
+ 'is_managed',
+ 'metadata',
+ 'name',
+ 'query',
+ 'query_class',
+ 'registry',
+ 'updated',
+ 'users',
+ 'version_id']
+2024-03-12 11:32:29,721:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 11:32:29,723:INFO : ['__abstract__',
+ '__class__',
+ '__delattr__',
+ '__dict__',
+ '__dir__',
+ '__doc__',
+ '__eq__',
+ '__format__',
+ '__ge__',
+ '__getattribute__',
+ '__gt__',
+ '__hash__',
+ '__init__',
+ '__init_subclass__',
+ '__le__',
+ '__lt__',
+ '__mapper__',
+ '__mapper_args__',
+ '__module__',
+ '__ne__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ '__table__',
+ '__tablename__',
+ '__weakref__',
+ '_sa_class_manager',
+ '_sa_instance_state',
+ '_sa_registry',
+ 'actionusers',
+ 'created',
+ 'description',
+ 'id',
+ 'is_managed',
+ 'metadata',
+ 'name',
+ 'query',
+ 'query_class',
+ 'registry',
+ 'updated',
+ 'users',
+ 'version_id']
+2024-03-12 11:32:29,727:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 11:32:29,729:INFO : ['__abstract__',
+ '__class__',
+ '__delattr__',
+ '__dict__',
+ '__dir__',
+ '__doc__',
+ '__eq__',
+ '__format__',
+ '__ge__',
+ '__getattribute__',
+ '__gt__',
+ '__hash__',
+ '__init__',
+ '__init_subclass__',
+ '__le__',
+ '__lt__',
+ '__mapper__',
+ '__mapper_args__',
+ '__module__',
+ '__ne__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ '__table__',
+ '__tablename__',
+ '__weakref__',
+ '_sa_class_manager',
+ '_sa_instance_state',
+ '_sa_registry',
+ 'actionusers',
+ 'created',
+ 'description',
+ 'id',
+ 'is_managed',
+ 'metadata',
+ 'name',
+ 'query',
+ 'query_class',
+ 'registry',
+ 'updated',
+ 'users',
+ 'version_id']
+2024-03-12 11:39:58,641:INFO : Role "knowledgeCommons|1004290|administrator" created successfully.
+2024-03-12 11:39:58,643:INFO : ['__abstract__',
+ '__class__',
+ '__delattr__',
+ '__dict__',
+ '__dir__',
+ '__doc__',
+ '__eq__',
+ '__format__',
+ '__ge__',
+ '__getattribute__',
+ '__gt__',
+ '__hash__',
+ '__init__',
+ '__init_subclass__',
+ '__le__',
+ '__lt__',
+ '__mapper__',
+ '__mapper_args__',
+ '__module__',
+ '__ne__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ '__table__',
+ '__tablename__',
+ '__weakref__',
+ '_sa_class_manager',
+ '_sa_instance_state',
+ '_sa_registry',
+ 'actionusers',
+ 'created',
+ 'description',
+ 'id',
+ 'is_managed',
+ 'metadata',
+ 'name',
+ 'query',
+ 'query_class',
+ 'registry',
+ 'updated',
+ 'users',
+ 'version_id']
+2024-03-12 11:39:58,647:INFO : Role "knowledgeCommons|1004290|member" created successfully.
+2024-03-12 11:39:58,647:INFO : ['__abstract__',
+ '__class__',
+ '__delattr__',
+ '__dict__',
+ '__dir__',
+ '__doc__',
+ '__eq__',
+ '__format__',
+ '__ge__',
+ '__getattribute__',
+ '__gt__',
+ '__hash__',
+ '__init__',
+ '__init_subclass__',
+ '__le__',
+ '__lt__',
+ '__mapper__',
+ '__mapper_args__',
+ '__module__',
+ '__ne__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ '__table__',
+ '__tablename__',
+ '__weakref__',
+ '_sa_class_manager',
+ '_sa_instance_state',
+ '_sa_registry',
+ 'actionusers',
+ 'created',
+ 'description',
+ 'id',
+ 'is_managed',
+ 'metadata',
+ 'name',
+ 'query',
+ 'query_class',
+ 'registry',
+ 'updated',
+ 'users',
+ 'version_id']
+2024-03-12 11:39:58,650:INFO : Role "knowledgeCommons|1004290|moderator" created successfully.
+2024-03-12 11:39:58,652:INFO : ['__abstract__',
+ '__class__',
+ '__delattr__',
+ '__dict__',
+ '__dir__',
+ '__doc__',
+ '__eq__',
+ '__format__',
+ '__ge__',
+ '__getattribute__',
+ '__gt__',
+ '__hash__',
+ '__init__',
+ '__init_subclass__',
+ '__le__',
+ '__lt__',
+ '__mapper__',
+ '__mapper_args__',
+ '__module__',
+ '__ne__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ '__table__',
+ '__tablename__',
+ '__weakref__',
+ '_sa_class_manager',
+ '_sa_instance_state',
+ '_sa_registry',
+ 'actionusers',
+ 'created',
+ 'description',
+ 'id',
+ 'is_managed',
+ 'metadata',
+ 'name',
+ 'query',
+ 'query_class',
+ 'registry',
+ 'updated',
+ 'users',
+ 'version_id']
+2024-03-12 11:41:21,849:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 11:41:21,856:INFO : ['__add__',
+ '__class__',
+ '__contains__',
+ '__delattr__',
+ '__dir__',
+ '__doc__',
+ '__eq__',
+ '__format__',
+ '__ge__',
+ '__getattribute__',
+ '__getitem__',
+ '__getnewargs__',
+ '__gt__',
+ '__hash__',
+ '__init__',
+ '__init_subclass__',
+ '__iter__',
+ '__le__',
+ '__len__',
+ '__lt__',
+ '__mod__',
+ '__mul__',
+ '__ne__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__rmod__',
+ '__rmul__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ 'capitalize',
+ 'casefold',
+ 'center',
+ 'count',
+ 'encode',
+ 'endswith',
+ 'expandtabs',
+ 'find',
+ 'format',
+ 'format_map',
+ 'index',
+ 'isalnum',
+ 'isalpha',
+ 'isascii',
+ 'isdecimal',
+ 'isdigit',
+ 'isidentifier',
+ 'islower',
+ 'isnumeric',
+ 'isprintable',
+ 'isspace',
+ 'istitle',
+ 'isupper',
+ 'join',
+ 'ljust',
+ 'lower',
+ 'lstrip',
+ 'maketrans',
+ 'partition',
+ 'removeprefix',
+ 'removesuffix',
+ 'replace',
+ 'rfind',
+ 'rindex',
+ 'rjust',
+ 'rpartition',
+ 'rsplit',
+ 'rstrip',
+ 'split',
+ 'splitlines',
+ 'startswith',
+ 'strip',
+ 'swapcase',
+ 'title',
+ 'translate',
+ 'upper',
+ 'zfill']
+2024-03-12 11:41:21,862:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 11:41:21,877:INFO : ['__add__',
+ '__class__',
+ '__contains__',
+ '__delattr__',
+ '__dir__',
+ '__doc__',
+ '__eq__',
+ '__format__',
+ '__ge__',
+ '__getattribute__',
+ '__getitem__',
+ '__getnewargs__',
+ '__gt__',
+ '__hash__',
+ '__init__',
+ '__init_subclass__',
+ '__iter__',
+ '__le__',
+ '__len__',
+ '__lt__',
+ '__mod__',
+ '__mul__',
+ '__ne__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__rmod__',
+ '__rmul__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ 'capitalize',
+ 'casefold',
+ 'center',
+ 'count',
+ 'encode',
+ 'endswith',
+ 'expandtabs',
+ 'find',
+ 'format',
+ 'format_map',
+ 'index',
+ 'isalnum',
+ 'isalpha',
+ 'isascii',
+ 'isdecimal',
+ 'isdigit',
+ 'isidentifier',
+ 'islower',
+ 'isnumeric',
+ 'isprintable',
+ 'isspace',
+ 'istitle',
+ 'isupper',
+ 'join',
+ 'ljust',
+ 'lower',
+ 'lstrip',
+ 'maketrans',
+ 'partition',
+ 'removeprefix',
+ 'removesuffix',
+ 'replace',
+ 'rfind',
+ 'rindex',
+ 'rjust',
+ 'rpartition',
+ 'rsplit',
+ 'rstrip',
+ 'split',
+ 'splitlines',
+ 'startswith',
+ 'strip',
+ 'swapcase',
+ 'title',
+ 'translate',
+ 'upper',
+ 'zfill']
+2024-03-12 11:41:21,880:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 11:41:21,883:INFO : ['__add__',
+ '__class__',
+ '__contains__',
+ '__delattr__',
+ '__dir__',
+ '__doc__',
+ '__eq__',
+ '__format__',
+ '__ge__',
+ '__getattribute__',
+ '__getitem__',
+ '__getnewargs__',
+ '__gt__',
+ '__hash__',
+ '__init__',
+ '__init_subclass__',
+ '__iter__',
+ '__le__',
+ '__len__',
+ '__lt__',
+ '__mod__',
+ '__mul__',
+ '__ne__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__rmod__',
+ '__rmul__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ 'capitalize',
+ 'casefold',
+ 'center',
+ 'count',
+ 'encode',
+ 'endswith',
+ 'expandtabs',
+ 'find',
+ 'format',
+ 'format_map',
+ 'index',
+ 'isalnum',
+ 'isalpha',
+ 'isascii',
+ 'isdecimal',
+ 'isdigit',
+ 'isidentifier',
+ 'islower',
+ 'isnumeric',
+ 'isprintable',
+ 'isspace',
+ 'istitle',
+ 'isupper',
+ 'join',
+ 'ljust',
+ 'lower',
+ 'lstrip',
+ 'maketrans',
+ 'partition',
+ 'removeprefix',
+ 'removesuffix',
+ 'replace',
+ 'rfind',
+ 'rindex',
+ 'rjust',
+ 'rpartition',
+ 'rsplit',
+ 'rstrip',
+ 'split',
+ 'splitlines',
+ 'startswith',
+ 'strip',
+ 'swapcase',
+ 'title',
+ 'translate',
+ 'upper',
+ 'zfill']
+2024-03-12 11:43:08,512:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 11:43:08,524:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 11:43:08,533:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 11:47:40,723:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 11:47:40,731:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 11:47:40,738:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 11:47:40,853:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-12 11:50:59,744:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 11:50:59,755:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 11:50:59,764:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 11:50:59,881:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-12 12:00:18,978:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 12:00:18,983:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 12:00:18,989:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 12:01:54,199:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 12:01:54,209:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 12:01:54,219:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 12:01:54,414:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-12 12:01:54,415:INFO : continuing with existing collection
+2024-03-12 12:07:07,066:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 12:07:07,070:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 12:07:07,073:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 12:07:07,310:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-12 12:07:07,311:INFO : continuing with existing collection
+2024-03-12 12:07:46,950:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 12:07:46,957:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 12:07:46,963:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 12:07:47,158:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-12 12:07:47,158:INFO : continuing with existing collection
+2024-03-12 12:10:28,091:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 12:10:28,101:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 12:10:28,106:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 12:10:28,335:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-12 12:10:28,335:INFO : continuing with existing collection
+2024-03-12 12:14:05,742:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 12:14:05,748:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 12:14:05,752:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 12:14:06,059:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-12 12:14:06,059:INFO : continuing with existing collection
+2024-03-12 12:14:06,160:ERROR : Manage members: True
+2024-03-12 12:24:22,477:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 12:24:22,509:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 12:24:22,514:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 12:24:22,624:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-12 12:24:22,624:INFO : continuing with existing collection
+2024-03-12 12:28:43,625:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 12:28:43,634:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 12:28:43,641:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 12:28:43,886:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-12 12:28:43,886:INFO : continuing with existing collection
+2024-03-12 12:28:43,892:ERROR : knowledgeCommons|1004290|moderator already a member
+2024-03-12 13:00:51,811:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 13:00:51,816:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 13:00:51,819:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 13:00:52,045:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-12 13:00:52,045:INFO : continuing with existing collection
+2024-03-12 13:00:52,192:ERROR : Manage members: True
+2024-03-12 13:00:52,200:ERROR : some of these roles were already managers: ['member', 'moderator', 'administrator']
+2024-03-12 13:00:52,213:ERROR : some of these roles were already curators: ['moderator', 'administrator']
+2024-03-12 13:10:20,456:INFO : Role "knowledgeCommons|1004290|administrator" created or retrieved successfully.
+2024-03-12 13:10:20,461:INFO : Role "knowledgeCommons|1004290|member" created or retrieved successfully.
+2024-03-12 13:10:20,464:INFO : Role "knowledgeCommons|1004290|moderator" created or retrieved successfully.
+2024-03-12 13:10:20,595:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-12 13:10:20,595:INFO : continuing with existing collection
+2024-03-12 13:10:20,645:ERROR : Manage members: True
+2024-03-12 13:10:20,651:ERROR : some of these roles were already managers: ['member', 'moderator', 'administrator']
+2024-03-12 13:10:20,654:ERROR : some of these roles were already curators: ['moderator', 'administrator']
+2024-03-12 13:10:20,658:ERROR : some of these roles were already readers: ['administrator', 'member', 'moderator']
+2024-03-12 13:55:24,527:INFO : Role "knowledgeCommons|1004287|administrator" created or retrieved successfully.
+2024-03-12 13:55:24,541:INFO : Role "knowledgeCommons|1004287|member" created or retrieved successfully.
+2024-03-12 13:55:24,560:INFO : Role "knowledgeCommons|1004287|moderator" created or retrieved successfully.
+2024-03-12 13:55:24,761:ERROR : New record: {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-12T17:55:24.643283+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'Foreign Language '
+                                                    'Onboarding & Advocacy '
+                                                    'Toolkit',
+                   'kcr:commons_group_id': '1004287',
+                   'kcr:commons_group_name': 'FLOAT',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': '6afc9626-39ad-479d-9469-494768cdadbd',
+ 'links': {'featured': 'https://localhost/api/communities/6afc9626-39ad-479d-9469-494768cdadbd/featured',
+           'invitations': 'https://localhost/api/communities/6afc9626-39ad-479d-9469-494768cdadbd/invitations',
+           'logo': 'https://localhost/api/communities/6afc9626-39ad-479d-9469-494768cdadbd/logo',
+           'members': 'https://localhost/api/communities/6afc9626-39ad-479d-9469-494768cdadbd/members',
+           'public_members': 'https://localhost/api/communities/6afc9626-39ad-479d-9469-494768cdadbd/members/public',
+           'records': 'https://localhost/api/communities/6afc9626-39ad-479d-9469-494768cdadbd/records',
+           'rename': 'https://localhost/api/communities/6afc9626-39ad-479d-9469-494768cdadbd/rename',
+           'requests': 'https://localhost/api/communities/6afc9626-39ad-479d-9469-494768cdadbd/requests',
+           'self': 'https://localhost/api/communities/6afc9626-39ad-479d-9469-494768cdadbd',
+           'self_html': 'https://localhost/communities/float',
+           'settings_html': 'https://localhost/communities/float/settings'},
+ 'metadata': {'curation_policy': '',
+              'description': 'A collection managed by theFLOAT group of '
+                             'Knowledge Commons',
+              'organizations': [{'name': 'FLOAT'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'FLOAT Collection is a collection of works curated by '
+                      'theFLOAT group of Knowledge Commons',
+              'title': 'FLOAT Collection (Knowledge Commons)',
+              'website': 'https://commons.msu.edu/groups/float-105314526/'},
+ 'revision_id': 2,
+ 'slug': 'float',
+ 'updated': '2024-03-12T17:55:24.658749+00:00'}
+2024-03-12 13:55:24,839:ERROR : Manage members: True
+2024-03-12 13:55:25,030:ERROR : owner members: True
+2024-03-12 13:55:25,042:ERROR : some of these roles were already curators: ['moderator', 'administrator']
+2024-03-12 13:55:25,046:ERROR : some of these roles were already readers: ['administrator', 'member', 'moderator']
+2024-03-12 16:26:05,202:INFO : Role "knowledgeCommons|1004286|administrator" created or retrieved successfully.
+2024-03-12 16:26:05,211:INFO : Role "knowledgeCommons|1004286|member" created or retrieved successfully.
+2024-03-12 16:26:05,217:INFO : Role "knowledgeCommons|1004286|moderator" created or retrieved successfully.
+2024-03-12 16:26:05,705:ERROR : New record: {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-12T20:26:05.436551+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'MLA 2024 Panel sponsored '
+                                                    'by the LLC English '
+                                                    'Romantic Forum. Panelist '
+                                                    'pre-circulated papers are '
+                                                    'being made available in '
+                                                    'order to facilitate a '
+                                                    'rich discussion during '
+                                                    'the Q&A part of the '
+                                                    'session. This session '
+                                                    'follows a format favored '
+                                                    'by the English Romantic '
+                                                    'Forum organizers in which '
+                                                    'a well-known text centers '
+                                                    'papers by a literary '
+                                                    'scholar, a creative '
+                                                    'writer/creative scholar, '
+                                                    'and a respondent. '
+                                                    'Panelists are: Vidyan '
+                                                    'Ravinthiran and Michele '
+                                                    'Speitz, with Nasser Mufti '
+                                                    'as respondent.',
+                   'kcr:commons_group_id': '1004286',
+                   'kcr:commons_group_name': 'Kubla Khan Panel',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': '668504cf-e846-4217-be12-71966b3e4ccd',
+ 'links': {'featured': 'https://localhost/api/communities/668504cf-e846-4217-be12-71966b3e4ccd/featured',
+           'invitations': 'https://localhost/api/communities/668504cf-e846-4217-be12-71966b3e4ccd/invitations',
+           'logo': 'https://localhost/api/communities/668504cf-e846-4217-be12-71966b3e4ccd/logo',
+           'members': 'https://localhost/api/communities/668504cf-e846-4217-be12-71966b3e4ccd/members',
+           'public_members': 'https://localhost/api/communities/668504cf-e846-4217-be12-71966b3e4ccd/members/public',
+           'records': 'https://localhost/api/communities/668504cf-e846-4217-be12-71966b3e4ccd/records',
+           'rename': 'https://localhost/api/communities/668504cf-e846-4217-be12-71966b3e4ccd/rename',
+           'requests': 'https://localhost/api/communities/668504cf-e846-4217-be12-71966b3e4ccd/requests',
+           'self': 'https://localhost/api/communities/668504cf-e846-4217-be12-71966b3e4ccd',
+           'self_html': 'https://localhost/communities/kubla-khan-panel',
+           'settings_html': 'https://localhost/communities/kubla-khan-panel/settings'},
+ 'metadata': {'curation_policy': '',
+              'description': 'A collection managed by the Kubla Khan Panel '
+                             'group of Knowledge Commons',
+              'organizations': [{'name': 'Kubla Khan Panel'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'This is a collection of works curated by the Kubla Khan '
+                      'Panel group of Knowledge Commons',
+              'title': 'Kubla Khan Panel Collection (Knowledge Commons)',
+              'website': 'https://mla.hcommons-dev.org/groups/kubla-khan-panel/'},
+ 'revision_id': 2,
+ 'slug': 'kubla-khan-panel',
+ 'updated': '2024-03-12T20:26:05.486457+00:00'}
+2024-03-12 16:26:05,770:ERROR : Manage members: True
+2024-03-12 16:36:40,784:INFO : Role "knowledgeCommons|1004284|administrator" created or retrieved successfully.
+2024-03-12 16:36:40,793:INFO : Role "knowledgeCommons|1004284|member" created or retrieved successfully.
+2024-03-12 16:36:40,800:INFO : Role "knowledgeCommons|1004284|moderator" created or retrieved successfully.
+2024-03-12 16:36:40,978:ERROR : New record: {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-12T20:36:40.857712+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'International Journal of '
+                                                    'Multidisciplinary '
+                                                    'Educational Research and '
+                                                    'Innovation is an '
+                                                    'international '
+                                                    'peer-reviewed academic '
+                                                    'journal that highly '
+                                                    'values the importance of '
+                                                    'developing knowledge in '
+                                                    'the field of '
+                                                    'multidisciplinary '
+                                                    'educational and '
+                                                    'innovative research. The '
+                                                    "journal's scope is broad, "
+                                                    'with the goals of '
+                                                    'disseminating information '
+                                                    'and providing a place for '
+                                                    'discussion, theoretical '
+                                                    'inquiry, practical '
+                                                    'applications, research '
+                                                    'discoveries, and '
+                                                    'experimentations in the '
+                                                    'field of education. '
+                                                    'IJMERI is maintained and '
+                                                    'supervised by the Saint '
+                                                    'Joseph College of Maasin '
+                                                    'City, Southern Leyte.',
+                   'kcr:commons_group_id': '1004284',
+                   'kcr:commons_group_name': 'International Journal of '
+                                             'Multidisciplinary Educational '
+                                             'Research and Innovation',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': 'db08dafc-1a57-4006-9b71-87e1b602fbdf',
+ 'links': {'featured': 'https://localhost/api/communities/db08dafc-1a57-4006-9b71-87e1b602fbdf/featured',
+           'invitations': 'https://localhost/api/communities/db08dafc-1a57-4006-9b71-87e1b602fbdf/invitations',
+           'logo': 'https://localhost/api/communities/db08dafc-1a57-4006-9b71-87e1b602fbdf/logo',
+           'members': 'https://localhost/api/communities/db08dafc-1a57-4006-9b71-87e1b602fbdf/members',
+           'public_members': 'https://localhost/api/communities/db08dafc-1a57-4006-9b71-87e1b602fbdf/members/public',
+           'records': 'https://localhost/api/communities/db08dafc-1a57-4006-9b71-87e1b602fbdf/records',
+           'rename': 'https://localhost/api/communities/db08dafc-1a57-4006-9b71-87e1b602fbdf/rename',
+           'requests': 'https://localhost/api/communities/db08dafc-1a57-4006-9b71-87e1b602fbdf/requests',
+           'self': 'https://localhost/api/communities/db08dafc-1a57-4006-9b71-87e1b602fbdf',
+           'self_html': 'https://localhost/communities/international-journal-of-multidisciplinary-educational-research-and-innovation',
+           'settings_html': 'https://localhost/communities/international-journal-of-multidisciplinary-educational-research-and-innovation/settings'},
+ 'metadata': {'curation_policy': '',
+              'description': 'A collection managed by the International '
+                             'Journal of Multidisciplinary Educational '
+                             'Research and Innovation group of Knowledge '
+                             'Commons',
+              'organizations': [{'name': 'International Journal of '
+                                         'Multidisciplinary Educational '
+                                         'Research and Innovation'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'This is a collection of works curated by the '
+                      'International Journal of Multidisciplinary Educational '
+                      'Research and Innovation group of Knowledge Commons',
+              'title': 'International Journal of Multidisciplinary Educational '
+                       'Research and Innovation Collection (Knowledge Commons)',
+              'website': 'https://hcommons-dev.org/groups/international-journal-of-multidisciplinary-educational-research-and-innovation-444144048/'},
+ 'revision_id': 2,
+ 'slug': 'international-journal-of-multidisciplinary-educational-research-and-innovation',
+ 'updated': '2024-03-12T20:36:40.882519+00:00'}
+2024-03-12 16:36:41,037:ERROR : Manage members: True
+2024-03-12 21:21:21,746:INFO : Role "knowledgeCommons|1004283|administrator" created or retrieved successfully.
+2024-03-12 21:21:21,758:INFO : Role "knowledgeCommons|1004283|member" created or retrieved successfully.
+2024-03-12 21:21:21,765:INFO : Role "knowledgeCommons|1004283|moderator" created or retrieved successfully.
+2024-03-12 21:21:22,353:ERROR : New record: {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-13T01:21:21.845855+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'Will you be attending '
+                                                    '#MLA24? Log in (or create '
+                                                    'an account) and join this '
+                                                    'group to start '
+                                                    'discussions, share '
+                                                    'convention-related links '
+                                                    'and resources, and '
+                                                    'connect with other '
+                                                    'participants. For full '
+                                                    'convention details, see '
+                                                    'the <a '
+                                                    'href="https://www.mla.org/Events/2024-MLA-Convention">MLA '
+                                                    '2024</a> page on '
+                                                    'mla.org.\n'
+                                                    '\n'
+                                                    'Cover photo by pmillera4 '
+                                                    'on Flickr.',
+                   'kcr:commons_group_id': '1004283',
+                   'kcr:commons_group_name': '2024 MLA Convention',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': 'f7386212-7c85-4bf5-aa22-e578e53f55eb',
+ 'links': {'featured': 'https://localhost/api/communities/f7386212-7c85-4bf5-aa22-e578e53f55eb/featured',
+           'invitations': 'https://localhost/api/communities/f7386212-7c85-4bf5-aa22-e578e53f55eb/invitations',
+           'logo': 'https://localhost/api/communities/f7386212-7c85-4bf5-aa22-e578e53f55eb/logo',
+           'members': 'https://localhost/api/communities/f7386212-7c85-4bf5-aa22-e578e53f55eb/members',
+           'public_members': 'https://localhost/api/communities/f7386212-7c85-4bf5-aa22-e578e53f55eb/members/public',
+           'records': 'https://localhost/api/communities/f7386212-7c85-4bf5-aa22-e578e53f55eb/records',
+           'rename': 'https://localhost/api/communities/f7386212-7c85-4bf5-aa22-e578e53f55eb/rename',
+           'requests': 'https://localhost/api/communities/f7386212-7c85-4bf5-aa22-e578e53f55eb/requests',
+           'self': 'https://localhost/api/communities/f7386212-7c85-4bf5-aa22-e578e53f55eb',
+           'self_html': 'https://localhost/communities/2024-mla-convention',
+           'settings_html': 'https://localhost/communities/2024-mla-convention/settings'},
+ 'metadata': {'curation_policy': '',
+              'description': 'A collection managed by the 2024 MLA Convention '
+                             'group of Knowledge Commons',
+              'organizations': [{'name': '2024 MLA Convention'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'This is a collection of works curated by the 2024 MLA '
+                      'Convention group of Knowledge Commons',
+              'title': '2024 MLA Convention Collection (Knowledge Commons)',
+              'website': 'https://mla.hcommons-dev.org/groups/2024-mla-convention/'},
+ 'revision_id': 2,
+ 'slug': '2024-mla-convention',
+ 'updated': '2024-03-13T01:21:21.870599+00:00'}
+2024-03-12 21:21:22,554:ERROR : Manage members: True
+2024-03-12 21:33:31,254:INFO : Role "knowledgeCommons|1004282|administrator" created or retrieved successfully.
+2024-03-12 21:33:31,265:INFO : Role "knowledgeCommons|1004282|member" created or retrieved successfully.
+2024-03-12 21:33:31,277:INFO : Role "knowledgeCommons|1004282|moderator" created or retrieved successfully.
+2024-03-12 21:33:31,442:ERROR : New record: {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-13T01:33:31.349395+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'A group of authors and '
+                                                    'their studies published '
+                                                    'in Ignatian International '
+                                                    'Journal for '
+                                                    'Multidisciplinary '
+                                                    'Research',
+                   'kcr:commons_group_id': '1004282',
+                   'kcr:commons_group_name': 'Ignatian International Journal '
+                                             'for Multidisciplinary Research',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': 'c9f62cef-3d0f-464f-a646-fe135795a02b',
+ 'links': {'featured': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/featured',
+           'invitations': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/invitations',
+           'logo': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/logo',
+           'members': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/members',
+           'public_members': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/members/public',
+           'records': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/records',
+           'rename': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/rename',
+           'requests': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/requests',
+           'self': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b',
+           'self_html': 'https://localhost/communities/ignatian-international-journal-for-multidisciplinary-research',
+           'settings_html': 'https://localhost/communities/ignatian-international-journal-for-multidisciplinary-research/settings'},
+ 'metadata': {'curation_policy': '',
+              'description': 'A collection managed by the Ignatian '
+                             'International Journal for Multidisciplinary '
+                             'Research group of Knowledge Commons',
+              'organizations': [{'name': 'Ignatian International Journal for '
+                                         'Multidisciplinary Research'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'This is a collection of works curated by the Ignatian '
+                      'International Journal for Multidisciplinary Research '
+                      'group of Knowledge Commons',
+              'title': 'Ignatian International Journal for Multidisciplinary '
+                       'Research Collection (Knowledge Commons)',
+              'website': 'https://hcommons-dev.org/groups/ignatian-international-journal-for-multidisciplinary-research/'},
+ 'revision_id': 2,
+ 'slug': 'ignatian-international-journal-for-multidisciplinary-research',
+ 'updated': '2024-03-13T01:33:31.361993+00:00'}
+2024-03-12 21:33:31,521:ERROR : Manage members: True

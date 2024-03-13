@@ -3,5 +3,8 @@ GROUP_COLLECTIONS_REMOTE_ROLES = {
 }
 
 GROUP_COLLECTIONS_METADATA_ENDPOINTS = {
-    "knowledgeCommons": "https://hcommons-dev.org/wp-json/commons/v1/groups",
+    "knowledgeCommons": {
+        "url": "https://hcommons-dev.org/wp-json/commons/v1/groups",
+        "token_name": "KNOWLEDGE_COMMONS_API_TOKEN",
+    },
 }

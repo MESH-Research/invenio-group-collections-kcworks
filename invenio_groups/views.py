@@ -656,6 +656,7 @@ must be provided in the "Authorization" request header.
 """
 
 # from flask import render_template
+from pprint import pformat
 from urllib import response
 from flask import (
     Blueprint,
@@ -683,6 +684,7 @@ from invenio_access.permissions import system_identity
 from invenio_accounts.models import UserIdentity
 from invenio_accounts.proxies import current_datastore as accounts_datastore
 from invenio_communities.proxies import current_communities
+from invenio_communities.members.errors import AlreadyMemberError
 from invenio_queues.proxies import current_queues
 import marshmallow as ma
 import requests
@@ -695,6 +697,8 @@ from werkzeug.exceptions import (
     # Unauthorized,
 )
 import os
+
+from invenio_groups import api
 
 from .utils import logger
 from .errors import CommonsGroupNotFoundError
@@ -870,151 +874,182 @@ class GroupCollectionsResource(Resource):
     def create(self):
         print("starting create****")
         print(resource_requestctx)
-        # commons_instance = resource_requestctx.data.get("commons_instance")
-        # commons_group_id = resource_requestctx.data.get("commons_group_id")
-        # commons_group_name = resource_requestctx.data.get("commons_group_name")
-        # commons_group_visibility = resource_requestctx.data.get(
-        #     "commons_group_visibility"
-        # )
-        # slug = commons_group_name.lower().replace(" ", "-")
+        commons_instance = resource_requestctx.data.get("commons_instance")
+        commons_group_id = resource_requestctx.data.get("commons_group_id")
+        commons_group_name = resource_requestctx.data.get("commons_group_name")
+        commons_group_visibility = resource_requestctx.data.get(
+            "commons_group_visibility"
+        )
+        slug = commons_group_name.lower().replace(" ", "-")
 
-        # instance_name = app.config["SSO_SAML_IDPS"][commons_instance]["title"]
+        instance_name = app.config["SSO_SAML_IDPS"][commons_instance]["title"]
 
-        # # make API request to commons instance to get group metadata
-        # commons_group_description = ""
-        # commons_group_url = ""
-        # commons_avatar_url = ""
-        # commons_upload_roles = []
-        # commons_moderate_roles = []
-        # meta_response = requests.get(
-        #     app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
-        #         commons_instance
-        #     ],
-        # )
-        # if meta_response.status_code == 200:
-        #     commons_group_description = meta_response.json["description"]
-        #     commons_group_url = meta_response.json["url"]
-        #     commons_avatar_url = meta_response.json["avatar"]
-        #     commons_upload_roles = meta_response.json["upload_roles"]
-        #     commons_moderate_roles = meta_response.json["moderate_roles"]
-        # else:
-        #     raise UnprocessableEntity(
-        #         f"No such group could be found on {instance_name}"
-        #     )
+        # make API request to commons instance to get group metadata
+        commons_group_description = ""
+        commons_group_url = ""
+        commons_avatar_url = ""
+        commons_upload_roles = []
+        commons_moderate_roles = []
+        api_details = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
+            commons_instance
+        ]
+        headers = {
+            "Authorization": f"Bearer {os.environ[api_details['token_name']]}"
+        }
+        meta_response = requests.get(
+            f"{api_details['url']}/{commons_group_id}",
+            headers=headers,
+        )
+        if meta_response.status_code == 200:
+            content = meta_response.json()
+            commons_group_description = content["description"]
+            commons_group_url = content["url"]
+            commons_avatar_url = content["avatar"]
+            commons_upload_roles = content["upload_roles"]
+            commons_moderate_roles = content["moderate_roles"]
+        else:
+            logger.error(
+                f"Failed to get metadata for group {commons_group_id} on "
+                f"{instance_name}"
+            )
+            logger.error(f"Response: {meta_response.text}")
+            logger.error(headers)
+            raise UnprocessableEntity(
+                f"No such group could be found on {instance_name}"
+            )
 
-        # # create roles for the new collection's group members
-        # remote_roles = app.config["GROUP_COLLECTIONS_REMOTE_ROLES"][
-        #     commons_instance
-        # ]
-        # for role in remote_roles:
-        #     group_name = f"{commons_instance}|{commons_group_id}|{role}"
-        #     my_group_role = accounts_datastore.find_or_create_role(
-        #         name=group_name
-        #     )
-        #     accounts_datastore.commit()
+        # create roles for the new collection's group members
+        remote_roles = app.config["GROUP_COLLECTIONS_REMOTE_ROLES"][
+            commons_instance
+        ]
+        for role in remote_roles:
+            group_name = f"{commons_instance}|{commons_group_id}|{role}"
+            my_group_role = accounts_datastore.find_or_create_role(
+                name=group_name
+            )
+            accounts_datastore.commit()
 
-        #     if my_group_role is not None:
-        #         logger.info(f'Role "{group_name}" created successfully.')
-        #     else:
-        #         raise RuntimeError(f'Role "{group_name}" not created.')
+            if my_group_role is not None:
+                assert my_group_role.name == group_name
+                logger.info(
+                    f'Role "{group_name}" created or retrieved successfully.'
+                )
+            else:
+                raise RuntimeError(f'Role "{group_name}" not created.')
 
         # create the new collection
-        # new_record = current_communities.service.create(
-        #     identity=system_identity,
-        #     data={
-        #         "access": {
-        #             "visibility": "restricted",
-        #             "member_policy": "closed",
-        #             "record_policy": "closed",
-        #             # "owned_by": [group_admins],
-        #         },
-        #         # "slug": slug,
-        #         "metadata": {
-        #             "title": f"{commons_group_name} Collection "
-        #             "({instance_name})",
-        #             "description": f"A collection managed by the"
-        #             f"{commons_group_name} group of {instance_name}",
-        #             "type": {
-        #                 "id": "event",
-        #             },
-        #             "curation_policy": "",
-        #             "page": f"Information about {commons_group_name}"
-        #             "Collection",
-        #             "website": commons_group_url,
-        #             "organizations": [
-        #                 {
-        #                     "name": commons_group_name,
-        #                 },
-        #                 {"name": commons_instance},
-        #             ],
-        #         },
-        #         "custom_fields": {
-        #             "kcr:commons_instance": commons_instance,
-        #             "kcr:commons_group_id": commons_group_id,
-        #             "kcr:commons_group_name": commons_group_name,
-        #             "kcr:commons_group_description": commons_group_description,
-        #             "kcr:commons_group_visibility": commons_group_visibility,
-        #         },
-        #     },
-        # )
-        # if not new_record:
-        #     raise RuntimeError("Failed to create new collection")
+        try:
+            new_record = current_communities.service.create(
+                identity=system_identity,
+                data={
+                    "access": {
+                        "visibility": "restricted",
+                        "member_policy": "closed",
+                        "record_policy": "closed",
+                        # "owned_by": [group_admins],
+                    },
+                    "slug": slug,
+                    "metadata": {
+                        "title": f"{commons_group_name} Collection "
+                        f"({instance_name})",
+                        "description": f"A collection managed by the "
+                        f"{commons_group_name} group of {instance_name}",
+                        "curation_policy": "",
+                        "page": f"This"
+                        " is a collection of works curated by the "
+                        f"{commons_group_name} group of {instance_name}",
+                        "website": commons_group_url,
+                        "organizations": [
+                            {
+                                "name": commons_group_name,
+                            },
+                            {"name": instance_name},
+                        ],
+                    },
+                    "custom_fields": {
+                        "kcr:commons_instance": commons_instance,
+                        "kcr:commons_group_id": commons_group_id,
+                        "kcr:commons_group_name": commons_group_name,
+                        "kcr:commons_group_description": commons_group_description,
+                        "kcr:commons_group_visibility": commons_group_visibility,
+                    },
+                },
+            )
+            logger.error(f"New record: {pformat(new_record.to_dict())}")
+            if not new_record:
+                raise RuntimeError("Failed to create new collection")
+        # group with slug already exists
+        except ma.ValidationError as e:
+            community_list = current_communities.service.search(
+                identity=system_identity, q=f"slug:{slug}"
+            )
+            new_record = list(community_list.hits)[0]
+            # raise UnprocessableEntity(str(e))
+            logger.error(pformat(e))
+            logger.info("continuing with existing collection")
+            pass
 
-        # # assign the group roles as members of the new collection
-        # manage_payload = [
-        #     {"id": f"{commons_instance}|{commons_group_id}|{role}"}
-        #     for role in commons_upload_roles
-        # ]
-        # manage_members = current_communities.members_service.add(
-        #     identity=system_identity,
-        #     id=new_record.id,
-        #     data={"members": manage_payload, "role": "manager"},
-        # )
+        # assign admins as members of the new collection
+        try:
+            manage_payload = [{"type": "group", "id": "administrator"}]
+            manage_members = current_communities.service.members.add(
+                system_identity,
+                new_record["id"],
+                data={"members": manage_payload, "role": "administrator"},
+            )
+            logger.error(f"Manage members: {pformat(manage_members)}")
+        except AlreadyMemberError:
+            logger.error("admin role is already a manager")
 
-        # moderate_payload = [
-        #     {"id": f"{commons_instance}|{commons_group_id}|{role}"}
-        #     for role in commons_moderate_roles
-        # ]
-        # moderate_members = current_communities.members_service.add(
-        #     identity=system_identity,
-        #     id=new_record.id,
-        #     data={"members": moderate_payload, "role": "moderator"},
-        # )
+        # assign the group roles as members of the new collection
+        for remote_role in remote_roles:
+            try:
+                works_role = "reader"
+                if remote_role in commons_upload_roles:
+                    works_role = "curator"  # or "owner"?
+                elif remote_role in commons_moderate_roles:
+                    works_role = "administrator"
+                payload = [
+                    {
+                        "type": "group",
+                        "id": f"{commons_instance}|{commons_group_id}"
+                        f"|{remote_role}",
+                    }
+                ]
+                member = current_communities.service.members.add(
+                    system_identity,
+                    new_record["id"],
+                    data={"members": payload, "role": works_role},
+                )
+                assert member
+            except AlreadyMemberError:
+                logger.error(
+                    f"{remote_role} role was was already a group member"
+                )
 
-        # member_payload = [
-        #     {"id": f"{commons_instance}|{commons_group_id}|member"}
-        #     for role in remote_roles
-        # ]
-        # members = current_communities.members_service.add(
-        #     identity=system_identity,
-        #     id=new_record.id,
-        #     data={"members": member_payload, "role": "member"},
-        # )
+        # download the group avatar and upload it to the Invenio instance
+        avatar_response = requests.get(commons_avatar_url)
+        if avatar_response.status_code == 200:
+            # with open(f"{slug}.png", "wb") as f:
+            #     f.write(avatar_response.content)
+            # upload the avatar to the Invenio instance
+            logo_result = current_communities.service.update_logo(
+                system_identity,
+                new_record.id,
+                stream=avatar_response.content,
+            )
+            if logo_result is not None:
+                logger.info("Logo uploaded successfully.")
+            else:
+                raise RuntimeError("Logo upload failed.")
 
-        # # download the group avatar and upload it to the Invenio instance
-        # avatar_response = requests.get(commons_avatar_url)
-        # if avatar_response.status_code == 200:
-        #     # with open(f"{slug}.png", "wb") as f:
-        #     #     f.write(avatar_response.content)
-        #     # upload the avatar to the Invenio instance
-        #     logo_result = current_communities.service.upload_logo(
-        #         identity=system_identity,
-        #         _id=new_record.id,
-        #         stream=avatar_response.content,
-        #     )
-        #     if logo_result is not None:
-        #         logger.info("Logo uploaded successfully.")
-        #     else:
-        #         raise RuntimeError("Logo upload failed.")
+        # Construct the response
+        response_data = {
+            "commons_group_id": commons_group_id,
+            "collection": "new-collection-slug",
+        }
 
-        # # Construct the response
-        # response_data = {
-        #     "commons_group_id": commons_group_id,
-        #     "collection": "new-collection-slug",
-        # }
-
-        # return jsonify(response_data), 201
-        return jsonify({"message": "create"}), 201
+        return jsonify(response_data), 201
 
     def update(self, collection_slug):
         # Implement the logic for handling PATCH requests
