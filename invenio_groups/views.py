@@ -15,8 +15,27 @@ changes have been made to the metadata of a Commons group. This endpoint is
 not used to receive updated group metadata. It only receives notifications
 that operations should be performed on a group's collection.
 
-The `group_collections` API endpoint
----------------
+## Endpoing configuration
+
+Two configuration variables must be provided in the `invenio.cfg` file
+in order to use this endpoint:
+
+- `GROUP_COLLECTIONS_REMOTE_ROLES`: a dictionary of Commons instances and
+    the roles that should be added to a collection when it is created by a
+    group in that instance. The roles should be provided as a list of strings.
+- `GROUP_COLLECTIONS_METADATA_ENDPOINTS`: a dictionary of Commons instances
+    and the configuration details necessary to retrieve metadata for a group
+
+    URL to which a GET request should be sent to retrieve the metadata
+    for a group. The URL should be provided as a string.
+
+"knowledgeCommons": {
+        "url": "https://hcommons-dev.org/wp-json/commons/v1/groups",
+        "token_name": "COMMONS_API_TOKEN",
+        "placeholder_avatar": "mystery-group.png",
+    },
+
+
 
 ## GET
 
@@ -529,6 +548,20 @@ created, the response status code will be 201 Created, and the response
 body will be a JSON object containing the URL slug for the newly
 created collection.
 
+The POST request will trigger a call to the Commons instance to get the
+metadata for the group. The metadata will be used to populate the collection
+metadata in Invenio. This request will be sent to the "url" specified in the
+`GROUP_COLLECTIONS_METADATA_ENDPOINTS` configuration variable under the key
+matching the `commons_instance` parameter in the request body. This request
+will be authenticated using the environment variable matching the `token_name`
+from the IDP's configuration dictionary.
+
+If the metadata returned from the Commons instance includes a url for an
+avatar, that avatar will be downloaded and stored in the Invenio instance's
+file storage. Since we do not want to use a placeholder avatar for the group,
+the instance's configuration can include a `placeholder_avatar` key. If the
+file name or last segment of the supplied avatar url matches this `placeholder_avatar` value, it will be ignored.
+
 ### Request
 
 ```http
@@ -656,17 +689,14 @@ must be provided in the "Authorization" request header.
 """
 
 # from flask import render_template
+from distutils.command import upload
+from email.mime import base
 from pprint import pformat
-from urllib import response
 from flask import (
-    Blueprint,
-    jsonify,
-    make_response,
     request,
     current_app as app,
     jsonify,
 )
-from flask.views import MethodView
 from flask_resources import (
     from_conf,
     JSONSerializer,
@@ -681,11 +711,10 @@ from flask_resources import (
     resource_requestctx,
 )
 from invenio_access.permissions import system_identity
-from invenio_accounts.models import UserIdentity
 from invenio_accounts.proxies import current_datastore as accounts_datastore
 from invenio_communities.proxies import current_communities
 from invenio_communities.members.errors import AlreadyMemberError
-from invenio_queues.proxies import current_queues
+from io import BytesIO
 import marshmallow as ma
 import requests
 from werkzeug.exceptions import (
@@ -698,10 +727,10 @@ from werkzeug.exceptions import (
 )
 import os
 
-from invenio_groups import api
+# from invenio_groups import api
 
 from .utils import logger
-from .errors import CommonsGroupNotFoundError
+from .errors import CollectionAlreadyExistsError, CommonsGroupNotFoundError
 
 
 class GroupCollectionsResourceConfig(ResourceConfig):
@@ -750,6 +779,10 @@ class GroupCollectionsResource(Resource):
             {"message": str(e.description), "status": 404},
             404,
         ),
+        CommonsGroupNotFoundError: lambda e: (
+            {"message": str(e.description), "status": 404},
+            404,
+        ),
         BadRequest: lambda e: (
             {"message": str(e.description), "status": 400},
             400,
@@ -769,6 +802,10 @@ class GroupCollectionsResource(Resource):
         RuntimeError: lambda e: (
             {"message": str(e.description), "status": 500},
             500,
+        ),
+        CollectionAlreadyExistsError: lambda e: (
+            {"message": str(e.description), "status": 409},
+            409,
         ),
     }
 
@@ -843,7 +880,7 @@ class GroupCollectionsResource(Resource):
         size = resource_requestctx.args.get("size")
         sort = resource_requestctx.args.get("sort", "updated-desc")
 
-        query_params = ""
+        query_params = "+_exists_:custom_fields.kcr\:commons_instance "
         if commons_instance:
             query_params += (
                 f"+custom_fields.kcr\:commons_instance:{commons_instance} "
@@ -872,15 +909,16 @@ class GroupCollectionsResource(Resource):
 
     @request_data
     def create(self):
-        print("starting create****")
-        print(resource_requestctx)
         commons_instance = resource_requestctx.data.get("commons_instance")
         commons_group_id = resource_requestctx.data.get("commons_group_id")
         commons_group_name = resource_requestctx.data.get("commons_group_name")
         commons_group_visibility = resource_requestctx.data.get(
             "commons_group_visibility"
         )
-        slug = commons_group_name.lower().replace(" ", "-")
+        base_slug = commons_group_name.lower().replace(" ", "-")
+        slug_incrementer = 0
+        slug = base_slug
+        errors = []
 
         instance_name = app.config["SSO_SAML_IDPS"][commons_instance]["title"]
 
@@ -897,7 +935,7 @@ class GroupCollectionsResource(Resource):
             "Authorization": f"Bearer {os.environ[api_details['token_name']]}"
         }
         meta_response = requests.get(
-            f"{api_details['url']}/{commons_group_id}",
+            api_details["url"].format(id=commons_group_id),
             headers=headers,
         )
         if meta_response.status_code == 200:
@@ -905,8 +943,21 @@ class GroupCollectionsResource(Resource):
             commons_group_description = content["description"]
             commons_group_url = content["url"]
             commons_avatar_url = content["avatar"]
+            if commons_avatar_url == api_details.get("default_avatar"):
+                commons_avatar_url = None
             commons_upload_roles = content["upload_roles"]
             commons_moderate_roles = content["moderate_roles"]
+        elif meta_response.status_code == 404:
+            logger.error(
+                f"Failed to get metadata for group {commons_group_id} on "
+                f"{instance_name}"
+            )
+            logger.error(f"Response: {meta_response.text}")
+            logger.error(headers)
+            raise CommonsGroupNotFoundError(
+                f"No such group {commons_group_id} could be found "
+                f"on {instance_name}"
+            )
         else:
             logger.error(
                 f"Failed to get metadata for group {commons_group_id} on "
@@ -915,13 +966,14 @@ class GroupCollectionsResource(Resource):
             logger.error(f"Response: {meta_response.text}")
             logger.error(headers)
             raise UnprocessableEntity(
-                f"No such group could be found on {instance_name}"
+                f"Something went wrong requesting group {commons_group_id} "
+                f"on {instance_name}"
             )
 
         # create roles for the new collection's group members
-        remote_roles = app.config["GROUP_COLLECTIONS_REMOTE_ROLES"][
-            commons_instance
-        ]
+        remote_roles = list(
+            set(commons_upload_roles.extend(commons_moderate_roles))
+        )
         for role in remote_roles:
             group_name = f"{commons_instance}|{commons_group_id}|{role}"
             my_group_role = accounts_datastore.find_or_create_role(
@@ -938,56 +990,69 @@ class GroupCollectionsResource(Resource):
                 raise RuntimeError(f'Role "{group_name}" not created.')
 
         # create the new collection
-        try:
-            new_record = current_communities.service.create(
-                identity=system_identity,
-                data={
-                    "access": {
-                        "visibility": "restricted",
-                        "member_policy": "closed",
-                        "record_policy": "closed",
-                        # "owned_by": [group_admins],
+        new_record = None
+        data = {
+            "access": {
+                "visibility": "restricted",
+                "member_policy": "closed",
+                "record_policy": "closed",
+            },
+            "slug": slug,
+            "metadata": {
+                "title": f"{commons_group_name}",
+                "description": f"A collection managed by the "
+                f"{commons_group_name} group of {instance_name}",
+                "curation_policy": "",
+                "page": f"This"
+                " is a collection of works curated by the "
+                f"{commons_group_name} group of {instance_name}",
+                "website": commons_group_url,
+                "organizations": [
+                    {
+                        "name": commons_group_name,
                     },
-                    "slug": slug,
-                    "metadata": {
-                        "title": f"{commons_group_name} Collection "
-                        f"({instance_name})",
-                        "description": f"A collection managed by the "
-                        f"{commons_group_name} group of {instance_name}",
-                        "curation_policy": "",
-                        "page": f"This"
-                        " is a collection of works curated by the "
-                        f"{commons_group_name} group of {instance_name}",
-                        "website": commons_group_url,
-                        "organizations": [
-                            {
-                                "name": commons_group_name,
-                            },
-                            {"name": instance_name},
-                        ],
-                    },
-                    "custom_fields": {
-                        "kcr:commons_instance": commons_instance,
-                        "kcr:commons_group_id": commons_group_id,
-                        "kcr:commons_group_name": commons_group_name,
-                        "kcr:commons_group_description": commons_group_description,
-                        "kcr:commons_group_visibility": commons_group_visibility,
-                    },
-                },
-            )
-            logger.error(f"New record: {pformat(new_record.to_dict())}")
-            if not new_record:
-                raise RuntimeError("Failed to create new collection")
-        # group with slug already exists
-        except ma.ValidationError as e:
-            community_list = current_communities.service.search(
-                identity=system_identity, q=f"slug:{slug}"
-            )
-            new_record = list(community_list.hits)[0]
-            # raise UnprocessableEntity(str(e))
-            logger.error(pformat(e))
-            logger.info("continuing with existing collection")
-            pass
+                    {"name": instance_name},
+                ],
+            },
+            "custom_fields": {
+                "kcr:commons_instance": commons_instance,
+                "kcr:commons_group_id": commons_group_id,
+                "kcr:commons_group_name": commons_group_name,
+                "kcr:commons_group_description": commons_group_description,  # noqa: E501
+                "kcr:commons_group_visibility": commons_group_visibility,  # noqa: E501
+            },
+        }
+
+        while not new_record:
+            try:
+                new_record_result = current_communities.service.create(
+                    identity=system_identity, data=data
+                )
+                logger.info(f"New record created successfully: {new_record}")
+                new_record = new_record_result
+                if not new_record_result:
+                    raise RuntimeError("Failed to create new collection")
+            except ma.ValidationError as e:
+                # group with slug already exists
+                if "A community with this identifier already exists" in e:
+                    community_list = current_communities.service.search(
+                        identity=system_identity, q=f"slug:{slug}"
+                    )
+                    if (
+                        community_list[0]["custom_fields"][
+                            "kcr:commons_group_id"
+                        ]
+                        == commons_group_id
+                    ):
+                        raise CollectionAlreadyExistsError(
+                            f"Collection for {instance_name} "
+                            f"group {commons_group_id} already exists"
+                        )
+                    else:
+                        slug_incrementer += 1
+                        data["slug"] = f"{base_slug}-{str(slug_incrementer)}"
+                else:
+                    raise UnprocessableEntity(str(e))
 
         # assign admins as members of the new collection
         try:
@@ -1006,9 +1071,9 @@ class GroupCollectionsResource(Resource):
             try:
                 works_role = "reader"
                 if remote_role in commons_upload_roles:
-                    works_role = "curator"  # or "owner"?
+                    works_role = "curator"
                 elif remote_role in commons_moderate_roles:
-                    works_role = "administrator"
+                    works_role = "administrator"  # or "owner"?
                 payload = [
                     {
                         "type": "group",
@@ -1026,27 +1091,59 @@ class GroupCollectionsResource(Resource):
                 logger.error(
                     f"{remote_role} role was was already a group member"
                 )
+        logger.error(pformat(new_record))
 
         # download the group avatar and upload it to the Invenio instance
-        avatar_response = requests.get(commons_avatar_url)
-        if avatar_response.status_code == 200:
-            # with open(f"{slug}.png", "wb") as f:
-            #     f.write(avatar_response.content)
-            # upload the avatar to the Invenio instance
-            logo_result = current_communities.service.update_logo(
-                system_identity,
-                new_record.id,
-                stream=avatar_response.content,
-            )
-            if logo_result is not None:
-                logger.info("Logo uploaded successfully.")
-            else:
-                raise RuntimeError("Logo upload failed.")
+        if commons_avatar_url:
+            avatar_response = requests.get(commons_avatar_url)
+            if avatar_response.status_code == 200:
+                try:
+                    logo_result = current_communities.service.update_logo(
+                        system_identity,
+                        new_record["id"],
+                        stream=BytesIO(avatar_response.content),
+                    )
+                    if logo_result is not None:
+                        logger.info("Logo uploaded successfully.")
+                    else:
+                        logger.error("Logo upload failed silently in Invenio.")
+                except Exception as e:
+                    logger.error(f"Logo upload failed: {e}")
+                    errors.append(f"Logo upload failed in Invenio: {e}")
+            elif avatar_response.status_code in [400, 405, 406, 412, 413]:
+                logger.error(
+                    "Request was not accepted when trying to access "
+                    f"the provided avatar at {commons_avatar_url}"
+                )
+                logger.error(f"Response: {avatar_response.text}")
+            elif avatar_response.status_code in [401, 403, 407]:
+                logger.error(
+                    "Access the provided avatar was not allowed "
+                    f"at {commons_avatar_url}"
+                )
+                logger.error(f"Response: {avatar_response.text}")
+            elif avatar_response.status_code in [404, 410]:
+                logger.error(
+                    f"Provided avatar was not found at {commons_avatar_url}"
+                )
+                logger.error(f"Response: {avatar_response.text}")
+            elif avatar_response.status_code == 403:
+                logger.error(
+                    "Access to the provided avatar was forbidden"
+                    f" at {commons_avatar_url}"
+                )
+                logger.error(f"Response: {avatar_response.text}")
+            elif avatar_response.status_code in [500, 502, 503, 504, 509, 511]:
+                logger.error(
+                    f"Internal server error when trying to access the "
+                    f"provided avatar at {commons_avatar_url}"
+                )
+                logger.error(f"Response: {avatar_response.text}")
 
         # Construct the response
         response_data = {
             "commons_group_id": commons_group_id,
-            "collection": "new-collection-slug",
+            "collection": slug,
         }
 
         return jsonify(response_data), 201
@@ -1081,163 +1178,6 @@ class GroupCollectionsResource(Resource):
 
         # Return appropriate response status
         return "", 204
-
-
-class IDPUpdateWebhook(MethodView):
-    """
-    View class providing methods for the remote-user-data webhook api endpoint.
-    """
-
-    init_every_request = False  # FIXME: is this right?
-
-    def __init__(self):
-        self.webhook_token = os.getenv("REMOTE_USER_DATA_WEBHOOK_TOKEN")
-        self.logger = logger
-
-    def post(self):
-        """
-        Handle POST requests to the user data webhook endpoint.
-
-        These are requests from a remote IDP indicating that user or group
-        data has been updated on the remote server.
-        """
-        self.logger.debug("****Received POST request to webhook endpoint")
-        print("****Received POST request to webhook endpoint")
-        # headers = request.headers
-        # bearer = headers.get("Authorization")
-        # token = bearer.split()[1]
-        # if token != self.webhook_token:
-        #     print("Unauthorized")
-        #     raise Unauthorized
-
-        try:
-            idp = request.json["idp"]
-            events = []
-            config = app.config["REMOTE_USER_DATA_API_ENDPOINTS"][idp]
-            entity_types = config["entity_types"]
-            bad_entity_types = []
-            bad_events = []
-            users = []
-            bad_users = []
-            groups = []
-            bad_groups = []
-
-            for e in request.json["updates"].keys():
-                if e in entity_types.keys():
-                    logger.debug(
-                        f"{idp} Received {e} update signal: "
-                        f"{request.json['updates'][e]}"
-                    )
-                    for u in request.json["updates"][e]:
-                        if u["event"] in entity_types[e]["events"]:
-                            if e == "users":
-                                user_identity = UserIdentity.query.filter_by(
-                                    id=u["id"], method=idp
-                                ).one_or_none()
-                                if user_identity is None:
-                                    bad_users.append(u["id"])
-                                    logger.error(
-                                        f"Received update signal from {idp} "
-                                        f"for unknown user: {u['id']}"
-                                    )
-                                else:
-                                    users.append(u["id"])
-                                    events.append(
-                                        {
-                                            "idp": idp,
-                                            "entity_type": e,
-                                            "event": u["event"],
-                                            "id": u["id"],
-                                        }
-                                    )
-                            elif e == "groups":
-                                groups.append(u["id"])
-                                events.append(
-                                    {
-                                        "idp": idp,
-                                        "entity_type": e,
-                                        "event": u["event"],
-                                        "id": u["id"],
-                                    }
-                                )
-                        else:
-                            bad_events.append(u)
-                            logger.error(
-                                f"{idp} Received update signal for "
-                                f"unknown event: {u}"
-                            )
-                else:
-                    bad_entity_types.append(e)
-                    logger.error(
-                        f"{idp} Received update signal for unknown "
-                        f"entity type: {e}"
-                    )
-                    logger.error(request.json)
-
-            if len(events) > 0:
-                current_queues.queues["user-data-updates"].publish(events)
-                remote_data_updated.send(
-                    app._get_current_object(), events=events
-                )
-                logger.debug(
-                    f"Published {len(events)} events to queue and emitted"
-                    " remote_data_updated signal"
-                )
-                logger.debug(events)
-            else:
-                if not users and bad_users or not groups and bad_groups:
-                    entity_string = ""
-                    if not users and bad_users:
-                        entity_string += "users"
-                    if not groups and bad_groups:
-                        if entity_string:
-                            entity_string += " and "
-                        entity_string += "groups"
-                    logger.error(
-                        f"{idp} requested updates for {entity_string} that"
-                        " do not exist"
-                    )
-                    logger.error(request.json["updates"])
-                    raise NotFound
-                elif not groups and bad_groups:
-                    logger.error(
-                        f"{idp} requested updates for groups that do not exist"
-                    )
-                    logger.error(request.json["updates"])
-                    raise NotFound
-                else:
-                    logger.error(f"{idp} No valid events received")
-                    logger.error(request.json["updates"])
-                    raise BadRequest
-
-            # return error message after handling signals that are
-            # properly formed
-            if len(bad_entity_types) > 0 or len(bad_events) > 0:
-                # FIXME: raise better error, since request isn't
-                # completely rejected
-                raise BadRequest
-        except KeyError:  # request is missing 'idp' or 'updates' keys
-            logger.error(f"Received malformed signal: {request.json}")
-            raise BadRequest
-
-        return (
-            jsonify(
-                {"message": "Webhook notification accepted", "status": 202}
-            ),
-            202,
-        )
-
-    def get(self):
-        return (
-            jsonify({"message": "Webhook receiver is active", "status": 200}),
-            200,
-        )
-
-    def put(self):
-        raise MethodNotAllowed
-
-    def delete(self):
-        raise MethodNotAllowed
 
 
 def create_api_blueprint(app):

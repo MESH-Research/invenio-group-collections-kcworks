@@ -969,3 +969,446 @@
  'slug': 'ignatian-international-journal-for-multidisciplinary-research',
  'updated': '2024-03-13T01:33:31.361993+00:00'}
 2024-03-12 21:33:31,521:ERROR : Manage members: True
+2024-03-14 20:15:22,315:INFO : Role "knowledgeCommons|1004282|administrator" created or retrieved successfully.
+2024-03-14 20:15:22,319:INFO : Role "knowledgeCommons|1004282|member" created or retrieved successfully.
+2024-03-14 20:15:22,324:INFO : Role "knowledgeCommons|1004282|moderator" created or retrieved successfully.
+2024-03-14 20:15:22,528:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-14 20:15:22,529:INFO : continuing with existing collection
+2024-03-14 20:15:22,537:ERROR : admin role is already a manager
+2024-03-14 20:15:22,542:ERROR : administrator role was was already a group member
+2024-03-14 20:15:22,545:ERROR : member role was was already a group member
+2024-03-14 20:15:22,549:ERROR : moderator role was was already a group member
+2024-03-14 20:30:22,166:INFO : Role "knowledgeCommons|1004282|administrator" created or retrieved successfully.
+2024-03-14 20:30:22,176:INFO : Role "knowledgeCommons|1004282|member" created or retrieved successfully.
+2024-03-14 20:30:22,180:INFO : Role "knowledgeCommons|1004282|moderator" created or retrieved successfully.
+2024-03-14 20:30:22,312:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-14 20:30:22,312:INFO : continuing with existing collection
+2024-03-14 20:30:22,318:ERROR : admin role is already a manager
+2024-03-14 20:30:22,322:ERROR : administrator role was was already a group member
+2024-03-14 20:30:22,326:ERROR : member role was was already a group member
+2024-03-14 20:30:22,329:ERROR : moderator role was was already a group member
+2024-03-14 20:31:36,608:INFO : Role "knowledgeCommons|1004282|administrator" created or retrieved successfully.
+2024-03-14 20:31:36,612:INFO : Role "knowledgeCommons|1004282|member" created or retrieved successfully.
+2024-03-14 20:31:36,617:INFO : Role "knowledgeCommons|1004282|moderator" created or retrieved successfully.
+2024-03-14 20:31:36,715:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-14 20:31:36,716:INFO : continuing with existing collection
+2024-03-14 20:31:36,722:ERROR : admin role is already a manager
+2024-03-14 20:31:36,727:ERROR : administrator role was was already a group member
+2024-03-14 20:31:36,731:ERROR : member role was was already a group member
+2024-03-14 20:31:36,734:ERROR : moderator role was was already a group member
+2024-03-14 20:34:41,744:INFO : Role "knowledgeCommons|1004282|administrator" created or retrieved successfully.
+2024-03-14 20:34:41,752:INFO : Role "knowledgeCommons|1004282|member" created or retrieved successfully.
+2024-03-14 20:34:41,756:INFO : Role "knowledgeCommons|1004282|moderator" created or retrieved successfully.
+2024-03-14 20:34:41,976:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-14 20:34:41,976:INFO : continuing with existing collection
+2024-03-14 20:34:41,982:ERROR : admin role is already a manager
+2024-03-14 20:34:41,986:ERROR : administrator role was was already a group member
+2024-03-14 20:34:41,990:ERROR : member role was was already a group member
+2024-03-14 20:34:41,993:ERROR : moderator role was was already a group member
+2024-03-14 20:34:41,993:ERROR : {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-13T01:33:31.349395+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'A group of authors and '
+                                                    'their studies published '
+                                                    'in Ignatian International '
+                                                    'Journal for '
+                                                    'Multidisciplinary '
+                                                    'Research',
+                   'kcr:commons_group_id': '1004282',
+                   'kcr:commons_group_name': 'Ignatian International Journal '
+                                             'for Multidisciplinary Research',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': 'c9f62cef-3d0f-464f-a646-fe135795a02b',
+ 'links': {'featured': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/featured',
+           'invitations': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/invitations',
+           'logo': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/logo',
+           'members': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/members',
+           'public_members': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/members/public',
+           'records': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/records',
+           'rename': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/rename',
+           'requests': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/requests',
+           'self': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b',
+           'self_html': 'https://localhost/communities/ignatian-international-journal-for-multidisciplinary-research',
+           'settings_html': 'https://localhost/communities/ignatian-international-journal-for-multidisciplinary-research/settings'},
+ 'metadata': {'curation_policy': "<p>Here's the curation policy</p>",
+              'description': 'A collection managed by the Ignatian '
+                             'International Journal for Multidisciplinary '
+                             'Research group of Knowledge Commons',
+              'organizations': [{'name': 'Ignatian International Journal for '
+                                         'Multidisciplinary Research'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'This is a collection of works curated by the Ignatian '
+                      'International Journal for Multidisciplinary Research '
+                      'group of Knowledge Commons',
+              'title': 'Ignatian International Journal for Multidisciplinary '
+                       'Research Collection (Knowledge Commons)',
+              'website': 'https://hcommons-dev.org/groups/ignatian-international-journal-for-multidisciplinary-research/'},
+ 'revision_id': 3,
+ 'slug': 'ignatian-international-journal-for-multidisciplinary-research',
+ 'updated': '2024-03-13T01:47:30.539908+00:00'}
+2024-03-14 20:40:47,084:INFO : Role "knowledgeCommons|1004282|administrator" created or retrieved successfully.
+2024-03-14 20:40:47,090:INFO : Role "knowledgeCommons|1004282|member" created or retrieved successfully.
+2024-03-14 20:40:47,094:INFO : Role "knowledgeCommons|1004282|moderator" created or retrieved successfully.
+2024-03-14 20:40:47,200:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-14 20:40:47,200:INFO : continuing with existing collection
+2024-03-14 20:40:47,205:ERROR : admin role is already a manager
+2024-03-14 20:40:47,213:ERROR : administrator role was was already a group member
+2024-03-14 20:40:47,220:ERROR : member role was was already a group member
+2024-03-14 20:40:47,226:ERROR : moderator role was was already a group member
+2024-03-14 20:40:47,227:ERROR : {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-13T01:33:31.349395+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'A group of authors and '
+                                                    'their studies published '
+                                                    'in Ignatian International '
+                                                    'Journal for '
+                                                    'Multidisciplinary '
+                                                    'Research',
+                   'kcr:commons_group_id': '1004282',
+                   'kcr:commons_group_name': 'Ignatian International Journal '
+                                             'for Multidisciplinary Research',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': 'c9f62cef-3d0f-464f-a646-fe135795a02b',
+ 'links': {'featured': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/featured',
+           'invitations': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/invitations',
+           'logo': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/logo',
+           'members': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/members',
+           'public_members': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/members/public',
+           'records': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/records',
+           'rename': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/rename',
+           'requests': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/requests',
+           'self': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b',
+           'self_html': 'https://localhost/communities/ignatian-international-journal-for-multidisciplinary-research',
+           'settings_html': 'https://localhost/communities/ignatian-international-journal-for-multidisciplinary-research/settings'},
+ 'metadata': {'curation_policy': "<p>Here's the curation policy</p>",
+              'description': 'A collection managed by the Ignatian '
+                             'International Journal for Multidisciplinary '
+                             'Research group of Knowledge Commons',
+              'organizations': [{'name': 'Ignatian International Journal for '
+                                         'Multidisciplinary Research'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'This is a collection of works curated by the Ignatian '
+                      'International Journal for Multidisciplinary Research '
+                      'group of Knowledge Commons',
+              'title': 'Ignatian International Journal for Multidisciplinary '
+                       'Research Collection (Knowledge Commons)',
+              'website': 'https://hcommons-dev.org/groups/ignatian-international-journal-for-multidisciplinary-research/'},
+ 'revision_id': 3,
+ 'slug': 'ignatian-international-journal-for-multidisciplinary-research',
+ 'updated': '2024-03-13T01:47:30.539908+00:00'}
+2024-03-14 20:45:53,608:INFO : Role "knowledgeCommons|1004282|administrator" created or retrieved successfully.
+2024-03-14 20:45:53,625:INFO : Role "knowledgeCommons|1004282|member" created or retrieved successfully.
+2024-03-14 20:45:53,639:INFO : Role "knowledgeCommons|1004282|moderator" created or retrieved successfully.
+2024-03-14 20:45:53,896:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-14 20:45:53,897:INFO : continuing with existing collection
+2024-03-14 20:45:53,905:ERROR : admin role is already a manager
+2024-03-14 20:45:53,909:ERROR : administrator role was was already a group member
+2024-03-14 20:45:53,913:ERROR : member role was was already a group member
+2024-03-14 20:45:53,916:ERROR : moderator role was was already a group member
+2024-03-14 20:45:53,917:ERROR : {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-13T01:33:31.349395+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'A group of authors and '
+                                                    'their studies published '
+                                                    'in Ignatian International '
+                                                    'Journal for '
+                                                    'Multidisciplinary '
+                                                    'Research',
+                   'kcr:commons_group_id': '1004282',
+                   'kcr:commons_group_name': 'Ignatian International Journal '
+                                             'for Multidisciplinary Research',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': 'c9f62cef-3d0f-464f-a646-fe135795a02b',
+ 'links': {'featured': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/featured',
+           'invitations': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/invitations',
+           'logo': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/logo',
+           'members': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/members',
+           'public_members': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/members/public',
+           'records': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/records',
+           'rename': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/rename',
+           'requests': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/requests',
+           'self': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b',
+           'self_html': 'https://localhost/communities/ignatian-international-journal-for-multidisciplinary-research',
+           'settings_html': 'https://localhost/communities/ignatian-international-journal-for-multidisciplinary-research/settings'},
+ 'metadata': {'curation_policy': "<p>Here's the curation policy</p>",
+              'description': 'A collection managed by the Ignatian '
+                             'International Journal for Multidisciplinary '
+                             'Research group of Knowledge Commons',
+              'organizations': [{'name': 'Ignatian International Journal for '
+                                         'Multidisciplinary Research'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'This is a collection of works curated by the Ignatian '
+                      'International Journal for Multidisciplinary Research '
+                      'group of Knowledge Commons',
+              'title': 'Ignatian International Journal for Multidisciplinary '
+                       'Research Collection (Knowledge Commons)',
+              'website': 'https://hcommons-dev.org/groups/ignatian-international-journal-for-multidisciplinary-research/'},
+ 'revision_id': 3,
+ 'slug': 'ignatian-international-journal-for-multidisciplinary-research',
+ 'updated': '2024-03-13T01:47:30.539908+00:00'}
+2024-03-14 21:00:30,441:INFO : Role "knowledgeCommons|1004282|administrator" created or retrieved successfully.
+2024-03-14 21:00:30,449:INFO : Role "knowledgeCommons|1004282|member" created or retrieved successfully.
+2024-03-14 21:00:30,456:INFO : Role "knowledgeCommons|1004282|moderator" created or retrieved successfully.
+2024-03-14 21:00:30,679:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-14 21:00:30,680:INFO : continuing with existing collection
+2024-03-14 21:00:30,686:ERROR : admin role is already a manager
+2024-03-14 21:00:30,690:ERROR : administrator role was was already a group member
+2024-03-14 21:00:30,694:ERROR : member role was was already a group member
+2024-03-14 21:00:30,697:ERROR : moderator role was was already a group member
+2024-03-14 21:00:30,698:ERROR : {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-13T01:33:31.349395+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'A group of authors and '
+                                                    'their studies published '
+                                                    'in Ignatian International '
+                                                    'Journal for '
+                                                    'Multidisciplinary '
+                                                    'Research',
+                   'kcr:commons_group_id': '1004282',
+                   'kcr:commons_group_name': 'Ignatian International Journal '
+                                             'for Multidisciplinary Research',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': 'c9f62cef-3d0f-464f-a646-fe135795a02b',
+ 'links': {'featured': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/featured',
+           'invitations': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/invitations',
+           'logo': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/logo',
+           'members': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/members',
+           'public_members': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/members/public',
+           'records': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/records',
+           'rename': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/rename',
+           'requests': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b/requests',
+           'self': 'https://localhost/api/communities/c9f62cef-3d0f-464f-a646-fe135795a02b',
+           'self_html': 'https://localhost/communities/ignatian-international-journal-for-multidisciplinary-research',
+           'settings_html': 'https://localhost/communities/ignatian-international-journal-for-multidisciplinary-research/settings'},
+ 'metadata': {'curation_policy': "<p>Here's the curation policy</p>",
+              'description': 'A collection managed by the Ignatian '
+                             'International Journal for Multidisciplinary '
+                             'Research group of Knowledge Commons',
+              'organizations': [{'name': 'Ignatian International Journal for '
+                                         'Multidisciplinary Research'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'This is a collection of works curated by the Ignatian '
+                      'International Journal for Multidisciplinary Research '
+                      'group of Knowledge Commons',
+              'title': 'Ignatian International Journal for Multidisciplinary '
+                       'Research Collection (Knowledge Commons)',
+              'website': 'https://hcommons-dev.org/groups/ignatian-international-journal-for-multidisciplinary-research/'},
+ 'revision_id': 3,
+ 'slug': 'ignatian-international-journal-for-multidisciplinary-research',
+ 'updated': '2024-03-13T01:47:30.539908+00:00'}
+2024-03-14 21:00:31,055:INFO : Logo uploaded successfully.
+2024-03-14 21:48:09,007:INFO : Role "knowledgeCommons|1004278|administrator" created or retrieved successfully.
+2024-03-14 21:48:09,016:INFO : Role "knowledgeCommons|1004278|member" created or retrieved successfully.
+2024-03-14 21:48:09,029:INFO : Role "knowledgeCommons|1004278|moderator" created or retrieved successfully.
+2024-03-14 21:48:09,249:ERROR : New record: {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-15T01:48:09.137159+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'A member of the Radical '
+                                                    'Open Access Collective, '
+                                                    'Culture Machine is a '
+                                                    'series of experiments in '
+                                                    'culture and theory. Since '
+                                                    '1999, it has sought out '
+                                                    'and promoted scholarly '
+                                                    'work that engages '
+                                                    'provocatively with '
+                                                    'contemporary technical '
+                                                    'objects, processes and '
+                                                    'imaginaries from the '
+                                                    'North and South. Building '
+                                                    'on its open ended, '
+                                                    'non-instrumental, and '
+                                                    'exploratory approach to '
+                                                    'media theory, cultural '
+                                                    'studies and political '
+                                                    'philosophy, Culture '
+                                                    'Machine welcomes creative '
+                                                    'proposals that contest '
+                                                    'and come up against '
+                                                    'globalizing technical '
+                                                    'narratives and the '
+                                                    'environmental logics of '
+                                                    'extraction.',
+                   'kcr:commons_group_id': '1004278',
+                   'kcr:commons_group_name': 'Culture Machine',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': 'd7d032d8-6f93-49a7-aa5a-b6e602484385',
+ 'links': {'featured': 'https://localhost/api/communities/d7d032d8-6f93-49a7-aa5a-b6e602484385/featured',
+           'invitations': 'https://localhost/api/communities/d7d032d8-6f93-49a7-aa5a-b6e602484385/invitations',
+           'logo': 'https://localhost/api/communities/d7d032d8-6f93-49a7-aa5a-b6e602484385/logo',
+           'members': 'https://localhost/api/communities/d7d032d8-6f93-49a7-aa5a-b6e602484385/members',
+           'public_members': 'https://localhost/api/communities/d7d032d8-6f93-49a7-aa5a-b6e602484385/members/public',
+           'records': 'https://localhost/api/communities/d7d032d8-6f93-49a7-aa5a-b6e602484385/records',
+           'rename': 'https://localhost/api/communities/d7d032d8-6f93-49a7-aa5a-b6e602484385/rename',
+           'requests': 'https://localhost/api/communities/d7d032d8-6f93-49a7-aa5a-b6e602484385/requests',
+           'self': 'https://localhost/api/communities/d7d032d8-6f93-49a7-aa5a-b6e602484385',
+           'self_html': 'https://localhost/communities/culture-machine',
+           'settings_html': 'https://localhost/communities/culture-machine/settings'},
+ 'metadata': {'curation_policy': '',
+              'description': 'A collection managed by the Culture Machine '
+                             'group of Knowledge Commons',
+              'organizations': [{'name': 'Culture Machine'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'This is a collection of works curated by the Culture '
+                      'Machine group of Knowledge Commons',
+              'title': 'Culture Machine Collection (Knowledge Commons)',
+              'website': 'https://hcommons-dev.org/groups/culture-machine/'},
+ 'revision_id': 2,
+ 'slug': 'culture-machine',
+ 'updated': '2024-03-15T01:48:09.158852+00:00'}
+2024-03-14 21:48:09,315:ERROR : Manage members: True
+2024-03-14 21:48:09,444:ERROR : <invenio_communities.communities.services.results.CommunityItem object at 0x1199f5c70>
+2024-03-14 21:48:09,827:INFO : Logo uploaded successfully.
+2024-03-15 10:11:43,973:INFO : Role "knowledgeCommons|1004277|administrator" created or retrieved successfully.
+2024-03-15 10:11:43,983:INFO : Role "knowledgeCommons|1004277|member" created or retrieved successfully.
+2024-03-15 10:11:44,003:INFO : Role "knowledgeCommons|1004277|moderator" created or retrieved successfully.
+2024-03-15 10:11:44,172:ERROR : New record: {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-15T14:11:44.087059+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'A group for all aspects '
+                                                    'of Old Norse philology, '
+                                                    'linguistics, and literary '
+                                                    "study. 'Norse' should be "
+                                                    'understood broadly, '
+                                                    'encompassing anything '
+                                                    'pertaining to the North '
+                                                    'Germanic languages from '
+                                                    'their earliest runic '
+                                                    'attestations through to '
+                                                    'the end of the Middle '
+                                                    'Ages (c. 1500 or so, '
+                                                    'approximately). This '
+                                                    'should cover everything '
+                                                    'from runic epigraphy to '
+                                                    'eddic and skaldic poetry '
+                                                    'to the Icelandic sagas to '
+                                                    'Scandinavian dialectology '
+                                                    'and more.',
+                   'kcr:commons_group_id': '1004277',
+                   'kcr:commons_group_name': 'Old Norse Language and '
+                                             'Literature',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': '2eb11c50-ea36-42c2-9e36-bafe75d9433e',
+ 'links': {'featured': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/featured',
+           'invitations': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/invitations',
+           'logo': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/logo',
+           'members': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/members',
+           'public_members': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/members/public',
+           'records': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/records',
+           'rename': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/rename',
+           'requests': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/requests',
+           'self': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e',
+           'self_html': 'https://localhost/communities/old-norse-language-and-literature',
+           'settings_html': 'https://localhost/communities/old-norse-language-and-literature/settings'},
+ 'metadata': {'curation_policy': '',
+              'description': 'A collection managed by the Old Norse Language '
+                             'and Literature group of Knowledge Commons',
+              'organizations': [{'name': 'Old Norse Language and Literature'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'This is a collection of works curated by the Old Norse '
+                      'Language and Literature group of Knowledge Commons',
+              'title': 'Old Norse Language and Literature Collection '
+                       '(Knowledge Commons)',
+              'website': 'https://hcommons-dev.org/groups/old-norse-language-and-literature/'},
+ 'revision_id': 2,
+ 'slug': 'old-norse-language-and-literature',
+ 'updated': '2024-03-15T14:11:44.109877+00:00'}
+2024-03-15 10:11:44,217:ERROR : Manage members: True
+2024-03-15 10:11:44,298:ERROR : <invenio_communities.communities.services.results.CommunityItem object at 0x14d0ecfd0>
+2024-03-15 10:11:44,660:INFO : Logo uploaded successfully.
+2024-03-15 11:24:32,192:INFO : Role "knowledgeCommons|1004277|administrator" created or retrieved successfully.
+2024-03-15 11:24:32,202:INFO : Role "knowledgeCommons|1004277|member" created or retrieved successfully.
+2024-03-15 11:24:32,208:INFO : Role "knowledgeCommons|1004277|moderator" created or retrieved successfully.
+2024-03-15 11:24:32,366:ERROR : ValidationError(l'A community with this identifier already exists.')
+2024-03-15 11:24:32,367:INFO : continuing with existing collection
+2024-03-15 11:24:32,380:ERROR : admin role is already a manager
+2024-03-15 11:24:32,386:ERROR : administrator role was was already a group member
+2024-03-15 11:24:32,392:ERROR : member role was was already a group member
+2024-03-15 11:24:32,398:ERROR : moderator role was was already a group member
+2024-03-15 11:24:32,399:ERROR : {'access': {'member_policy': 'closed',
+            'record_policy': 'closed',
+            'review_policy': 'closed',
+            'visibility': 'restricted'},
+ 'children': {'allow': False},
+ 'created': '2024-03-15T14:11:44.087059+00:00',
+ 'custom_fields': {'kcr:commons_group_description': 'A group for all aspects '
+                                                    'of Old Norse philology, '
+                                                    'linguistics, and literary '
+                                                    "study. 'Norse' should be "
+                                                    'understood broadly, '
+                                                    'encompassing anything '
+                                                    'pertaining to the North '
+                                                    'Germanic languages from '
+                                                    'their earliest runic '
+                                                    'attestations through to '
+                                                    'the end of the Middle '
+                                                    'Ages (c. 1500 or so, '
+                                                    'approximately). This '
+                                                    'should cover everything '
+                                                    'from runic epigraphy to '
+                                                    'eddic and skaldic poetry '
+                                                    'to the Icelandic sagas to '
+                                                    'Scandinavian dialectology '
+                                                    'and more.',
+                   'kcr:commons_group_id': '1004277',
+                   'kcr:commons_group_name': 'Old Norse Language and '
+                                             'Literature',
+                   'kcr:commons_group_visibility': 'public',
+                   'kcr:commons_instance': 'knowledgeCommons'},
+ 'deletion_status': {'is_deleted': False, 'status': 'P'},
+ 'id': '2eb11c50-ea36-42c2-9e36-bafe75d9433e',
+ 'links': {'featured': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/featured',
+           'invitations': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/invitations',
+           'logo': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/logo',
+           'members': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/members',
+           'public_members': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/members/public',
+           'records': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/records',
+           'rename': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/rename',
+           'requests': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e/requests',
+           'self': 'https://localhost/api/communities/2eb11c50-ea36-42c2-9e36-bafe75d9433e',
+           'self_html': 'https://localhost/communities/old-norse-language-and-literature',
+           'settings_html': 'https://localhost/communities/old-norse-language-and-literature/settings'},
+ 'metadata': {'curation_policy': '',
+              'description': 'A collection managed by the Old Norse Language '
+                             'and Literature group of Knowledge Commons',
+              'organizations': [{'name': 'Old Norse Language and Literature'},
+                                {'name': 'Knowledge Commons'}],
+              'page': 'This is a collection of works curated by the Old Norse '
+                      'Language and Literature group of Knowledge Commons',
+              'title': 'Old Norse Language and Literature Collection '
+                       '(Knowledge Commons)',
+              'website': 'https://hcommons-dev.org/groups/old-norse-language-and-literature/'},
+ 'revision_id': 2,
+ 'slug': 'old-norse-language-and-literature',
+ 'updated': '2024-03-15T14:11:44.109877+00:00'}
+2024-03-15 11:24:32,732:INFO : Logo uploaded successfully.
