@@ -1,692 +1,5 @@
 # -*- coding: utf-8 -*- # # This file is part of the invenio-groups package.  # Copyright (C) 2023-2024, MESH Research.  # # invenio-groups is free software; you can redistribute it # and/or modify it under the terms of the MIT License; see # LICENSE file for more details.
-"""Views for Commons group collections API endpoints.
-
-Two endpoints are exposed by this file:
-
-- https://example.org/api/group_collections
-- https://example.org/api/webhooks/group_updates
-
-The `group_collections` API endpoint allows a Commons instance
-to create, modify, or delete a collection (community) in Invenio owned
-by a Commons group.
-
-The `group_updates` webhook receives signals notifying Invenio that
-changes have been made to the metadata of a Commons group. This endpoint is
-not used to receive updated group metadata. It only receives notifications
-that operations should be performed on a group's collection.
-
-## Endpoing configuration
-
-Two configuration variables must be provided in the `invenio.cfg` file
-in order to use this endpoint:
-
-- `GROUP_COLLECTIONS_REMOTE_ROLES`: a dictionary of Commons instances and
-    the roles that should be added to a collection when it is created by a
-    group in that instance. The roles should be provided as a list of strings.
-- `GROUP_COLLECTIONS_METADATA_ENDPOINTS`: a dictionary of Commons instances
-    and the configuration details necessary to retrieve metadata for a group
-
-    URL to which a GET request should be sent to retrieve the metadata
-    for a group. The URL should be provided as a string.
-
-"knowledgeCommons": {
-        "url": "https://hcommons-dev.org/wp-json/commons/v1/groups",
-        "token_name": "COMMONS_API_TOKEN",
-        "placeholder_avatar": "mystery-group.png",
-    },
-
-
-
-## GET
-
-A GET request to this endpoint will retrieve metadata on Invenio collections
-that are owned by a Commons group. A request to the bare endpoint without a
-group ID or collection slug will return a list of all collections owned by
-all Commons groups.
-
-### Query parameters
-
-Four optional query parameters can be used to filter the results:
-
-| Parameter name | Description |
-| ---------------|------------ |
-| `commons_instance` | the name of the Commons instance to which the group belongs. If this parameter is provided, the response will only include collections owned by groups in that instance. |
-| `commons_group_id` | the ID of the Commons group. If this parameter is provided, the response will only include collections owned by that group. |
-| `collection` | the slug of the collection. If this parameter is provided, the response will include only metadata for that collection. |
-| `page` | the page number of the results |
-| `size` | the number of results to include on each page |
-| `sort` | the field to sort the results by |
-
-#### Sorting
-
-The `sort` parameter can be set to one of the following sort types:
-
-| Field name | Description |
-| -----------|-------------|
-| newest | |
-| oldest | |
-| version | |
-| updated-desc | |
-| updated-asc | |
-
-By default the results are sorted by `updated-desc`
-
-#### Pagination
-
-If there are more than 10 results they will be paginated. The response will include links to the first, last, previous, and next pages of results--both in the `Link` response header and in the `link` property of the response body. By default the page size is 10, but this can be changed by providing a value for the `size` query parameter. Sizes between 10 and 1000 are allowed.
-
-### Requesting all collections
-
-#### Request
-
-```http
-GET https://example.org/api/group_collections HTTP/1.1
-```
-
-#### Successful Response Status Code
-
-`200 OK`
-
-#### Successful response body
-
-```json
-{
-    "aggregations": {
-        "type": {
-            "buckets": [
-                {
-                    "doc_count": 50,
-                    "is_selected": False,
-                    "key": "event",
-                    "label": "Event",
-                },
-                {
-                    "doc_count": 50,
-                    "is_selected": False,
-                    "key": "organization",
-                    "label": "Organization",
-                },
-            ],
-            "label": "Type",
-        },
-        "visibility": {
-            "buckets": [
-                {
-                    "doc_count": 100,
-                    "is_selected": False,
-                    "key": "public",
-                    "label": "Public",
-                }
-            ],
-            "label": "Visibility",
-        },
-    },
-    "hits": {
-        "hits": [
-            {
-                "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
-                "access": {
-                    "member_policy": "open",
-                    "record_policy": "open",
-                    "review_policy": "closed",
-                    "visibility": "public",
-                },
-                "children": {"allow": False},
-                "created": "2024-01-01T00:00:00Z",
-                "updated": "2024-01-01T00:00:00Z",
-                "links": {
-                    "self": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7",
-                    "self_html": "https://example.org/communities/panda-group-collection",
-                    "settings_html": "https://example.org/communities/panda-group-collection/settings",
-                    "logo": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/logo",
-                    "rename": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/rename",
-                    "members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members",
-                    "public_members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members/public",
-                    "invitations": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/invitations",
-                    "requests": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/requests",
-                    "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records",
-                    "featured": "https://example.org/api/"
-                                "communities/"
-                                "5402d72b-b144-4891-aa8e-1038515d68f7/"
-                                "featured",
-                },
-                "revision_id": 1,
-                "slug": "panda-group-collection",
-                "metadata": {
-                    "title": "The Panda Group Collection",
-                    "curation_policy": "Curation policy",
-                    "page": "Information for the panda group collection",
-                    "description": "This is a collection about pandas.",
-                    "website": "https://example.org/pandas",
-                    "organizations": [
-                        {
-                            "name": "Panda Research Institute",
-                        }
-                    ],
-                    "size": 100,
-                },
-                "deletion_status": {
-                    "is_deleted": False,
-                    "status": "P",
-                },
-                "custom_fields": {
-                    "kcr:commons_instance": "knowledgeCommons",
-                    "kcr:commons_group_description": "This is a group for panda research.",
-                    "kcr:commons_group_id": "12345",
-                    "kcr:commons_group_name": "Panda Research Group",
-                    "kcr:commons_group_visibility": "public",
-                },
-                "access": {
-                    "visibility": "public",
-                    "member_policy": "closed",
-                    "record_policy": "open",
-                    "review_policy": "open",
-                }
-            },
-            ...
-        ],
-        "total": 100,
-    },
-    "links": {
-        "self": "https://example.org/api/group_collections",
-        "first": "https://example.org/api/group_collections?page=1",
-        "last": "https://example.org/api/group_collections?page=10",
-        "prev": "https://example.org/api/group_collections?page=1",
-        "next": "https://example.org/api/group_collections?page=2",
-    }
-    "sortBy": "updated",
-    "order": "ascending",
-}
-```
-
-#### Successful Response Headers
-
-| Header name | Header value |
-| ------------|-------------- |
-| Content-Type | `application/json` |
-| Link | `<https://example.org/api/group_collections?page=1>; rel="first", <https://example.org/api/group_collections?page=10>; rel="last", <https://example.org/api/group_collections?page=1>; rel="prev", <https://example.org/api/group_collections?page=2>; rel="next"` |
-
-### Requesting collections for a Commons instance
-
-#### Request
-
-```http
-GET https://example.org/api/group_collections?commons_instance=knowledgeCommons HTTP/1.1
-```
-
-#### Successful response status code
-
-`200 OK`
-
-#### Successful Response Body:
-
-```json
-{
-    "aggregations": {
-        "type": {
-            "buckets": [
-                {
-                    "doc_count": 45,
-                    "is_selected": False,
-                    "key": "event",
-                    "label": "Event",
-                },
-                {
-                    "doc_count": 45,
-                    "is_selected": False,
-                    "key": "organization",
-                    "label": "Organization",
-                },
-            ],
-            "label": "Type",
-        },
-        "visibility": {
-            "buckets": [
-                {
-                    "doc_count": 90,
-                    "is_selected": False,
-                    "key": "public",
-                    "label": "Public",
-                }
-            ],
-            "label": "Visibility",
-        },
-    },
-    "hits": {
-        "hits": [
-            {
-                "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
-                "access": {
-                    "member_policy": "open",
-                    "record_policy": "open",
-                    "review_policy": "closed",
-                    "visibility": "public",
-                },
-                "children": {"allow": False},
-                "created": "2024-01-01T00:00:00Z",
-                "updated": "2024-01-01T00:00:00Z",
-                "links": {
-                    "self": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7",
-                    "self_html": "https://example.org/communities/panda-group-collection",
-                    "settings_html": "https://example.org/communities/panda-group-collection/settings",
-                    "logo": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/logo",
-                    "rename": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/rename",
-                    "members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members",
-                    "public_members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members/public",
-                    "invitations": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/invitations",
-                    "requests": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/requests",
-                    "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records",
-                    "featured": "https://example.org/api/"
-                                "communities/"
-                                "5402d72b-b144-4891-aa8e-1038515d68f7/"
-                                "featured",
-                },
-                "revision_id": 1,
-                "slug": "panda-group-collection",
-                "metadata": {
-                    "title": "The Panda Group Collection",
-                    "curation_policy": "Curation policy",
-                    "page": "Information for the panda group collection",
-                    "description": "This is a collection about pandas.",
-                    "website": "https://example.org/pandas",
-                    "organizations": [
-                        {
-                            "name": "Panda Research Institute",
-                        }
-                    ],
-                    "size": 100,
-                },
-                "deletion_status": {
-                    "is_deleted": False,
-                    "status": "P",
-                },
-                "custom_fields": {
-                    "kcr:commons_instance": "knowledgeCommons",
-                    "kcr:commons_group_description": "This is a group for panda research.",
-                    "kcr:commons_group_id": "12345",
-                    "kcr:commons_group_name": "Panda Research Group",
-                    "kcr:commons_group_visibility": "public",
-                },
-                "access": {
-                    "visibility": "public",
-                    "member_policy": "closed",
-                    "record_policy": "open",
-                    "review_policy": "open",
-                }
-            },
-            ...
-        ],
-        "total": 90,
-    },
-    "links": {
-        "self": "https://example.org/api/group_collections?commons_instance=knowledgeCommons",
-        "first": "https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=1",
-        "last": "https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=9",
-        "prev": "https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=1",
-        "next": "https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=2",
-    }
-    "sortBy": "updated",
-    "order": "ascending",
-}
-```
-
-#### Successful response headers
-
-| Header name | Header value |
-| ------------|-------------- |
-| Content-Type | `application/json` |
-| Link | `<https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=1>; rel="first", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=9>; rel="last", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=1>; rel="prev", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=2>; rel="next"` |
-
-
-### Requesting collections for a specific group
-
-#### Request
-
-```http
-GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&commons_group_id=12345 HTTP/1.1
-```
-
-#### Successful response status code
-
-`200 OK`
-
-#### Successful Response Body:
-
-```json
-{
-    "aggregations": {
-        "type": {
-            "buckets": [
-                {
-                    "doc_count": 2,
-                    "is_selected": False,
-                    "key": "event",
-                    "label": "Event",
-                },
-                {
-                    "doc_count": 2,
-                    "is_selected": False,
-                    "key": "organization",
-                    "label": "Organization",
-                },
-            ],
-            "label": "Type",
-        },
-        "visibility": {
-            "buckets": [
-                {
-                    "doc_count": 4,
-                    "is_selected": False,
-                    "key": "public",
-                    "label": "Public",
-                }
-            ],
-            "label": "Visibility",
-        },
-    },
-    "hits": {
-        "hits": [
-            {
-                "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
-                "access": {
-                    "member_policy": "open",
-                    "record_policy": "open",
-                    "review_policy": "closed",
-                    "visibility": "public",
-                },
-                "children": {"allow": False},
-                "created": "2024-01-01T00:00:00Z",
-                "updated": "2024-01-01T00:00:00Z",
-                "links": {
-                    "self": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7",
-                    "self_html": "https://example.org/communities/panda-group-collection",
-                    "settings_html": "https://example.org/communities/panda-group-collection/settings",
-                    "logo": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/logo",
-                    "rename": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/rename",
-                    "members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members",
-                    "public_members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members/public",
-                    "invitations": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/invitations",
-                    "requests": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/requests",
-                    "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records",
-                    "featured": "https://example.org/api/"
-                                "communities/"
-                                "5402d72b-b144-4891-aa8e-1038515d68f7/"
-                                "featured",
-                },
-                "revision_id": 1,
-                "slug": "panda-group-collection",
-                "metadata": {
-                    "title": "The Panda Group Collection",
-                    "curation_policy": "Curation policy",
-                    "page": "Information for the panda group collection",
-                    "description": "This is a collection about pandas.",
-                    "website": "https://example.org/pandas",
-                    "organizations": [
-                        {
-                            "name": "Panda Research Institute",
-                        }
-                    ],
-                    "size": 2,
-                },
-                "deletion_status": {
-                    "is_deleted": False,
-                    "status": "P",
-                },
-                "custom_fields": {
-                    "kcr:commons_instance": "knowledgeCommons",
-                    "kcr:commons_group_description": "This is a group for panda research.",
-                    "kcr:commons_group_id": "12345",
-                    "kcr:commons_group_name": "Panda Research Group",
-                    "kcr:commons_group_visibility": "public",
-                },
-                "access": {
-                    "visibility": "public",
-                    "member_policy": "closed",
-                    "record_policy": "open",
-                    "review_policy": "open",
-                }
-            },
-            ...
-        ],
-        "total": 4,
-    },
-    "links": {
-        "self": "https://example.org/api/group_collections",
-        "first": "https://example.org/api/group_collections?page=1",
-        "last": "https://example.org/api/group_collections?page=1",
-        "prev": "https://example.org/api/group_collections?page=1",
-        "next": "https://example.org/api/group_collections?page=1",
-    }
-    "sortBy": "updated",
-    "order": "ascending",
-}
-```
-
-#### Successful response headers
-
-| Header name | Header value |
-| ------------|-------------- |
-| Content-Type | `application/json` |
-| Link | `<https://example.org/api/group_collections?commons_instance=knowledgeCommons&commons_group_id=12345&page=1>; rel="first", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&commons_group_id=12345&page=1>; rel="last", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&commons_group_id=12345&page=1>; rel="prev", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&commons_group_id=12345&page=1>; rel="next"` |
-
-### Requesting a specific collection
-
-#### Request
-
-```http
-GET https://example.org/api/group_collections/my-collection-slug HTTP/1.1
-```
-
-#### Successful Response Status Code
-
-`200 OK`
-
-#### Successful Response Body:
-
-```json
-{
-    "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
-    "created": "2024-01-01T00:00:00Z",
-    "updated": "2024-01-01T00:00:00Z",
-    "links": {
-        "self": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7",
-        "self_html": "https://example.org/communities/panda-group-collection",
-        "settings_html": "https://example.org/communities/panda-group-collection/settings",
-        "logo": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/logo",
-        "rename": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/rename",
-        "members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members",
-        "public_members": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/members/public",
-        "invitations": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/invitations",
-        "requests": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/requests",
-        "records": "https://example.org/api/communities/5402d72b-b144-4891-aa8e-1038515d68f7/records",
-        "featured": "https://example.org/api/"
-                    "communities/"
-                    "5402d72b-b144-4891-aa8e-1038515d68f7/"
-                    "featured",
-    },
-    "revision_id": 1,
-    "slug": "panda-group-collection",
-    "metadata": {
-        "title": "The Panda Group Collection",
-        "curation_policy": "Curation policy",
-        "page": "Information for the panda group collection",
-        "description": "This is a collection about pandas.",
-        "website": "https://example.org/pandas",
-        "organizations": [
-            {
-                "name": "Panda Research Institute",
-            }
-        ],
-        "size": 100,
-    },
-    "deletion_status": {
-        "is_deleted": False,
-        "status": "P",
-    },
-    "custom_fields": {
-        "kcr:commons_instance": "knowledgeCommons",
-        "kcr:commons_group_description": "This is a group for pandas research.",
-        "kcr:commons_group_id": "12345",
-        "kcr:commons_group_name": "Panda Research Group",
-        "kcr:commons_group_visibility": "public",
-    },
-    "access": {
-        "visibility": "public",
-        "member_policy": "closed",
-        "record_policy": "open",
-        "review_policy": "open",
-    }
-}
-```
-
-
-## POST
-
-A POST request to this endpoint creates a new collection in Invenio
-owned by the specified Commons group. If the collection is successfully
-created, the response status code will be 201 Created, and the response
-body will be a JSON object containing the URL slug for the newly
-created collection.
-
-The POST request will trigger a call to the Commons instance to get the
-metadata for the group. The metadata will be used to populate the collection
-metadata in Invenio. This request will be sent to the "url" specified in the
-`GROUP_COLLECTIONS_METADATA_ENDPOINTS` configuration variable under the key
-matching the `commons_instance` parameter in the request body. This request
-will be authenticated using the environment variable matching the `token_name`
-from the IDP's configuration dictionary.
-
-If the metadata returned from the Commons instance includes a url for an
-avatar, that avatar will be downloaded and stored in the Invenio instance's
-file storage. Since we do not want to use a placeholder avatar for the group,
-the instance's configuration can include a `placeholder_avatar` key. If the
-file name or last segment of the supplied avatar url matches this `placeholder_avatar` value, it will be ignored.
-
-### Request
-
-```http
-POST https://example.org/api/group_collections HTTP/1.1
-```
-
-### Request body
-
-```json
-{
-    "commons_instance": "knowledgeCommons",
-    "commons_group_id": "12345",
-    "commons_group_name": "Panda Research Group",
-    "commons_group_visibility": "public",
-}
-```
-
-### Successful response status code
-
-`201 Created`
-
-### Successful response body
-
-```json
-{
-    "commons_group_id": "12345",
-    "collection_slug": "new-collection-slug"
-}
-```
-
-
-## PATCH
-
-A PATCH request to this endpoint modifies an existing collection in Invenio
-by changing the Commons group to which it belongs. This is the *only*
-modification that can be made to a collection via this endpoint. Other
-modifications to Commons group metadata should be handled by signalling the Invenio webhook for commons group metadata updates. Modifications to
-internal metadata or settings for the Invenio collection should be made
-view the Invenio "communities" API or the collection settings UI.
-
-Note that the collection memberships in Invenio will be automatically
-transferred to the new Commons group. The corporate roles for the old
-Commons group will be removed from the collection and corporate roles
-for the new Commons group will be added to its membership with appropriate
-permissions. But any individual memberships that have been granted through
-the Invenio UI will be left unchanged. If the new collection administrators
-wish to change these individual memberships, they will need to do so through
-the Invenio UI.
-
-### Request
-
-```http
-PATCH https://example.org/api/group_collections/my-collection-slug HTTP/1.1
-```
-
-### Successful request body
-
-```json
-{
-    "commons_instance": "knowledgeCommons",
-    "old_commons_group_id": "12345",
-    "new_commons_group_id": "67890",
-    "new_commons_group_name": "My Group",
-    "new_commons_group_visibility": "public",
-}
-```
-
-### Successful response status code
-
-`200 OK`
-
-### Successful response body
-
-```json
-{
-    "collection": "my-collection-slug"
-    "old_commons_group_id": "12345",
-    "new_commons_group_id": "67890",
-}
-```
-
-### Unsuccessful response codes
-
-- 400 Bad Request: The request body is missing required fields or contains
-    invalid data.
-- 404 Not Found: The collection does not exist.
-- 403 Forbidden: The request is not authorized to modify the collection.
-- 304 Not Modified: The collection is already owned by the specified
-    Commons group.
-
-## DELETE
-
-A DELETE request to this endpoint deletes a collection in Invenio
-owned by the specified Commons group. If the collection is successfully
-deleted, the response status code will be 204 No Content.
-
-### Request
-
-```http
-DELETE https://example.org/api/group_collections/my-collection-slug HTTP/1.1
-```
-
-### Successful response status code
-
-`202 Accepted`
-
-### Unsuccessful response codes
-
-- 404 Not Found: The collection does not exist.
-- 403 Forbidden: The request is not authorized to delete the collection.
-
-Logging
--------
-
-The module will log each POST, PATCH, or DELETE request to the endpoint
-in a dedicated log file, `logs/invenio-group-collections.log`.
-
-Endpoint security
------------------
-
-The endpoint is secured by a token that must be obtained by the Commons
-instance administrator from the Invenio instance administrator. The token
-must be provided in the "Authorization" request header.
-
-"""
+"""Views for Commons group collections API endpoints."""
 
 # from flask import render_template
 from distutils.command import upload
@@ -712,6 +25,11 @@ from flask_resources import (
 )
 from invenio_access.permissions import system_identity
 from invenio_accounts.proxies import current_datastore as accounts_datastore
+from invenio_communities.errors import (
+    DeletionStatusError,
+    LogoSizeLimitError,
+    OpenRequestsForCommunityDeletionError,
+)
 from invenio_communities.proxies import current_communities
 from invenio_communities.members.errors import AlreadyMemberError
 from io import BytesIO
@@ -771,6 +89,10 @@ class GroupCollectionsResource(Resource):
         self.service = service
 
     error_handlers = {
+        Forbidden: lambda e: (
+            {"message": str(e.description), "status": 403},
+            403,
+        ),
         MethodNotAllowed: lambda e: (
             {"message": str(e.description), "status": 405},
             405,
@@ -851,6 +173,7 @@ class GroupCollectionsResource(Resource):
             route("POST", "/", self.create),
             route("GET", "/", self.search),
             route("GET", "/<slug>", self.read),
+            route("DELETE", "/", self.delete_for_group),
             route("DELETE", "/<slug>", self.delete),
             route("PATCH", "/<slug>", self.update),
         ]
@@ -1171,13 +494,79 @@ class GroupCollectionsResource(Resource):
 
         return jsonify(response_data), 200
 
-    def delete(self, collection_slug):
-        # Implement the logic for handling DELETE requests
-        # Replace the following dummy data with your actual data processing logic
-        # ...
+    @request_parsed_args
+    @request_parsed_view_args
+    def delete(self):
+        """Delete a group collection and delete the group roles."""
+        collection_slug = resource_requestctx.view_args.get("slug")
+        commons_instance = resource_requestctx.args.get("commons_instance")
+        commons_group_id = resource_requestctx.args.get("commons_group_id")
+        logger.info(
+            f"Attempting to delete collection {collection_slug} for "
+            f"{commons_instance} group {commons_group_id}"
+        )
+
+        if not collection_slug:
+            logger.error("No collection slug provided. Could not delete.")
+            raise BadRequest("No collection slug provided")
+        elif not commons_instance:
+            logger.error("No commons_instance provided. Could not delete.")
+            raise BadRequest("No commons_instance provided")
+        elif not commons_group_id:
+            logger.error("No commons_group_id provided. Could not delete.")
+            raise BadRequest("No commons_group_id provided")
+
+        try:
+            collection_record = current_communities.service.read(
+                system_identity, collection_slug
+            )
+            if not collection_record:
+                msg = f"No collection found with the slug {collection_slug}. Could not delete."  # noqa: E501
+                logger.error(msg)
+                raise NotFound(msg)
+            elif (
+                collection_record["custom_fields"].get("kcr:commons_instance")
+                != commons_instance
+            ):
+                msg = f"Collection {collection_slug} does not belong to {commons_instance}. Could not delete."  # noqa: E501
+                logger.error(msg)
+                raise Forbidden(msg)
+            elif (
+                collection_record["custom_fields"].get("kcr:commons_group_id")
+                != commons_group_id
+            ):
+                msg = f"Collection {collection_slug} does not belong to group {commons_group_id}. Could not delete."  # noqa: E501
+                logger.error(msg)
+                raise Forbidden(msg)
+
+            deleted = current_communities.service.delete(
+                system_identity, collection_slug
+            )
+            if deleted:
+                logger.info(
+                    f"Collection {collection_slug} belonging to "
+                    f"{commons_instance} group {commons_group_id}"
+                    "deleted successfully."
+                )
+            else:
+                msg = f"Failed to delete collection {collection_slug} belonging to {commons_instance} group {commons_group_id}"  # noqa: E501
+                logger.error(msg)
+                raise RuntimeError(msg)
+        except DeletionStatusError as e:
+            msg = f"Collection has already been deleted: {str(e)}"
+            logger.error(msg)
+            raise UnprocessableEntity(msg)
+        except OpenRequestsForCommunityDeletionError as oe:
+            msg = "Cannot delete a collection with open" f"requests: {str(oe)}"
+            logger.error(msg)
+            raise UnprocessableEntity(msg)
 
         # Return appropriate response status
-        return "", 204
+        return (
+            f"Successfully deleted collection {collection_slug} "
+            f"for {commons_instance} group {commons_group_id}",
+            204,
+        )
 
 
 def create_api_blueprint(app):

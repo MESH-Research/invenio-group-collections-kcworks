@@ -552,7 +552,7 @@ GET https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 ```
 
 
-## POST
+## Creating a Collection for a Group (POST)
 
 A POST request to this endpoint creates a new collection in Invenio owned by the specified Commons group. If the collection is successfully created, the response status code will be 201 Created, and the response body will be a JSON object containing the URL slug for the newly created collection.
 
@@ -602,7 +602,7 @@ POST https://example.org/api/group_collections HTTP/1.1
 - 403 Forbidden: The request is not authorized to modify the collection.
 - 409 Conflict: A collection already exists in Knowledge Commons Works linked to the specified group.
 
-## PATCH
+## Changing the Group Ownership of a Collection (PATCH)
 
 A PATCH request to this endpoint modifies an existing collection in Invenio by changing the Commons group to which it belongs. This is the *only* modification that can be made to a collection via this endpoint. Other modifications to Commons group metadata should be handled by signalling the Invenio webhook for commons group metadata updates. Modifications to internal metadata or settings for the Invenio collection should be made view the Invenio "communities" API or the collection settings UI.
 
@@ -649,26 +649,34 @@ PATCH https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 - 304 Not Modified: The collection is already owned by the specified
     Commons group.
 
-## DELETE
+## Deleting a Group's Collection (DELETE)
 
-A DELETE request to this endpoint deletes a collection in Invenio
-owned by the specified Commons group. If the collection is successfully
-deleted, the response status code will be 204 No Content.
+A DELETE request to this endpoint deletes a collection in Invenio owned by the specified Commons group. Note that the request must include all of:
+
+- the collection slug as the url path parameter
+- the identifier of the Commons instance to which the group belongs, in the `commons_instance` query parameter
+- the Commons identifier of the group which owns the collection, in the `commons_group_id` query parameter
+
+If any of these is missing the request will fail with a `400 Bad Request` error. This is to ensure that collections are not deleted accidentally or by agents without authorization.
+
+If the collection is successfully deleted, the response status code will be 204 No Content.
 
 ### Request
 
 ```http
-DELETE https://example.org/api/group_collections/my-collection-slug HTTP/1.1
+DELETE https://example.org/api/group_collections/my-collection-slug?commons_instance=knowledgeCommons&commons_group_id=12345 HTTP/1.1
 ```
 
 ### Successful response status code
 
-`202 Accepted`
+`204 No Content`
 
 ### Unsuccessful response codes
 
+- 400 Bad Request: The request did not include the required parameters or the parameters are not well formed.
+- 403 Forbidden: The requesting agent is not authorized to delete the collection. The collection may not belong to the Commons instance making the request, or it may not belong to the specified Commons group.
 - 404 Not Found: The collection does not exist.
-- 403 Forbidden: The request is not authorized to delete the collection.
+- 422 UnprocessableEntity: The deletion could not be performed because the
 
 ## Logging
 
