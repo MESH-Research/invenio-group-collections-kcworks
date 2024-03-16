@@ -5,11 +5,13 @@
 from distutils.command import upload
 from email.mime import base
 from pprint import pformat
+import time
 from flask import (
     request,
     current_app as app,
     jsonify,
 )
+from flask_principal import AnonymousIdentity
 from flask_resources import (
     from_conf,
     JSONSerializer,
@@ -24,22 +26,28 @@ from flask_resources import (
     resource_requestctx,
 )
 from invenio_access.permissions import system_identity
+from invenio_access.utils import get_identity
 from invenio_accounts.proxies import current_datastore as accounts_datastore
 from invenio_communities.errors import (
+    CommunityDeletedError,
     DeletionStatusError,
     LogoSizeLimitError,
     OpenRequestsForCommunityDeletionError,
 )
-from invenio_communities.proxies import current_communities
 from invenio_communities.members.errors import AlreadyMemberError
+from invenio_communities.members.records.api import Member
+from invenio_communities.proxies import current_communities
 from io import BytesIO
 import marshmallow as ma
+from opensearchpy import ConflictError
+from py import log
 import requests
 from werkzeug.exceptions import (
     BadRequest,
     Forbidden,
     MethodNotAllowed,
     NotFound,
+    RequestTimeout,
     UnprocessableEntity,
     # Unauthorized,
 )
@@ -109,10 +117,6 @@ class GroupCollectionsResource(Resource):
             {"message": str(e.description), "status": 400},
             400,
         ),
-        Forbidden: lambda e: (
-            {"message": str(e.description), "status": 403},
-            403,
-        ),
         ma.ValidationError: lambda e: (
             {"message": str(e.messages), "status": 400},
             400,
@@ -128,6 +132,14 @@ class GroupCollectionsResource(Resource):
         CollectionAlreadyExistsError: lambda e: (
             {"message": str(e.description), "status": 409},
             409,
+        ),
+        requests.exceptions.ConnectionError: lambda e: (
+            {"message": str(e), "status": 503},
+            503,
+        ),
+        RequestTimeout: lambda e: (
+            {"message": str(e), "status": 503},
+            503,
         ),
     }
 
@@ -163,6 +175,7 @@ class GroupCollectionsResource(Resource):
                 ),
                 load_default="updated-desc",
             ),
+            "restore_deleted": ma.fields.Boolean(load_default=False),
         },
         location="args",
     )
@@ -173,9 +186,9 @@ class GroupCollectionsResource(Resource):
             route("POST", "/", self.create),
             route("GET", "/", self.search),
             route("GET", "/<slug>", self.read),
-            route("DELETE", "/", self.delete_for_group),
+            route("DELETE", "/", self.failed_delete),
             route("DELETE", "/<slug>", self.delete),
-            route("PATCH", "/<slug>", self.update),
+            route("PATCH", "/<slug>", self.change_group_ownership),
         ]
 
     @request_parsed_view_args
@@ -230,11 +243,13 @@ class GroupCollectionsResource(Resource):
 
         return jsonify(collections_data), 200
 
+    @request_parsed_args
     @request_data
     def create(self):
         commons_instance = resource_requestctx.data.get("commons_instance")
         commons_group_id = resource_requestctx.data.get("commons_group_id")
         commons_group_name = resource_requestctx.data.get("commons_group_name")
+        restore_deleted = resource_requestctx.args.get("restore_deleted")
         commons_group_visibility = resource_requestctx.data.get(
             "commons_group_visibility"
         )
@@ -257,10 +272,21 @@ class GroupCollectionsResource(Resource):
         headers = {
             "Authorization": f"Bearer {os.environ[api_details['token_name']]}"
         }
-        meta_response = requests.get(
-            api_details["url"].format(id=commons_group_id),
-            headers=headers,
-        )
+        try:
+            meta_response = requests.get(
+                api_details["url"].format(id=commons_group_id),
+                headers=headers,
+                timeout=15,
+            )
+        except requests.exceptions.Timeout:
+            raise RequestTimeout(
+                "Request to Commons instance for group metadata timed out"
+            )
+        except requests.exceptions.ConnectionError:
+            raise requests.exceptions.ConnectionError(
+                "Could not connect to "
+                "Commons instance to fetch group metadata"
+            )
         if meta_response.status_code == 200:
             content = meta_response.json()
             commons_group_description = content["description"]
@@ -295,7 +321,7 @@ class GroupCollectionsResource(Resource):
 
         # create roles for the new collection's group members
         remote_roles = list(
-            set(commons_upload_roles.extend(commons_moderate_roles))
+            set([*commons_upload_roles, *commons_moderate_roles])
         )
         for role in remote_roles:
             group_name = f"{commons_instance}|{commons_group_id}|{role}"
@@ -357,12 +383,25 @@ class GroupCollectionsResource(Resource):
                     raise RuntimeError("Failed to create new collection")
             except ma.ValidationError as e:
                 # group with slug already exists
-                if "A community with this identifier already exists" in e:
+                logger.error(f"Validation error: {e}")
+                if "A community with this identifier already exists" in str(e):
                     community_list = current_communities.service.search(
                         identity=system_identity, q=f"slug:{slug}"
                     )
-                    if (
-                        community_list[0]["custom_fields"][
+                    if community_list.to_dict()["hits"]["total"] < 1:
+                        msg = f"Collection for {instance_name} group {commons_group_id} seems to have been deleted previously and has not been restored. Continuing with a new url slug."  # noqa: E501
+                        logger.error(msg)
+                        # raise DeletionStatusError(False, msg)
+                        # TODO: provide the option of restoring a deleted
+                        # collection here? `restore_deleted` query param is
+                        # in place
+
+                        if restore_deleted:
+                            raise NotImplementedError(
+                                "Restore deleted collection not yet implemented"
+                            )
+                    elif (
+                        community_list.to_dict()["hits"][0]["custom_fields"][
                             "kcr:commons_group_id"
                         ]
                         == commons_group_id
@@ -418,7 +457,17 @@ class GroupCollectionsResource(Resource):
 
         # download the group avatar and upload it to the Invenio instance
         if commons_avatar_url:
-            avatar_response = requests.get(commons_avatar_url)
+            try:
+                avatar_response = requests.get(commons_avatar_url, timeout=15)
+            except requests.exceptions.Timeout:
+                logger.error(
+                    "Request to Commons instance for group avatar timed out"
+                )
+            except requests.exceptions.ConnectionError:
+                logger.error(
+                    "Could not connect to "
+                    "Commons instance to fetch group avatar"
+                )
             if avatar_response.status_code == 200:
                 try:
                     logo_result = current_communities.service.update_logo(
@@ -458,7 +507,7 @@ class GroupCollectionsResource(Resource):
                 logger.error(f"Response: {avatar_response.text}")
             elif avatar_response.status_code in [500, 502, 503, 504, 509, 511]:
                 logger.error(
-                    f"Internal server error when trying to access the "
+                    f"Connection failed when trying to access the "
                     f"provided avatar at {commons_avatar_url}"
                 )
                 logger.error(f"Response: {avatar_response.text}")
@@ -471,7 +520,7 @@ class GroupCollectionsResource(Resource):
 
         return jsonify(response_data), 201
 
-    def update(self, collection_slug):
+    def change_group_ownership(self, collection_slug):
         # Implement the logic for handling PATCH requests
         # Replace the following dummy data with your actual data processing logic
         request_data = request.get_json()
@@ -552,7 +601,7 @@ class GroupCollectionsResource(Resource):
                 msg = f"Failed to delete collection {collection_slug} belonging to {commons_instance} group {commons_group_id}"  # noqa: E501
                 logger.error(msg)
                 raise RuntimeError(msg)
-        except DeletionStatusError as e:
+        except (DeletionStatusError, CommunityDeletedError) as e:
             msg = f"Collection has already been deleted: {str(e)}"
             logger.error(msg)
             raise UnprocessableEntity(msg)
@@ -567,6 +616,10 @@ class GroupCollectionsResource(Resource):
             f"for {commons_instance} group {commons_group_id}",
             204,
         )
+
+    def failed_delete(self):
+        """Error response for missing collection slug."""
+        raise BadRequest("No collection slug provided")
 
 
 def create_api_blueprint(app):

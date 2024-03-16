@@ -1,5 +1,8 @@
 # invenio-groups
 
+Copyright 2024 Mesh Research
+Contributors: Ian Scott
+
 Social groups integration between the InvenioRDM repository system and a Knowledge Commons instance as a part of *Knowledge Commons Works*.
 
 The package provides the InvenioRDM data structures and service to store metadata about groups created on a Commons instance (such as Knowledge Commons or MLA Commons).
@@ -18,9 +21,7 @@ From your InvenioRDM instance directory:
 
 This will add the package to your Pipfile and install it in your InvenioRDM instance's virtual environment.
 
-## Usage
-
-## Group Collections Endpoint
+## Group Collections Endpoint Usage
 
 ```http
 https://example.org/api/group_collections
@@ -28,7 +29,7 @@ https://example.org/api/group_collections
 
 The `group_collections` REST API endpoint allows a Commons instance to create, read, modify, or delete a collection in Invenio owned by a Commons group. This endpoint is not configured to receive all of the metadata required to create or modify group collections. Rather, the `group_collections` endpoint receives minimal signals from a Commons Instance and then obtains the full required metadata via an API callback to the Commons instance.
 
-## Endpoint configuration
+### Endpoint configuration
 
 The configuration variable `GROUP_COLLECTIONS_METADATA_ENDPOINTS` must be provided in the `invenio.cfg` file in order to use this endpoint. This variable should hold a dictionary whose keys are Commons instance names. The value for each key is a dictionary containing the following keys:
 
@@ -50,14 +51,14 @@ GROUP_COLLECTIONS_METADATA_ENDPOINTS = {
 }
 ```
 
-## Retrieving Group Collection Metadata (GET)
+### Retrieving Group Collection Metadata (GET)
 
 A GET request to this endpoint will retrieve metadata on Invenio collections
 that are owned by a Commons group. A request to the bare endpoint without a
 group ID or collection slug will return a list of all collections owned by
 all Commons groups. (Commons Works collections not linked to a Commons group will not be included. If you wish to query all groups, please use the `communities` API endpoint.)
 
-### Query parameters
+#### Query parameters
 
 Four optional query parameters can be used to filter the results:
 
@@ -70,7 +71,7 @@ Four optional query parameters can be used to filter the results:
 | `size` | the number of results to include on each page |
 | `sort` | the kind of sorting applied to the returned results |
 
-#### Sorting
+###### Sorting
 
 The `sort` parameter can be set to one of the following sort types:
 
@@ -83,23 +84,23 @@ The `sort` parameter can be set to one of the following sort types:
 
 By default the results are sorted by `updated-desc`
 
-#### Pagination
+###### Pagination
 
 Long result sets will be paginated. The response will include urls for the `first`, `last`, `previous`, and `next` pages of results in the `link` property of the response body. A url for the current page of results will also be included in the list as a `self` link. By default the page size is 25, but this can be changed by providing a value for the `size` query parameter.
 
-### Requesting all collections
+#### Requesting all collections
 
-#### Request
+###### Request
 
 ```http
 GET https://example.org/api/group_collections HTTP/1.1
 ```
 
-#### Successful Response Status Code
+###### Successful Response Status Code
 
 `200 OK`
 
-#### Successful response body
+###### Successful response body
 
 ```json
 {
@@ -211,25 +212,25 @@ GET https://example.org/api/group_collections HTTP/1.1
 }
 ```
 
-#### Successful Response Headers
+###### Successful Response Headers
 
 | Header name | Header value |
 | ------------|-------------- |
 | Content-Type | `application/json` |
 
-### Requesting collections for a Commons instance
+#### Requesting collections for a Commons instance
 
-#### Request
+###### Request
 
 ```http
 GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&sort=updated-asc HTTP/1.1
 ```
 
-#### Successful response status code
+###### Successful response status code
 
 `200 OK`
 
-#### Successful Response Body:
+###### Successful Response Body:
 
 ```json
 {
@@ -340,7 +341,7 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
 }
 ```
 
-#### Successful response headers
+###### Successful response headers
 
 | Header name | Header value |
 | ------------|-------------- |
@@ -348,21 +349,21 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
 | Link | `<https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=1>; rel="first", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=9>; rel="last", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=1>; rel="prev", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=2>; rel="next"` |
 
 
-### Requesting collections for a specific group
+#### Requesting collections for a specific group
 
 Note that if you specify a `commons_group_id` value, you must *also* provide a `commons_instance` value. This is to avoid confusion if different Commons instances use the same internal id for groups.
 
-#### Request
+###### Request
 
 ```http
 GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&commons_group_id=12345 HTTP/1.1
 ```
 
-#### Successful response status code
+###### Successful response status code
 
 `200 OK`
 
-#### Successful Response Body:
+###### Successful Response Body:
 
 ```json
 {
@@ -473,27 +474,27 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
 }
 ```
 
-#### Successful response headers
+###### Successful response headers
 
 | Header name | Header value |
 | ------------|-------------- |
 | Content-Type | `application/json` |
 
-### Requesting a specific collection
+#### Requesting a specific collection
 
 While other kinds of requests require query parameters, a request for metadata on a specific Commons Works collection can be made by simply adding the community's slug to the end of the url path. Once again, this will only succeed for collections that are linked to a Commons instance group. Collections that exist independently on Knowledge Commons Works will not be found at the `group_collections` endpoint and should be requested at the `communities` endpoint instead.
 
-#### Request
+###### Request
 
 ```http
 GET https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 ```
 
-#### Successful Response Status Code
+###### Successful Response Status Code
 
 `200 OK`
 
-#### Successful Response Body:
+###### Successful Response Body:
 
 ```json
 {
@@ -552,7 +553,7 @@ GET https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 ```
 
 
-## Creating a Collection for a Group (POST)
+### Creating a Collection for a Group (POST)
 
 A POST request to this endpoint creates a new collection in Invenio owned by the specified Commons group. If the collection is successfully created, the response status code will be 201 Created, and the response body will be a JSON object containing the URL slug for the newly created collection.
 
@@ -560,17 +561,17 @@ The POST request will trigger a callback to the Commons instance to get the meta
 
 If the metadata returned from the Commons instance includes a url for an avatar, that avatar will be downloaded and stored in the Invenio instance's file storage. Since we do not want to use a placeholder avatar for the group, the instance's configuration can include a `placeholder_avatar` key. If the file name or last segment of the supplied avatar url matches this `placeholder_avatar` value, it will be ignored.
 
-### Handling collection name collisions
+#### Handling collection name collisions
 
 It is possible for two groups on Commons instances to share the same human readable name, even though their ids are different. Knowledge Commons Works *will* allow multiple collections to share identical human readable names, but group url *slugs* must be unique across all KCW collections. So where group names collide, only the first of the identically-named collections will have its slug generated normally. Susequent collections with the same name will have a numerical disambiguator appended to the end of their slugs. So if we have three groups named "Panda Studies," the first collection created for one of the groups will have the slug `panda-studies`. The other collections created by these groups will be assigned the slugs `panda-studies-1` and `panda-studies-2`, in order of their creation in Knowledge Commons Works.
 
-### Request
+#### Request
 
 ```http
 POST https://example.org/api/group_collections HTTP/1.1
 ```
 
-### Request body
+#### Request body
 
 ```json
 {
@@ -581,11 +582,11 @@ POST https://example.org/api/group_collections HTTP/1.1
 }
 ```
 
-### Successful response status code
+#### Successful response status code
 
 `201 Created`
 
-### Successful response body
+#### Successful response body
 
 ```json
 {
@@ -594,7 +595,7 @@ POST https://example.org/api/group_collections HTTP/1.1
 }
 ```
 
-### Unsuccessful response codes
+#### Unsuccessful response codes
 
 - 400 Bad Request: The request body is missing required fields or contains
     invalid data.
@@ -602,19 +603,19 @@ POST https://example.org/api/group_collections HTTP/1.1
 - 403 Forbidden: The request is not authorized to modify the collection.
 - 409 Conflict: A collection already exists in Knowledge Commons Works linked to the specified group.
 
-## Changing the Group Ownership of a Collection (PATCH)
+### Changing the Group Ownership of a Collection (PATCH)
 
 A PATCH request to this endpoint modifies an existing collection in Invenio by changing the Commons group to which it belongs. This is the *only* modification that can be made to a collection via this endpoint. Other modifications to Commons group metadata should be handled by signalling the Invenio webhook for commons group metadata updates. Modifications to internal metadata or settings for the Invenio collection should be made view the Invenio "communities" API or the collection settings UI.
 
 Note that the collection memberships in Invenio will be automatically transferred to the new Commons group. The corporate roles for the old Commons group will be removed from the collection and corporate roles for the new Commons group will be added to its membership with appropriate permissions. But any individual memberships that have been granted through the Invenio UI will be left unchanged. If the new collection administrators wish to change these individual memberships, they will need to do so through the Invenio UI.
 
-### Request
+#### Request
 
 ```http
 PATCH https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 ```
 
-### Successful request body
+#### Successful request body
 
 ```json
 {
@@ -626,11 +627,11 @@ PATCH https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 }
 ```
 
-### Successful response status code
+#### Successful response status code
 
 `200 OK`
 
-### Successful response body
+#### Successful response body
 
 ```json
 {
@@ -640,7 +641,7 @@ PATCH https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 }
 ```
 
-### Unsuccessful response codes
+#### Unsuccessful response codes
 
 - 400 Bad Request: The request body is missing required fields or contains
     invalid data.
@@ -649,7 +650,7 @@ PATCH https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 - 304 Not Modified: The collection is already owned by the specified
     Commons group.
 
-## Deleting a Group's Collection (DELETE)
+### Deleting a Group's Collection (DELETE)
 
 A DELETE request to this endpoint deletes a collection in Invenio owned by the specified Commons group. Note that the request must include all of:
 
@@ -661,33 +662,33 @@ If any of these is missing the request will fail with a `400 Bad Request` error.
 
 If the collection is successfully deleted, the response status code will be 204 No Content.
 
-### Request
+#### Request
 
 ```http
 DELETE https://example.org/api/group_collections/my-collection-slug?commons_instance=knowledgeCommons&commons_group_id=12345 HTTP/1.1
 ```
 
-### Successful response status code
+#### Successful response status code
 
 `204 No Content`
 
-### Unsuccessful response codes
+#### Unsuccessful response codes
 
 - 400 Bad Request: The request did not include the required parameters or the parameters are not well formed.
 - 403 Forbidden: The requesting agent is not authorized to delete the collection. The collection may not belong to the Commons instance making the request, or it may not belong to the specified Commons group.
 - 404 Not Found: The collection does not exist.
 - 422 UnprocessableEntity: The deletion could not be performed because the
 
-## Logging
+### Logging
 
-The module will log each POST, PATCH, or DELETE request to the endpoint (as well as any errors) in a dedicated log file, `logs/invenio-group-collections.log`.
+The module will log each POST, PATCH, or DELETE request to the `group_collections` endpoint (as well as any errors) in a dedicated log file, `logs/invenio-group-collections.log`.
 
-## Endpoint security
+### Endpoint security
 
 The endpoint is secured by a token that must be obtained by the Commons instance administrator from the Knowledge Commons Works administrator. The token must be provided in the "Authorization" request header.
 
 
-### Versions
+## Versions
 
 This repository follows [calendar versioning](https://calver.org/):
 
