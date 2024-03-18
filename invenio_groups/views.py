@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*- # # This file is part of the invenio-groups package.  # Copyright (C) 2023-2024, MESH Research.  # # invenio-groups is free software; you can redistribute it # and/or modify it under the terms of the MIT License; see # LICENSE file for more details.
+# -*- coding: utf-8 -*- # # This file is part of the invenio-groups package.
+# Copyright (C) 2023-2024, MESH Research.
+# invenio-groups is free software; you can redistribute it
+# and/or modify it under the terms of the MIT License; see
+# LICENSE file for more details.
+
 """Views for Commons group collections API endpoints."""
 
 # from flask import render_template
-from distutils.command import upload
-from email.mime import base
 from pprint import pformat
-import time
 from flask import (
     request,
     current_app as app,
     jsonify,
 )
-from flask_principal import AnonymousIdentity
 from flask_resources import (
     from_conf,
     JSONSerializer,
@@ -26,7 +27,6 @@ from flask_resources import (
     resource_requestctx,
 )
 from invenio_access.permissions import system_identity
-from invenio_access.utils import get_identity
 from invenio_accounts.proxies import current_datastore as accounts_datastore
 from invenio_communities.errors import (
     CommunityDeletedError,
@@ -140,6 +140,10 @@ class GroupCollectionsResource(Resource):
         RequestTimeout: lambda e: (
             {"message": str(e), "status": 503},
             503,
+        ),
+        NotImplementedError: lambda e: (
+            {"message": str(e), "status": 501},
+            501,
         ),
     }
 
@@ -400,6 +404,10 @@ class GroupCollectionsResource(Resource):
                             raise NotImplementedError(
                                 "Restore deleted collection not yet implemented"
                             )
+                        else:
+                            slug_incrementer += 1
+                            slug = f"{base_slug}-{str(slug_incrementer)}"
+                            data["slug"] = slug
                     elif (
                         community_list.to_dict()["hits"][0]["custom_fields"][
                             "kcr:commons_group_id"
@@ -412,7 +420,8 @@ class GroupCollectionsResource(Resource):
                         )
                     else:
                         slug_incrementer += 1
-                        data["slug"] = f"{base_slug}-{str(slug_incrementer)}"
+                        slug = f"{base_slug}-{str(slug_incrementer)}"
+                        data["slug"] = slug
                 else:
                     raise UnprocessableEntity(str(e))
 
@@ -521,27 +530,30 @@ class GroupCollectionsResource(Resource):
         return jsonify(response_data), 201
 
     def change_group_ownership(self, collection_slug):
-        # Implement the logic for handling PATCH requests
-        # Replace the following dummy data with your actual data processing logic
-        request_data = request.get_json()
-        old_commons_group_id = request_data.get("old_commons_group_id")
-        new_commons_group_id = request_data.get("new_commons_group_id")
-        new_commons_group_name = request_data.get("new_commons_group_name")
-        new_commons_group_visibility = request_data.get(
-            "new_commons_group_visibility"
-        )
+        # Implement the logic for handling PATCH requests to change group ownership
+        # request_data = request.get_json()
+        # old_commons_group_id = request_data.get("old_commons_group_id")
+        # new_commons_group_id = request_data.get("new_commons_group_id")
+        # new_commons_group_name = request_data.get("new_commons_group_name")
+        # new_commons_group_visibility = request_data.get(
+        #     "new_commons_group_visibility"
+        # )
 
         # Implement logic to modify an existing collection
         # ...
 
         # Construct the response
-        response_data = {
-            "collection": collection_slug,
-            "old_commons_group_id": old_commons_group_id,
-            "new_commons_group_id": new_commons_group_id,
-        }
+        # response_data = {
+        #     "collection": collection_slug,
+        #     "old_commons_group_id": old_commons_group_id,
+        #     "new_commons_group_id": new_commons_group_id,
+        # }
 
-        return jsonify(response_data), 200
+        # return jsonify(response_data), 200
+        raise NotImplementedError(
+            "PATCH requests to change group ownership of a collection "
+            "are not yet implemented."
+        )
 
     @request_parsed_args
     @request_parsed_view_args

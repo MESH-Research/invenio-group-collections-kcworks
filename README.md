@@ -605,6 +605,9 @@ POST https://example.org/api/group_collections HTTP/1.1
 
 ### Changing the Group Ownership of a Collection (PATCH)
 
+[!WARNING]
+PATCH requests to change group ownership of the collection are not yet implemented.
+
 A PATCH request to this endpoint modifies an existing collection in Invenio by changing the Commons group to which it belongs. This is the *only* modification that can be made to a collection via this endpoint. Other modifications to Commons group metadata should be handled by signalling the Invenio webhook for commons group metadata updates. Modifications to internal metadata or settings for the Invenio collection should be made view the Invenio "communities" API or the collection settings UI.
 
 Note that the collection memberships in Invenio will be automatically transferred to the new Commons group. The corporate roles for the old Commons group will be removed from the collection and corporate roles for the new Commons group will be added to its membership with appropriate permissions. But any individual memberships that have been granted through the Invenio UI will be left unchanged. If the new collection administrators wish to change these individual memberships, they will need to do so through the Invenio UI.
@@ -661,6 +664,13 @@ A DELETE request to this endpoint deletes a collection in Invenio owned by the s
 If any of these is missing the request will fail with a `400 Bad Request` error. This is to ensure that collections are not deleted accidentally or by agents without authorization.
 
 If the collection is successfully deleted, the response status code will be 204 No Content.
+
+[!NOTE]
+Once a group collection has been deleted, its former URL slug is still registered in Invenio's PID store and reserved for the (now deleted) collection. Subsequent requests to create a collection for the same group cannot re-use the same URL slug. Instead the new slug will have a numerical disambiguator added to the end, exactly as in cases of group name collision. E.g., if the group `panda-studies` were deleted earlier, a request to create a new collection for the "Panda Studies" group would be assigned the URL slug `panda-studies-1`.
+
+[!NOTE]
+Group collections are soft deleted and can in principle be restored within a short period after the delete signal has been sent. Eventually, though, the soft deleted collection records will be
+automatically purged entirely from the database. There is also no API mechanism for restoring them. So delete operations should be regarded as permanent and irrevocable.
 
 #### Request
 
