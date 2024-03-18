@@ -193,7 +193,14 @@ class GroupCollectionsResource(Resource):
             route("DELETE", "/", self.failed_delete),
             route("DELETE", "/<slug>", self.delete),
             route("PATCH", "/<slug>", self.change_group_ownership),
+            route("PUT", "/<slug>", self.replace_group_metadata),
         ]
+
+    def replace_group_metadata():
+        raise NotImplementedError(
+            "Modification of collection metadata is not supported at "
+            "this endpoint. Use the main `communities` API endpoint instead."
+        )
 
     @request_parsed_view_args
     def read(self):
