@@ -305,7 +305,8 @@ class GroupCollectionsResource(Resource):
         # Return appropriate response status
         return (
             f"Successfully deleted collection {deleted_collection.slug} "
-            f"along with its user roles for {commons_instance} group {commons_group_id}",
+            f"along with its user roles for {commons_instance} group "
+            f"{commons_group_id}",
             204,
         )
 

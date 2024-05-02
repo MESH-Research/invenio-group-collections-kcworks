@@ -7,6 +7,7 @@
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
+from flask import current_app as app
 from flask_principal import Identity
 from invenio_accounts.proxies import current_datastore as accounts_datastore
 from invenio_access.permissions import system_identity
@@ -225,7 +226,7 @@ class GroupCollectionsService(RecordService):
         """
         errors = []
 
-        instance_name = self.config["SSO_SAML_IDPS"][commons_instance]["title"]
+        instance_name = app.config["SSO_SAML_IDPS"][commons_instance]["title"]
 
         # make API request to commons instance to get group metadata
         commons_group_name = ""
@@ -234,7 +235,7 @@ class GroupCollectionsService(RecordService):
         commons_avatar_url = ""
         commons_upload_roles = []
         commons_moderate_roles = []
-        api_details = self.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
+        api_details = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
             commons_instance
         ]
         headers = {

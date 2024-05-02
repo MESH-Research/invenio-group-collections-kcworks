@@ -21,7 +21,6 @@ from .service_config import (
 from .service import (
     GroupCollectionsService,
     GroupsMetadataService,
-    GroupRolesService,
 )
 
 
@@ -51,7 +50,6 @@ class InvenioGroups(object):
         self.collections_service = GroupCollectionsService(
             GroupCollectionsServiceConfig.build(app)
         )
-        self.roles_service = GroupRolesService(app)
 
     def init_config(self, app):
         """Initialize configuration.
