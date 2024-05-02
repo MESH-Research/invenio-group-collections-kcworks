@@ -1452,3 +1452,22 @@
 2024-03-16 17:47:00,001:INFO : Role "knowledgeCommons|1004277|member" created or retrieved successfully.
 2024-03-16 17:47:00,118:ERROR : Validation error: A community with this identifier already exists.
 2024-03-16 17:47:00,288:ERROR : Collection for Knowledge Commons group 1004277 seems to have been deleted previously and has not been restored.
+2024-03-16 17:56:31,877:INFO : Role "knowledgeCommons|1004277|administrator" created or retrieved successfully.
+2024-03-16 17:56:31,881:INFO : Role "knowledgeCommons|1004277|moderator" created or retrieved successfully.
+2024-03-16 17:56:31,886:INFO : Role "knowledgeCommons|1004277|member" created or retrieved successfully.
+2024-03-16 17:56:32,063:ERROR : Validation error: A community with this identifier already exists.
+2024-03-16 17:56:32,222:ERROR : Collection for Knowledge Commons group 1004277 seems to have been deleted previously and has not been restored.
+2024-03-16 17:56:34,639:INFO : Role "knowledgeCommons|1004277|administrator" created or retrieved successfully.
+2024-03-16 17:56:34,654:INFO : Role "knowledgeCommons|1004277|moderator" created or retrieved successfully.
+2024-03-16 17:56:34,665:INFO : Role "knowledgeCommons|1004277|member" created or retrieved successfully.
+2024-03-16 17:56:34,700:ERROR : Validation error: A community with this identifier already exists.
+2024-03-16 17:56:34,749:ERROR : Collection for Knowledge Commons group 1004277 seems to have been deleted previously and has not been restored.
+2024-03-16 17:57:04,562:INFO : Role "knowledgeCommons|1004277|administrator" created or retrieved successfully.
+2024-03-16 17:57:04,572:INFO : Role "knowledgeCommons|1004277|member" created or retrieved successfully.
+2024-03-16 17:57:04,579:INFO : Role "knowledgeCommons|1004277|moderator" created or retrieved successfully.
+2024-03-16 17:57:04,663:ERROR : Validation error: A community with this identifier already exists.
+2024-03-16 17:57:04,797:ERROR : Collection for Knowledge Commons group 1004277 seems to have been deleted previously and has not been restored. Continuing with a new url slug.
+2024-03-16 17:57:04,872:INFO : New record created successfully: None
+2024-03-16 17:57:04,952:ERROR : Manage members: True
+2024-03-16 17:57:05,116:ERROR : <invenio_communities.communities.services.results.CommunityItem object at 0x1400f8790>
+2024-03-16 17:57:05,379:INFO : Logo uploaded successfully.

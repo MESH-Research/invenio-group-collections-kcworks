@@ -14,6 +14,7 @@ psycopg2 = "*"
 opensearch-dsl = "*"
 invenio-administration = "*"
 invenio-communities = "*"
+invenio-remote-user-data = {file = "../invenio-remote-user-data", editable = true}
 
 [dev-packages]
 

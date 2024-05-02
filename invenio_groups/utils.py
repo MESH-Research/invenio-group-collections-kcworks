@@ -10,15 +10,19 @@
 """Utility functions for invenio-groups."""
 
 import logging
+import os
 from pathlib import Path
+from typing import Union
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s:%(levelname)s : %(message)s")
 
-log_file_path = (
-    Path(__file__).parent / "logs" / "invenio-group-collections.log"
-)
+instance_path = os.environ.get("INVENIO_INSTANCE_PATH")
+if not instance_path:
+    instance_path = Path(__file__).parent.parent
+
+log_file_path = Path(instance_path) / "logs" / "invenio-group-collections.log"
 
 if not log_file_path.exists():
     log_file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -33,3 +37,12 @@ file_handler.setFormatter(formatter)
 if logger.hasHandlers():
     logger.handlers.clear()
 logger.addHandler(file_handler)
+
+
+def make_group_slug(
+    id: Union[str, int], group_name: str, instance_name: str
+) -> Union[str, list]:
+    """Create a slug from a group name."""
+    #  FIXME: Implement returning a list of slugs if the group has
+    #  soft deleted collections.
+    return f'{instance_name}|{group_name.lower().replace(" ", "-").replace(",", "")}'
