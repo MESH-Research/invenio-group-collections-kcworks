@@ -58,7 +58,7 @@ class GroupCollectionsService(RecordService):
         super().__init__(config=config, **kwargs)
 
     def update_avatar(
-        commons_avatar_url: str, community_record_id: str
+        self, commons_avatar_url: str, community_record_id: str
     ) -> bool:
         """Update the avatar of a community in Invenio from the provided url.
 
@@ -403,11 +403,11 @@ class GroupCollectionsService(RecordService):
             manage_members = current_communities.service.members.add(
                 system_identity,
                 new_record["id"],
-                data={"members": manage_payload, "role": "administrator"},
+                data={"members": manage_payload, "role": "manager"},
             )
             logger.error(f"Manage members: {pformat(manage_members)}")
         except AlreadyMemberError:
-            logger.error("admin role is already a manager")
+            logger.error("adminstrator role is already a manager")
 
         # assign the group roles as members of the new collection
         for irole in invenio_roles.values():
