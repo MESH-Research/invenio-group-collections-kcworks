@@ -1,13 +1,9 @@
-# invenio-groups
+# invenio-group-collections
 
 Copyright 2024 Mesh Research
 Contributors: Ian Scott
 
-Social groups integration between the InvenioRDM repository system and a Knowledge Commons instance as a part of *Knowledge Commons Works*.
-
-The package provides the InvenioRDM data structures and service to store metadata about groups created on a Commons instance (such as Knowledge Commons or MLA Commons).
-
-The package also provides integration between Commons groups and InvenioRDM collections. It exposes a `group_collections` API endpoint that can be used for automatic creation of an InvenioRDM record collection linked to a Commons group. Updates to Commons Search for group collection events is not handled in this package but rather in the invenio_remote_api_provisioner package.
+Social groups integration between the InvenioRDM repository system and a Knowledge Commons instance as a part of *Knowledge Commons Works*. The package provides integration between Commons groups and InvenioRDM collections. It exposes a `group_collections` API endpoint that can be used for automatic creation of an InvenioRDM record collection linked to a Commons group. Updates to Commons Search for group collection events is not handled in this package but rather in the `invenio_remote_api_provisioner` package. Updates to Commons group metadata in a linked Invenio collection are handled by the `invenio_remote_user_data` package.
 
 (Note: The Knowledge Commons Works instance of InvenioRDM uses the term "collection" in place of the default term "community" employed in standard InvenioRDM installations.)
 
@@ -16,7 +12,7 @@ The package also provides integration between Commons groups and InvenioRDM coll
 From your InvenioRDM instance directory:
 
 ```shell
-    pipenv install invenio-groups
+    pipenv install invenio-group-collections
 ```
 
 This will add the package to your Pipfile and install it in your InvenioRDM instance's virtual environment.
@@ -552,7 +548,6 @@ GET https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 }
 ```
 
-
 ### Creating a Collection for a Group (POST)
 
 A POST request to this endpoint creates a new collection in Invenio owned by the specified Commons group. If the collection is successfully created, the response status code will be 201 Created, and the response body will be a JSON object containing the URL slug for the newly created collection.
@@ -561,9 +556,20 @@ The POST request will trigger a callback to the Commons instance to get the meta
 
 If the metadata returned from the Commons instance includes a url for an avatar, that avatar will be downloaded and stored in the Invenio instance's file storage. Since we do not want to use a placeholder avatar for the group, the instance's configuration can include a `placeholder_avatar` key. If the file name or last segment of the supplied avatar url matches this `placeholder_avatar` value, it will be ignored.
 
+#### Handling group name changes
+
+Note that when a collection is created for a group, the collection's slug will be generated from the group's name. If the group's name is changed in the Commons instance, the collection's slug will not be automatically updated. This is to avoid breaking links to the collection. If the group's name is changed, the collection's slug will remain the same, but the collection's metadata will be updated to reflect the new group name.
+
 #### Handling collection name collisions
 
-It is possible for two groups on Commons instances to share the same human readable name, even though their ids are different. Knowledge Commons Works *will* allow multiple collections to share identical human readable names, but group url *slugs* must be unique across all KCW collections. So where group names collide, only the first of the identically-named collections will have its slug generated normally. Susequent collections with the same name will have a numerical disambiguator appended to the end of their slugs. So if we have three groups named "Panda Studies," the first collection created for one of the groups will have the slug `panda-studies`. The other collections created by these groups will be assigned the slugs `panda-studies-1` and `panda-studies-2`, in order of their creation in Knowledge Commons Works.
+It is possible for two groups on Commons instances to share the same human readable name, even though their ids are different. Knowledge Commons Works *will* allow multiple collections to share identical human readable names, but group url *slugs* must be unique across all KC Works collections. So where group names collide, only the first of the identically-named collections will have its slug generated normally. Susequent collections with the same name will have a numerical disambiguator appended to the end of their slugs. So if we have three groups named "Panda Studies," the first collection created for one of the groups will have the slug `panda-studies`. The other collections created by these groups will be assigned the slugs `panda-studies-1` and `panda-studies-2`, in order of their creation in Knowledge Commons Works.
+
+#### Handling deleted group collections
+
+If a group collection is deleted, its slug will be reserved in the Invenio PID store and cannot be re-used for a new collection. If a new collection is created for the same group, the slug will have a numerical disambiguator appended to the end, exactly as in cases of group name collision. E.g., if the group `panda-studies` were deleted earlier, a request to create a new collection for the "Panda Studies" group would be assigned the URL slug `panda-studies-1`. This is to avoid breaking links to the deleted collection.
+
+In future it may be possible to restore deleted collections, but this is not currently implemented.
+<!-- TODO: Implement collection restoration -->
 
 #### Request
 
@@ -697,9 +703,14 @@ The module will log each POST, PATCH, or DELETE request to the `group_collection
 
 The endpoint is secured by a token that must be obtained by the Commons instance administrator from the Knowledge Commons Works administrator. The token must be provided in the "Authorization" request header.
 
+## Utility functions
+
+### `utils.make_group_slug`
+
+This function takes a string and returns a slug suitable for use as a URL slug for a group collection. The slug is generated by converting the string to lowercase, replacing spaces with hyphens, and removing any characters that are not alphanumeric or hyphens. The slug is also truncated to 50 characters to ensure that it fits within the Invenio database constraints.
 
 ## Versions
 
 This repository follows [calendar versioning](https://calver.org/):
 
-`2021.06.18` is both a valid semantic version and an indicator of the year-month corresponding to the loaded FAST terms.
+`2021.06.18` is both a valid semantic version and an indicator of the date when the current version was released.

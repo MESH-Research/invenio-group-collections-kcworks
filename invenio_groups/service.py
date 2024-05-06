@@ -7,6 +7,7 @@
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
+from email.mime import base
 from flask import current_app as app
 from flask_principal import Identity
 from invenio_accounts.proxies import current_datastore as accounts_datastore
@@ -39,7 +40,7 @@ from werkzeug.exceptions import (
 )
 
 from .errors import CollectionAlreadyExistsError, CommonsGroupNotFoundError
-from .utils import logger
+from .utils import logger, make_base_group_slug, convert_remote_roles
 
 
 class GroupsMetadataService(RecordService):
@@ -227,7 +228,6 @@ class GroupCollectionsService(RecordService):
         errors = []
 
         instance_name = app.config["SSO_SAML_IDPS"][commons_instance]["title"]
-
         # make API request to commons instance to get group metadata
         commons_group_name = ""
         commons_group_description = ""
@@ -268,7 +268,7 @@ class GroupCollectionsService(RecordService):
             commons_upload_roles = content["upload_roles"]
             commons_moderate_roles = content["moderate_roles"]
 
-            base_slug = commons_group_name.lower().replace(" ", "-")
+            base_slug = make_base_group_slug(commons_group_name)
             slug_incrementer = 0
             slug = base_slug
 
@@ -296,22 +296,20 @@ class GroupCollectionsService(RecordService):
             )
 
         # create roles for the new collection's group members
-        invenio_roles = GroupRolesComponent.convert_remote_roles(
-            f"{commons_instance}|{slug}",
+        invenio_roles = convert_remote_roles(
+            f"{commons_instance}---{base_slug}|{commons_group_id}",
             commons_moderate_roles,
             commons_upload_roles,
         )
-        for role in invenio_roles.values():
-            my_group_role = accounts_datastore.find_or_create_role(name=role)
-            accounts_datastore.commit()
-
-            if my_group_role is not None:
-                assert my_group_role.name == role
-                logger.info(
-                    f'Role "{role}" created or retrieved successfully.'
+        for key, value in invenio_roles.items():
+            for remote_role in value:
+                my_group_role = accounts_datastore.find_or_create_role(
+                    name=remote_role
                 )
-            else:
-                raise RuntimeError(f'Role "{role}" not created.')
+                accounts_datastore.commit()
+
+                if my_group_role is None:
+                    raise RuntimeError(f'Role "{remote_role}" not created.')
 
         # create the new collection
         new_record = None
@@ -410,25 +408,26 @@ class GroupCollectionsService(RecordService):
             logger.error("adminstrator role is already a manager")
 
         # assign the group roles as members of the new collection
-        for irole in invenio_roles.values():
-            payload = [
-                {
-                    "type": "group",
-                    "id": irole,
-                }
-            ]
-            try:
-                member = current_communities.service.members.add(
-                    system_identity,
-                    new_record["id"],
-                    data={
-                        "members": payload,
-                        "role": irole.split("|")[-1],
-                    },
-                )
-                assert member
-            except AlreadyMemberError:
-                logger.error(f"{irole} role was was already a group member")
+        for coll_perm, remote_roles in invenio_roles.items():
+            for role in remote_roles:
+                payload = [
+                    {
+                        "type": "group",
+                        "id": role,
+                    }
+                ]
+                try:
+                    member = current_communities.service.members.add(
+                        system_identity,
+                        new_record["id"],
+                        data={
+                            "members": payload,
+                            "role": coll_perm,
+                        },
+                    )
+                    assert member
+                except AlreadyMemberError:
+                    logger.error(f"{role} role was was already a group member")
         logger.error(pformat(new_record))
 
         # download the group avatar and upload it to the Invenio instance
