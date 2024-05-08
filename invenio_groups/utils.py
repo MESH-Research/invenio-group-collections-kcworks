@@ -9,15 +9,17 @@
 
 """Utility functions for invenio-groups."""
 
-from email.mime import base
+from flask import current_app
 from invenio_access.permissions import system_identity
+from invenio_communities.members.errors import AlreadyMemberError
+from invenio_communities.members.records.api import Member
 from invenio_communities.proxies import current_communities
+
 import logging
 import os
 from pathlib import Path
 import re
 from typing import Union
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -170,3 +172,29 @@ def make_group_slug(
         incrementer += 1
 
     return {"fresh_slug": fresh_slug, "deleted_slugs": deleted_slugs}
+
+
+def add_user_to_community(
+    user_id: int, role: str, community_id: int
+) -> Member:
+    """Add a user to a community with a given role."""
+
+    members = None
+    try:
+        payload = [{"type": "user", "id": user_id}]
+        members = current_communities.service.members.add(
+            system_identity,
+            community_id,
+            data={"members": payload, "role": role},
+        )
+        assert members
+    except AlreadyMemberError:
+        current_app.logger.error(
+            f"User {user_id} was already a {role} member of community "
+            f"{community_id}"
+        )
+    except AssertionError:
+        current_app.logger.error(
+            f"Error adding user {user_id} to community {community_id}"
+        )
+    return members

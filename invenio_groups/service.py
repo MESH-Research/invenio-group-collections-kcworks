@@ -40,7 +40,12 @@ from werkzeug.exceptions import (
 )
 
 from .errors import CollectionAlreadyExistsError, CommonsGroupNotFoundError
-from .utils import logger, make_base_group_slug, convert_remote_roles
+from .utils import (
+    logger,
+    make_base_group_slug,
+    convert_remote_roles,
+    add_user_to_community,
+)
 
 
 class GroupsMetadataService(RecordService):
@@ -297,10 +302,14 @@ class GroupCollectionsService(RecordService):
 
         # create roles for the new collection's group members
         invenio_roles = convert_remote_roles(
-            f"{commons_instance}---{base_slug}|{commons_group_id}",
+            f"{commons_instance}---{commons_group_id}",
             commons_moderate_roles,
             commons_upload_roles,
         )
+        print("GroupCollectionService creating roles")
+        print(invenio_roles)
+        app.logger.debug("GroupCollectionService creating roles")
+        app.logger.debug(invenio_roles)
         for key, value in invenio_roles.items():
             for remote_role in value:
                 my_group_role = accounts_datastore.find_or_create_role(
@@ -508,3 +517,91 @@ class GroupCollectionsService(RecordService):
             raise UnprocessableEntity(msg)
 
         return deleted
+
+    def disown(
+        self,
+        identity: Identity,
+        collection_id: str,
+        collection_slug: str,
+        remote_group_id: str,
+        remote_instance_name: str,
+    ) -> CommunityItem:
+        """Remove all connections between the remote group and the collection.
+
+        This method will remove all role-based members of the collection that
+        are associated with the remote group. It will also remove the remote
+        group's metadata from the collection.
+
+        All users who were formerly members of the remote group by virtue of
+        their roles will be re-added as individual members of the collection
+        with permission levels based on their former roles.
+
+        The group roles themselves (that were used to assign group memberships
+        in the collection) will not be deleted. This is because the group itself
+        may still exist and may create a new collection in the future.
+        They will only be deleted when the group itself is deleted.
+
+        params:
+            identity: The identity of the user making the request.
+            collection_id: The ID of the collection to disown.
+            collection_slug: The slug of the collection to disown.
+            remote_group_id: The ID of the group on the remote Commons
+            instance.
+            remote_instance_name: The name of the remote Commons instance.
+
+        returns:
+            A CommunityItem object representing the disowned collection. This
+            should have no group-based members linked to the remote group, and
+            the remote group's metadata should be removed from its
+            custom_fields.
+        """
+        group_members = current_communities.service.members.search(
+            system_identity,
+            collection_id,
+            q=f"+member.type:group +member.id:{remote_instance_name}"
+            f"---{remote_group_id}",
+        )
+
+        individual_memberships = []
+        failures = []
+        for member_role in group_members:
+            individuals = GroupRolesComponent.get_current_members_of_group(
+                member_role.id
+            )
+
+            for member in individuals:
+                # assign member to the group collection community
+                # directly with a community role based on their former
+                # group role
+                add_result = add_user_to_community(
+                    member.id, member["role"], collection_id
+                )
+                if add_result:
+                    individual_memberships.append(
+                        (add_result.id, add_result["member"]["role"])
+                    )
+                else:
+                    failures.append(member)
+        if failures:
+            raise RuntimeError(
+                "Failed to reassign all members to the collection."
+            )
+
+        # remove the remote group's metadata from the collection
+        collection_record = current_communities.service.read(
+            system_identity, collection_id
+        )
+        new_data = collection_record.to_dict()
+        removals = {
+            "kcr:commons_instance": None,
+            "kcr:commons_group_id": None,
+            "kcr:commons_group_name": None,
+            "kcr:commons_group_description": None,
+            "kcr:commons_group_visibility": None,
+        }
+        new_data["custom_fields"].update(removals)
+        new_record = current_communities.service.update(
+            system_identity, collection_id, data=new_data
+        )
+
+        return new_record
