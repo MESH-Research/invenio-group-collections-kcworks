@@ -10,8 +10,10 @@
 from email.mime import base
 from flask import current_app as app
 from flask_principal import Identity
+from invenio_accounts import current_accounts
 from invenio_accounts.proxies import current_datastore as accounts_datastore
 from invenio_access.permissions import system_identity
+from invenio_communities.communities.records.api import Community
 from invenio_communities.communities.services.results import (
     CommunityItem,
     CommunityListResult,
@@ -25,6 +27,9 @@ from invenio_communities.members.errors import AlreadyMemberError
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.services.records.service import RecordService
 from invenio_remote_user_data.components.groups import GroupRolesComponent
+from invenio_users_resources.proxies import (
+    current_users_service as current_users,
+)
 from io import BytesIO
 import marshmallow as ma
 import os
@@ -39,7 +44,13 @@ from werkzeug.exceptions import (
     # Unauthorized,
 )
 
-from .errors import CollectionAlreadyExistsError, CommonsGroupNotFoundError
+from .errors import (
+    CollectionAlreadyExistsError,
+    CollectionNotFoundError,
+    CollectionNotCreatedError,
+    CommonsGroupNotFoundError,
+    RoleNotCreatedError,
+)
 from .utils import (
     logger,
     make_base_group_slug,
@@ -72,7 +83,8 @@ class GroupCollectionsService(RecordService):
             commons_avatar_url: The URL of the avatar to fetch.
             community_record_id: The ID of the community to update.
 
-        returns True if the avatar was updated successfully, otherwise False.
+        returns:
+            True if the avatar was updated successfully, otherwise False.
         """
 
         success = False
@@ -135,27 +147,38 @@ class GroupCollectionsService(RecordService):
 
     def read(
         self,
-        identity,
-        slug,
-    ) -> Union[CommunityItem, dict]:
-        """Read a collection (community) by its slug."""
+        identity: Identity,
+        slug: str,
+    ) -> CommunityItem:
+        """Read a collection (community) by its slug.
+
+        raises:
+            CollectionNotFoundError: If no collection is found in Invenio with
+            the given slug.
+
+        returns:
+            A CommunityItem object representing the collection.
+        """
 
         community_list = current_communities.service.search(
-            identity=system_identity, q=f"slug:{slug}"
+            identity=identity, q=f"slug:{slug}"
         )
 
-        if community_list.to_dict()["hits"]["total"] == 0:
-            raise NotFound(f"No collection found with the slug {slug}")
+        if community_list.total == 0:
+            raise CollectionNotFoundError(
+                f"No collection found with the slug {slug}"
+            )
+        result = next(community_list.hits)
 
-        return community_list.to_dict()["hits"]["hits"][0]
+        return result
 
     def search(
         self,
         identity: Identity,
         commons_instance: str,
         commons_group_id: Optional[str] = None,
-        sort: Optional[str] = None,
-        size: Optional[int] = None,
+        sort: Optional[str] = "updated-desc",
+        size: Optional[int] = 10,
         page: Optional[int] = 1,
     ) -> CommunityListResult:
         """Search collections (communities) by Commons instance and group ID.
@@ -175,6 +198,10 @@ class GroupCollectionsService(RecordService):
         that instance will be returned. If the group ID is also provided, all
         collections belonging to that group will be returned.
 
+        raises:
+            CommonsGroupNotFoundError: If no collections are found matching the parameters.
+            UnprocessableEntityError: If the query parameters are invalid.
+
         returns:
             Returns a CommunityListResult object.
         """
@@ -189,10 +216,12 @@ class GroupCollectionsService(RecordService):
             )
         community_list = current_communities.service.search(
             identity=identity,
-            q=query_params,
-            sort=sort,
-            size=size,
-            page=page,
+            params={
+                "q": query_params,
+                "sort": sort,
+                "size": int(size),
+                "page": int(page),
+            },
         )
 
         if community_list.to_dict()["hits"]["total"] == 0:
@@ -218,6 +247,10 @@ class GroupCollectionsService(RecordService):
         the Commons instance and constructs the collection metadata from that
         data.
 
+        Note that group collections are created with the administrative user
+        as the collection owner. The group's admins are added as managers of
+        the collection.
+
         params:
             identity: The identity of the user creating the collection.
             commons_group_id: The ID of the group on the Commons instance.
@@ -226,6 +259,16 @@ class GroupCollectionsService(RecordService):
                 was previously deleted. If False, a new collection will be
                 created with a new slug. [default: False]
             **kwargs: Additional keyword arguments.
+
+        raises:
+            CommonsGroupNotFoundError: If the group is not found on the
+                Commons instance.
+            CollectionAlreadyExistsError: If a collection for the group
+                already exists and has not been deleted.
+            CollectionNotCreatedError: If the collection could not be created
+                for some other reason.
+            RequestTimeout: If the request to the Commons instance api
+                endpoint times out.
 
         returns:
             The created collection record.
@@ -263,19 +306,25 @@ class GroupCollectionsService(RecordService):
             )
         if meta_response.status_code == 200:
             content = meta_response.json()
-            commons_group_name = content["name"]
-            commons_group_description = content["description"]
-            commons_group_visibility = content["visibility"]
-            commons_group_url = content["url"]
-            commons_avatar_url = content["avatar"]
-            if commons_avatar_url == api_details.get("default_avatar"):
-                commons_avatar_url = None
-            commons_upload_roles = content["upload_roles"]
-            commons_moderate_roles = content["moderate_roles"]
+            if not content or content["id"] != commons_group_id:
+                raise CommonsGroupNotFoundError(
+                    f"No such group {commons_group_id} could be found "
+                    f"on {instance_name}"
+                )
+            else:
+                commons_group_name = content["name"]
+                commons_group_description = content["description"]
+                commons_group_visibility = content["visibility"]
+                commons_group_url = content["url"]
+                commons_avatar_url = content["avatar"]
+                if commons_avatar_url == api_details.get("default_avatar"):
+                    commons_avatar_url = None
+                commons_upload_roles = content["upload_roles"]
+                commons_moderate_roles = content["moderate_roles"]
 
-            base_slug = make_base_group_slug(commons_group_name)
-            slug_incrementer = 0
-            slug = base_slug
+                base_slug = make_base_group_slug(commons_group_name)
+                slug_incrementer = 0
+                slug = base_slug
 
         elif meta_response.status_code == 404:
             logger.error(
@@ -318,7 +367,9 @@ class GroupCollectionsService(RecordService):
                 accounts_datastore.commit()
 
                 if my_group_role is None:
-                    raise RuntimeError(f'Role "{remote_role}" not created.')
+                    raise RoleNotCreatedError(
+                        f'Role "{remote_role}" not created.'
+                    )
 
         # create the new collection
         new_record = None
@@ -327,16 +378,17 @@ class GroupCollectionsService(RecordService):
                 "visibility": "restricted",
                 "member_policy": "closed",
                 "record_policy": "closed",
+                "review_policy": "closed",
             },
             "slug": slug,
             "metadata": {
                 "title": f"{commons_group_name}",
-                "description": f"A collection managed by the "
-                f"{commons_group_name} group of {instance_name}",
+                "description": f"A collection managed by "
+                f"{commons_group_name}, a {instance_name} group",
                 "curation_policy": "",
                 "page": f"This"
-                " is a collection of works curated by the "
-                f"{commons_group_name} group of {instance_name}",
+                " is a collection of works curated by "
+                f"{commons_group_name}, a {instance_name} group",
                 "website": commons_group_url,
                 "organizations": [
                     {
@@ -362,7 +414,9 @@ class GroupCollectionsService(RecordService):
                 logger.info(f"New record created successfully: {new_record}")
                 new_record = new_record_result
                 if not new_record_result:
-                    raise RuntimeError("Failed to create new collection")
+                    raise CollectionNotCreatedError(
+                        "Failed to create new collection"
+                    )
             except ma.ValidationError as e:
                 # group with slug already exists
                 logger.error(f"Validation error: {e}")
@@ -370,7 +424,7 @@ class GroupCollectionsService(RecordService):
                     community_list = current_communities.service.search(
                         identity=system_identity, q=f"slug:{slug}"
                     )
-                    if community_list.to_dict()["hits"]["total"] < 1:
+                    if community_list.total < 1:
                         msg = f"Collection for {instance_name} group {commons_group_id} seems to have been deleted previously and has not been restored. Continuing with a new url slug."  # noqa: E501
                         logger.error(msg)
                         # raise DeletionStatusError(False, msg)
@@ -388,9 +442,10 @@ class GroupCollectionsService(RecordService):
                             slug = f"{base_slug}-{str(slug_incrementer)}"
                             data["slug"] = slug
                     elif (
-                        community_list.to_dict()["hits"][0]["custom_fields"][
-                            "kcr:commons_group_id"
-                        ]
+                        community_list.total == 1
+                        and community_list.to_dict()["hits"]["hits"][0][
+                            "custom_fields"
+                        ]["kcr:commons_group_id"]
                         == commons_group_id
                     ):
                         raise CollectionAlreadyExistsError(
@@ -402,11 +457,11 @@ class GroupCollectionsService(RecordService):
                         slug = f"{base_slug}-{str(slug_incrementer)}"
                         data["slug"] = slug
                 else:
-                    raise UnprocessableEntity(str(e))
+                    raise CollectionNotCreatedError(str(e))
 
         # assign admins as members of the new collection
         try:
-            manage_payload = [{"type": "group", "id": "administrator"}]
+            manage_payload = [{"type": "group", "id": "admin"}]
             manage_members = current_communities.service.members.add(
                 system_identity,
                 new_record["id"],
@@ -415,6 +470,26 @@ class GroupCollectionsService(RecordService):
             logger.error(f"Manage members: {pformat(manage_members)}")
         except AlreadyMemberError:
             logger.error("adminstrator role is already a manager")
+
+        # assign the administrative user as the owner of the new collection
+
+        owner_role = accounts_datastore.find_or_create_role(
+            name="group-collections-owner"
+        )
+        accounts_datastore.commit()
+        owner_role_holders = [
+            u for u in accounts_datastore.find_role(owner_role.name).users
+        ]
+        member = current_communities.service.members.add(
+            system_identity,
+            new_record["id"],
+            data={
+                "members": [
+                    {"type": "user", "id": str(owner_role_holders[0].id)}
+                ],
+                "role": "owner",
+            },
+        )
 
         # assign the group roles as members of the new collection
         for coll_perm, remote_roles in invenio_roles.items():
@@ -441,7 +516,9 @@ class GroupCollectionsService(RecordService):
 
         # download the group avatar and upload it to the Invenio instance
         if commons_avatar_url:
-            assert self.update_avatar(commons_avatar_url, new_record["id"])
+            self.update_avatar(commons_avatar_url, new_record["id"])
+
+        Community.index.refresh()
 
         return new_record
 
@@ -516,6 +593,8 @@ class GroupCollectionsService(RecordService):
             logger.error(msg)
             raise UnprocessableEntity(msg)
 
+        Community.index.refresh()
+
         return deleted
 
     def disown(
@@ -555,33 +634,58 @@ class GroupCollectionsService(RecordService):
             the remote group's metadata should be removed from its
             custom_fields.
         """
-        group_members = current_communities.service.members.search(
-            system_identity,
-            collection_id,
-            q=f"+member.type:group +member.id:{remote_instance_name}"
-            f"---{remote_group_id}",
+        logger.info(
+            f"GroupCollectionsService: Disowning collection "
+            f"{collection_slug} from {remote_instance_name} "
+            f"group {remote_group_id}"
         )
+        model_class = current_communities.service.members.record_cls.model_cls
+        query = model_class.query.filter(
+            model_class.group_id.contains(
+                f"{remote_instance_name}---{remote_group_id}"
+            )
+        )
+        group_members = [(g.group_id, g.role) for g in query.all()]
+        logger.info(f"Group members to remove: {group_members}")
 
         individual_memberships = []
         failures = []
         for member_role in group_members:
+            logger.info(f"Group member to remove: {member_role}")
             individuals = GroupRolesComponent.get_current_members_of_group(
-                member_role.id
+                member_role[0]
             )
+            logger.info(f"Individuals: {pformat(individuals)}")
 
             for member in individuals:
                 # assign member to the group collection community
                 # directly with a community role based on their former
                 # group role
                 add_result = add_user_to_community(
-                    member.id, member["role"], collection_id
+                    member.id, member_role[1], collection_id
                 )
                 if add_result:
-                    individual_memberships.append(
-                        (add_result.id, add_result["member"]["role"])
-                    )
+                    individual_memberships.append((member.id, member_role[1]))
+                    logger.info(f"Member {member.id} reassigned successfully.")
                 else:
                     failures.append(member)
+
+            members = (
+                current_communities.service.members.record_cls.get_members(
+                    collection_id,
+                    members=[{"type": "group", "id": member_role[0]}],
+                )
+            )
+            logger.info(f"Members to remove: {pformat(members)}")
+            if members:
+                current_communities.service.members.delete(
+                    system_identity,
+                    collection_id,
+                    data={
+                        "members": [{"id": member_role[0], "type": "group"}]
+                    },
+                )
+
         if failures:
             raise RuntimeError(
                 "Failed to reassign all members to the collection."
@@ -593,15 +697,17 @@ class GroupCollectionsService(RecordService):
         )
         new_data = collection_record.to_dict()
         removals = {
-            "kcr:commons_instance": None,
-            "kcr:commons_group_id": None,
-            "kcr:commons_group_name": None,
-            "kcr:commons_group_description": None,
-            "kcr:commons_group_visibility": None,
+            "kcr:commons_instance": "",
+            "kcr:commons_group_id": "",
+            "kcr:commons_group_name": "",
+            "kcr:commons_group_description": "",
+            "kcr:commons_group_visibility": "",
         }
         new_data["custom_fields"].update(removals)
         new_record = current_communities.service.update(
             system_identity, collection_id, data=new_data
         )
+
+        Community.index.refresh()
 
         return new_record

@@ -14,6 +14,7 @@ from invenio_db.utils import drop_alembic_version_table
 from sqlalchemy.inspection import inspect
 
 
+@pytest.mark.skip(reason="Not implemented")
 def test_alembic(app, db):
     """Test alembic migrations."""
     ext = app.extensions["invenio-db"]

@@ -1,7 +1,10 @@
 from copy import deepcopy
-from celery import shared_task
-from invenio_oauth2server.models import Token
+import json
+from invenio_access.permissions import system_identity
+from invenio_communities import current_communities
 import pytest
+
+from invenio_groups.utils import logger
 
 communities_data = {
     "knowledgeCommons": [
@@ -62,6 +65,7 @@ for instance in communities_data:
                 "member_policy": "open",
                 "record_policy": "open",
                 "review_policy": "closed",
+                "members_visibility": "public",
             },
             "children": {"allow": False},
             "slug": c[2].lower().replace(" ", "-"),
@@ -205,7 +209,7 @@ sample_communities_data = {
             404,
             {
                 "message": "No Works collection found matching the parameters"
-                " +custom_fields.kcr\:commons_instance:nonexistentCommons ",
+                " +_exists_:custom_fields.kcr\:commons_instance +custom_fields.kcr\:commons_instance:nonexistentCommons ",
                 "status": 404,
             },
         ),
@@ -216,7 +220,7 @@ sample_communities_data = {
             404,
             {
                 "message": "No Works collection found matching the parameters"
-                " +custom_fields.kcr\:commons_instance:msuCommons "
+                " +_exists_:custom_fields.kcr\:commons_instance +custom_fields.kcr\:commons_instance:msuCommons "
                 "+custom_fields.kcr\:commons_group_id:77777",
                 "status": 404,
             },
@@ -247,17 +251,19 @@ def test_group_collections_resource_search(
 ):
     sample_communities(app, communities_service)
     expected_json = deepcopy(expected_json_base)
-    actual = client.get(url, follow_redirects=True)
-    assert actual.status_code == expected_response_code
-    if expected_response_code == 200:
 
+    actual = client.get(url, follow_redirects=True)
+
+    assert actual.status_code == expected_response_code
+
+    if expected_response_code == 200:
         if idx == 3:
             expected_json["links"][
                 "next"
             ] = "https://127.0.0.1:5000/api/communities?page=2&q=&size=4&sort=newest"
             expected_json["links"] = {
-                "prev": "https://127.0.0.1:5000/api/communities?page=1&q=&size=4&sort=newest",
-                "self": "https://127.0.0.1:5000/api/communities?page=2&q=&size=4&sort=newest",
+                "prev": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20&size=4&sort=newest",
+                "self": "https://127.0.0.1:5000/api/communities?page=2&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20&size=4&sort=newest",
             }
             for a in expected_json["aggregations"]:
                 for b in expected_json["aggregations"][a]["buckets"]:
@@ -274,7 +280,7 @@ def test_group_collections_resource_search(
                 for b in expected_json["aggregations"][a]["buckets"]:
                     b["doc_count"] = 1
             expected_json["links"] = {
-                "self": "https://127.0.0.1:5000/api/communities?page=1&q=%2Bcustom_fields.kcr%5C%3Acommons_instance%3AknowledgeCommons%20%2Bcustom_fields.kcr%5C%3Acommons_group_id%3A456&size=25&sort=newest"
+                "self": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20%2Bcustom_fields.kcr%5C%3Acommons_instance%3AknowledgeCommons%20%2Bcustom_fields.kcr%5C%3Acommons_group_id%3A456&size=25&sort=newest"
             }
         if idx == 1:
             expected_json["hits"]["total"] = 4
@@ -288,11 +294,11 @@ def test_group_collections_resource_search(
                 for b in expected_json["aggregations"][a]["buckets"]:
                     b["doc_count"] = 4
             expected_json["links"] = {
-                "self": "https://127.0.0.1:5000/api/communities?page=1&q=%2Bcustom_fields.kcr%5C%3Acommons_instance%3AknowledgeCommons%20&size=25&sort=newest"
+                "self": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20%2Bcustom_fields.kcr%5C%3Acommons_instance%3AknowledgeCommons%20&size=25&sort=newest"
             }
         if idx == 0:
             expected_json["links"] = {
-                "self": "https://127.0.0.1:5000/api/communities?page=1&q=&size=25&sort=newest"
+                "self": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20&size=25&sort=newest"
             }
 
         print("actual hits", [h["slug"] for h in actual.json["hits"]["hits"]])
@@ -396,13 +402,14 @@ def test_group_collections_resource_read(
             },
             {
                 "commons_group_id": "1004290",
-                "collection_slug": "the-inklings",
+                "collection": "the-inklings",
             },
             201,
         )
     ],
 )
 def test_group_collections_resource_create(
+    app,
     appctx,
     broker_uri,
     # celery_session_app,
@@ -413,37 +420,209 @@ def test_group_collections_resource_create(
     request_payload,
     expected_json,
     expected_response_code,
+    sample_community1,
     search_clear,
+    requests_mock,
 ):
-    # from pprint import pprint
+    with app.test_client() as client:
+        token_actual = admin.allowed_token
 
-    # pprint(broker_uri)
-    # pprint(celery_session_app.broker_connection)
-    # pprint(celery_session_app.conf)
+        update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
+            "knowledgeCommons"
+        ][
+            "url"
+        ]  # noqa
+        requests_mock.get(
+            update_url.replace("{id}", "1004290"),
+            status_code=200,
+            json=sample_community1["api_response"],
+        )
+        requests_mock.get(
+            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",
+            status_code=404,
+        )
 
-    token_actual = Token.create_personal(
-        "webhook", admin.id, is_internal=False
-    )
-    db.session.commit()
-    print(f"token_actual: {token_actual.client_id}")
+        headers = {
+            "Authorization": f"Bearer {token_actual}",
+            "content-type": "application/json",
+            "accept": "application/json",
+        }
 
-    headers = {
-        "Authorization": f"Bearer {token_actual.client_id}",
-        "content-type": "application/json",
-        "accept": "application/json",
-    }
+        actual_resp = client.post(
+            "/group_collections",
+            data=json.dumps(request_payload),
+            follow_redirects=True,
+            headers=headers,
+        )
+        print(actual_resp.json)
+        assert actual_resp.status_code == expected_response_code
+        actual = actual_resp.json
+        if expected_response_code == 201:
+            assert (
+                actual["commons_group_id"] == expected_json["commons_group_id"]
+            )
+            assert actual["collection"] == expected_json["collection"]
+        else:
+            assert actual == expected_json
 
-    actual_resp = client.post(
-        "/group_collections",
-        json=request_payload,
-        # follow_redirects=True,
-        headers=headers,
-    )
-    print(actual_resp.json)
-    assert actual_resp.status_code == expected_response_code
-    actual = actual_resp.json
-    if expected_response_code == 201:
-        assert actual["commons_group_id"] == expected_json["commons_group_id"]
-        assert actual["collection_slug"] == expected_json["collection_slug"]
-    else:
-        assert actual == expected_json
+
+def test_collections_resource_create_unauthorized(
+    app,
+    appctx,
+    broker_uri,
+    # celery_session_app,
+    client,
+    db,
+    location,
+    sample_community1,
+    search_clear,
+    requests_mock,
+):
+    with app.test_client() as client:
+        token_actual = "invalid-token"
+
+        update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
+            "knowledgeCommons"
+        ][
+            "url"
+        ]  # noqa
+
+        headers = {
+            "Authorization": f"Bearer {token_actual}",
+            "content-type": "application/json",
+            "accept": "application/json",
+        }
+
+        actual_resp = client.post(
+            "/group_collections",
+            data=json.dumps(
+                {
+                    "commons_instance": "knowledgeCommons",
+                    "commons_group_id": "1004290",
+                    "commons_group_name": "The Inklings",
+                    "commons_group_visibility": "public",
+                }
+            ),
+            follow_redirects=True,
+            headers=headers,
+        )
+        assert actual_resp.status_code == 400
+        assert actual_resp.json == {
+            "message": "CSRF cookie not set.",
+            "status": 400,
+        }
+
+
+def test_collections_resource_not_found(
+    app,
+    appctx,
+    broker_uri,
+    # celery_session_app,
+    client,
+    admin,
+    db,
+    location,
+    not_found_response_body,
+    search_clear,
+    requests_mock,
+):
+    with app.test_client() as client:
+        token_actual = admin.allowed_token
+
+        update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
+            "knowledgeCommons"
+        ][
+            "url"
+        ]  # noqa
+
+        requests_mock.get(
+            update_url.replace("{id}", "100429011"),
+            status_code=200,
+            json=not_found_response_body,
+        )
+
+        headers = {
+            "Authorization": f"Bearer {token_actual}",
+            "content-type": "application/json",
+            "accept": "application/json",
+        }
+
+        actual_resp = client.post(
+            "/group_collections",
+            data=json.dumps(
+                {
+                    "commons_instance": "knowledgeCommons",
+                    "commons_group_id": "100429011",
+                    "commons_group_name": "The Inklings",
+                    "commons_group_visibility": "public",
+                }
+            ),
+            follow_redirects=True,
+            headers=headers,
+        )
+        assert actual_resp.status_code == 404
+        assert actual_resp.json == {
+            "message": "No such group 100429011 could be found on Knowledge Commons",
+            "status": 404,
+        }
+
+def test_collections_resource_delete(
+    app,
+    appctx,
+    broker_uri,
+    client,
+    db,
+    location,
+    admin,
+    sample_community1,
+    search_clear,
+    requests_mock,
+):
+    with app.test_client() as client:
+        token_actual = admin.allowed_token
+
+        update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
+            "knowledgeCommons"
+        ][
+            "url"
+        ]  # noqa
+        requests_mock.get(
+            update_url.replace("{id}", "1004290"),
+            status_code=200,
+            json=sample_community1["api_response"],
+        )
+        requests_mock.get(
+            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",
+            status_code=404,
+        )
+
+        headers = {
+            "Authorization": f"Bearer {token_actual}",
+            "content-type": "application/json",
+            "accept": "application/json",
+        }
+
+        created_collection = current_communities.service.create(
+            system_identity,
+            data=sample_community1["creation_payload"],
+        )
+
+
+        actual_resp = client.delete(
+            "/group_collections/collection-the-inklings",
+            follow_redirects=True,
+            headers=headers,
+        )
+        assert actual_resp.status_code == 204
+
+        actual_resp = client.get(
+            "/group_collections/collection-the-inklings",
+            follow_redirects=True,
+            headers=headers,
+        )
+        assert actual_resp.status_code == 404
+        assert actual_resp.json == {
+            "message": "No collection found with the slug collection-the-inklings",
+            "status": 404,
+        }
+)

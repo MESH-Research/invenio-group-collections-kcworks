@@ -37,7 +37,11 @@ from werkzeug.exceptions import (
 )
 
 from .utils import logger
-from .errors import CollectionAlreadyExistsError, CommonsGroupNotFoundError
+from .errors import (
+    CollectionAlreadyExistsError,
+    CollectionNotFoundError,
+    CommonsGroupNotFoundError,
+)
 from .proxies import current_group_collections_service
 
 
@@ -92,7 +96,7 @@ class GroupCollectionsResource(Resource):
             404,
         ),
         CommonsGroupNotFoundError: lambda e: (
-            {"message": str(e.description), "status": 404},
+            {"message": str(e), "status": 404},
             404,
         ),
         BadRequest: lambda e: (
@@ -114,6 +118,10 @@ class GroupCollectionsResource(Resource):
         CollectionAlreadyExistsError: lambda e: (
             {"message": str(e.description), "status": 409},
             409,
+        ),
+        CollectionNotFoundError: lambda e: (
+            {"message": str(e), "status": 404},
+            404,
         ),
         requests.exceptions.ConnectionError: lambda e: (
             {"message": str(e), "status": 503},
@@ -207,9 +215,9 @@ class GroupCollectionsResource(Resource):
             system_identity,
             commons_instance,
             commons_group_id,
-            page,
-            size,
-            sort,
+            sort=sort,
+            size=size,
+            page=page,
         )
 
         return jsonify(results.to_dict()), 200
@@ -227,17 +235,16 @@ class GroupCollectionsResource(Resource):
 
         new_collection = current_group_collections_service.create(
             system_identity,
-            commons_instance,
             commons_group_id,
-            commons_group_name,
-            restore_deleted,
-            commons_group_visibility,
+            commons_instance,
+            restore_deleted=restore_deleted,
+            commons_group_visibility=commons_group_visibility,
         )
 
         # Construct the response
         response_data = {
             "commons_group_id": commons_group_id,
-            "collection": new_collection.slug,
+            "collection": new_collection.data["slug"],
         }
 
         return jsonify(response_data), 201

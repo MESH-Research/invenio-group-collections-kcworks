@@ -30,6 +30,7 @@ if not instance_path:
     instance_path = Path(__file__).parent.parent
 
 log_file_path = Path(instance_path) / "logs" / "invenio-group-collections.log"
+print("log_file_path", log_file_path)
 
 if not log_file_path.exists():
     log_file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -181,7 +182,7 @@ def add_user_to_community(
 
     members = None
     try:
-        payload = [{"type": "user", "id": user_id}]
+        payload = [{"type": "user", "id": str(user_id)}]
         members = current_communities.service.members.add(
             system_identity,
             community_id,

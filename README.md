@@ -25,6 +25,12 @@ https://example.org/api/group_collections
 
 The `group_collections` REST API endpoint allows a Commons instance to create, read, modify, or delete a collection in Invenio owned by a Commons group. This endpoint is not configured to receive all of the metadata required to create or modify group collections. Rather, the `group_collections` endpoint receives minimal signals from a Commons Instance and then obtains the full required metadata via an API callback to the Commons instance.
 
+### Group collection owner
+
+InvenioRDM does not allow groups to be owners of a collection (community). When a collection is created for a group, though, we do not know which of the group's administrators to assign as the individual owner. It is also awkward to change ownership of a collection later on if the group's administrativer personnel change. So the collection is owned by an administrative user who is assigned the role `group-collections-owner`. The group's administrators are then assigned privileges as "managers" of the group collection. This allows them to manage the collection's settings and membership, but not to delete the collection or change its ownership.
+
+Before the invenio_group_collections module can be used, the administrator must create a role called `group-collections-owner` and assign membership in that role to one administrative user account. If multiple user accounts belong to that role, the first user account in the list will be assigned as the owner of group collections. If no user accounts belong to the role, the group collection creation will fail with a NoOwnerAvailable error.
+
 ### Endpoint configuration
 
 The configuration variable `GROUP_COLLECTIONS_METADATA_ENDPOINTS` must be provided in the `invenio.cfg` file in order to use this endpoint. This variable should hold a dictionary whose keys are Commons instance names. The value for each key is a dictionary containing the following keys:

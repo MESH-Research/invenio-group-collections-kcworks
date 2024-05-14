@@ -7,20 +7,233 @@
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
-"""Unit tests for the invenio-groups service."""
+"""Unit tests for the invenio-groups services."""
 
+from invenio_access.permissions import system_identity
+from invenio_accounts import current_accounts
 from invenio_cache import current_cache
+from invenio_communities.communities.records.api import Community
+from invenio_communities.proxies import current_communities
 from invenio_groups.api import GroupsMetadataAPI
-from invenio_groups.service import GroupsMetadataService
-from invenio_groups.proxies import current_groups
-from invenio_search import current_search
+from invenio_groups.errors import (
+    CommonsGroupNotFoundError,
+    CollectionAlreadyExistsError,
+)
+from invenio_groups.service import (
+    GroupsMetadataService,
+    GroupCollectionsService,
+)
+from invenio_groups.proxies import (
+    current_groups,
+    current_group_collections_service as current_collections,
+)
 import marshmallow
 
 # from pprint import pprint
 import pytest
+from invenio_groups.utils import logger
 
 
-def test_service(app, db, superuser_identity, search_clear):
+def test_collections_service_init(app):
+    """Test service initialization."""
+    with app.app_context():
+        ext = current_groups
+        collections_service = ext.collections_service
+        assert collections_service
+        assert isinstance(collections_service, GroupCollectionsService)
+
+
+def test_collections_service_create(
+    app,
+    db,
+    requests_mock,
+    search_clear,
+    sample_community1,
+    location,
+    custom_fields,
+    admin,
+):
+    """Test service creation."""
+    instance_name = "knowledgeCommons"
+    group_remote_id = sample_community1["api_response"]["id"]
+    api_response = sample_community1["api_response"]
+    expected_record = sample_community1["expected_record"]
+
+    with app.app_context():
+        update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
+            "knowledgeCommons"
+        ][
+            "url"
+        ]  # noq"
+        requests_mock.get(
+            update_url.replace("{id}", group_remote_id),
+            json=api_response,
+        )
+        requests_mock.get(
+            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",
+            status_code=404,
+        )
+
+        assert admin.user
+
+        # test record creation
+        actual = current_collections.create(
+            system_identity,
+            group_remote_id,
+            instance_name,
+        )
+        actual_vals = {
+            k: v
+            for k, v in actual.to_dict().items()
+            if k not in ["id", "created", "updated", "links"]
+        }
+        assert actual_vals == {**expected_record, "revision_id": 2}
+
+        actual_slug = actual.data["slug"]
+        community_list = current_communities.service.search(
+            identity=system_identity, q=f"slug:{actual_slug}"
+        ).to_dict()
+        assert len(community_list["hits"]["hits"]) == 1
+
+        read_vals = {
+            k: v
+            for k, v in community_list["hits"]["hits"][0].items()
+            if k not in ["id", "created", "updated", "links"]
+        }
+        assert read_vals == {**expected_record, "revision_id": 2}
+
+
+def test_collections_service_create_not_found(
+    app, db, requests_mock, not_found_response_body, search_clear, location
+):
+    """Test service creation when requested group cannot be found."""
+    with app.app_context():
+        update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
+            "knowledgeCommons"
+        ][
+            "url"
+        ]  # noqa
+        requests_mock.get(
+            update_url.replace("{id}", "1004290111"),
+            status_code=200,
+            headers={
+                "Content-Type": "application/json",
+            },
+            json=not_found_response_body,
+        )
+
+        with pytest.raises(CommonsGroupNotFoundError):
+            current_collections.create(
+                system_identity, "1004290111", "knowledgeCommons"
+            )
+
+
+def test_collections_service_create_already_deleted(
+    app,
+    db,
+    requests_mock,
+    sample_community1,
+    search_clear,
+    location,
+    custom_fields,
+    admin,
+):
+    """Test service creation when a group for the requested community
+    already exists but was deleted.
+    """
+    logger.debug("test_collections_service_create_already_deleted***********")
+    with app.app_context():
+        update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
+            "knowledgeCommons"
+        ][
+            "url"
+        ]  # noqa
+        requests_mock.get(
+            update_url.replace("{id}", "1004290"),
+            status_code=200,
+            json=sample_community1["api_response"],
+        )
+        requests_mock.get(
+            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",
+            status_code=404,
+        )
+
+        admin = admin.user
+        logger.debug("admin.id")
+        logger.debug(admin.id)
+        logger.debug(current_accounts.datastore.get_user(1))
+
+        existing = current_communities.service.create(
+            system_identity, data=sample_community1["creation_metadata"]
+        )
+        Community.index.refresh()
+
+        current_communities.service.delete(system_identity, existing.id)
+
+        Community.index.refresh()
+
+        actual = current_collections.create(
+            system_identity,
+            "1004290",
+            "knowledgeCommons",
+        )
+        actual_data = {
+            k: v
+            for k, v in actual.to_dict().items()
+            if k not in ["id", "created", "updated", "links", "revision_id"]
+        }
+
+        # slug is incremented because of soft-deleted community
+        expected = {
+            **sample_community1["expected_record"],
+            "slug": "the-inklings-1",
+        }
+        assert actual_data == expected
+
+
+def test_collections_service_create_already_exists(
+    app,
+    db,
+    requests_mock,
+    sample_community1,
+    search_clear,
+    location,
+    custom_fields,
+    admin,
+):
+    """Test service creation when a group for the requested community
+    already exists.
+    """
+    logger.debug("test_collections_service_create_already_exists***********")
+    with app.app_context():
+        logger.debug("admin.id")
+        logger.debug(admin.user.id)
+
+        update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
+            "knowledgeCommons"
+        ][
+            "url"
+        ]  # noqa
+        requests_mock.get(
+            update_url.replace("{id}", "1004290"),
+            status_code=200,
+            json=sample_community1["api_response"],
+        )
+        current_communities.service.create(
+            system_identity, data=sample_community1["creation_metadata"]
+        )
+        Community.index.refresh()
+
+        with pytest.raises(CollectionAlreadyExistsError):
+            current_collections.create(
+                system_identity,
+                "1004290",
+                "knowledgeCommons",
+            )
+
+
+@pytest.mark.skip(reason="Not implemented")
+def test_metadata_service_create(app, db, superuser_identity, search_clear):
     """Test service creation."""
     with app.app_context():
         current_cache.clear()
