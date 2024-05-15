@@ -15,4 +15,3 @@ from invenio_group_collections import __version__
 def test_version():
     """Test version import."""
     assert __version__
-

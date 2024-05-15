@@ -186,20 +186,23 @@ class GroupCollectionsService(RecordService):
         collections belonging to that group will be returned.
 
         raises:
-            CommonsGroupNotFoundError: If no collections are found matching the parameters.
+            CommonsGroupNotFoundError: If no collections are found matching
+                the parameters.
             UnprocessableEntityError: If the query parameters are invalid.
 
         returns:
             Returns a CommunityListResult object.
         """
-        query_params = "+_exists_:custom_fields.kcr\:commons_instance "
+        query_params = "+_exists_:custom_fields.kcr\:commons_instance "  # noqa
         if commons_instance:
             query_params += (
-                f"+custom_fields.kcr\:commons_instance:{commons_instance} "
+                f"+custom_fields.kcr\:commons_instance:"  # noqa: W605
+                f"{commons_instance} "
             )
         if commons_group_id:
             query_params += (
-                f"+custom_fields.kcr\:commons_group_id:{commons_group_id}"
+                f"+custom_fields.kcr\:commons_group_id:"  # noqa: W605
+                f"{commons_group_id}"
             )
         community_list = current_communities.service.search(
             identity=identity,
@@ -225,7 +228,7 @@ class GroupCollectionsService(RecordService):
         commons_group_id: str,
         commons_instance: str,
         restore_deleted: bool = False,
-        collection_visibility: str = "private",
+        collection_visibility: str = "restricted",
         **kwargs,
     ) -> CommunityItem:
         """Create a in Invenio collection (community) belonging to a KC group.
@@ -261,8 +264,6 @@ class GroupCollectionsService(RecordService):
         returns:
             The created collection record.
         """
-        errors = []
-
         instance_name = app.config["SSO_SAML_IDPS"][commons_instance]["title"]
         # make API request to commons instance to get group metadata
         commons_group_name = ""
@@ -604,8 +605,8 @@ class GroupCollectionsService(RecordService):
         with permission levels based on their former roles.
 
         The group roles themselves (that were used to assign group memberships
-        in the collection) will not be deleted. This is because the group itself
-        may still exist and may create a new collection in the future.
+        in the collection) will not be deleted. This is because the group
+        itself may still exist and may create a new collection in the future.
         They will only be deleted when the group itself is deleted.
 
         params:

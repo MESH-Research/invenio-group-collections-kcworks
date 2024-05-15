@@ -21,7 +21,7 @@ from invenio_group_collections.service import (
     GroupCollectionsService,
 )
 from invenio_group_collections.proxies import (
-    current_groups,
+    current_group_collections,
     current_group_collections_service as current_collections,
 )
 
@@ -33,7 +33,7 @@ from invenio_group_collections.utils import logger
 def test_collections_service_init(app):
     """Test service initialization."""
     with app.app_context():
-        ext = current_groups
+        ext = current_group_collections
         collections_service = ext.collections_service
         assert collections_service
         assert isinstance(collections_service, GroupCollectionsService)
@@ -66,7 +66,7 @@ def test_collections_service_create(
             json=api_response,
         )
         requests_mock.get(
-            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",
+            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",  # noqa
             status_code=404,
         )
 
@@ -150,7 +150,7 @@ def test_collections_service_create_already_deleted(
             json=sample_community1["api_response"],
         )
         requests_mock.get(
-            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",
+            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",  # noqa
             status_code=404,
         )
 
@@ -226,4 +226,3 @@ def test_collections_service_create_already_exists(
                 "1004290",
                 "knowledgeCommons",
             )
-

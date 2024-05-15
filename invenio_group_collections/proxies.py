@@ -12,7 +12,9 @@
 from flask import current_app
 from werkzeug.local import LocalProxy
 
-current_group_collections = LocalProxy(lambda: current_app.extensions["invenio-group-collections"])
+current_group_collections = LocalProxy(
+    lambda: current_app.extensions["invenio-group-collections"]
+)
 """Proxy to the extension."""
 
 current_group_collections_service = LocalProxy(

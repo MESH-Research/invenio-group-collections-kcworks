@@ -36,4 +36,3 @@ class GroupCollectionsServiceConfig(RecordServiceConfig, ConfiguratorMixin):
     """Community collections service configuration."""
 
     service_id = "group_collections"
-

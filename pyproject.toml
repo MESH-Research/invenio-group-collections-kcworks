@@ -31,7 +31,7 @@ dependencies = [
     "invenio-administration",
     "invenio-communities",
     "invenio-remote-user-data",
-    "invenio-cli = "*"
+    "invenio-cli",
 ]
 requires-python = ">=3.9"
 

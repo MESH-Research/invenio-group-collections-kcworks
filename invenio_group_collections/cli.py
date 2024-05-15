@@ -10,9 +10,11 @@
 import click
 
 """
-A command line interface for administering social group collections in InvenioRDM.
+A command line interface for administering social group collections
+in InvenioRDM.
 
 """
+
 
 @click.group()
 def cli():

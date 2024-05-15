@@ -14,11 +14,9 @@ fixtures are available.
 """
 
 # from traceback import format_exc
-from random import sample
 import traceback
 from invenio_accounts import current_accounts
 import pytest
-from flask_security.utils import hash_password
 from invenio_access.models import ActionRoles, Role
 from invenio_access.permissions import superuser_access, system_identity
 from invenio_administration.permissions import administration_access_action
@@ -41,8 +39,6 @@ from invenio_search.utils import build_alias_name
 from invenio_vocabularies.proxies import current_service as vocabulary_service
 from invenio_vocabularies.records.api import Vocabulary
 import marshmallow as ma
-from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.schema import DropConstraint, DropSequence, DropTable
 
 pytest_plugins = ("celery.contrib.pytest",)
 
@@ -674,8 +670,8 @@ def sample_community1(app, communities_service, user_factory):
             "name": "The Inklings",
             "url": "https://hcommons-dev.org/groups/the-inklings/",
             "visibility": "public",
-            "description": "For scholars interested in J.R.R. Tolkien, C. S. Lewis, Charles Williams, and other writers associated with the Inklings.",
-            "avatar": "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",
+            "description": "For scholars interested in J.R.R. Tolkien, C. S. Lewis, Charles Williams, and other writers associated with the Inklings.",  # noqa
+            "avatar": "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",  # noqa
             "groupblog": "",
             "upload_roles": ["member", "moderator", "administrator"],
             "moderate_roles": ["moderator", "administrator"],
@@ -694,14 +690,14 @@ def sample_community1(app, communities_service, user_factory):
             #     "members": "https://127.0.0.1:5000/api/communities/55d2af81-fa4e-4ac0-866f-a8d99c333c6d/members",  # noqa
             #     "public_members": "https://127.0.0.1:5000/api/communities/55d2af81-fa4e-4ac0-866f-a8d99c333c6d/members/public",  # noqa
             #     "invitations": "https://127.0.0.1:5000/api/communities/55d2af81-fa4e-4ac0-866f-a8d99c333c6d/invitations",  # noqa
-            #     "requests": "https://127.0.0.1:5000/api/communities/55d2af81-fa4e-4ac0-866f-a8d99c333c6d/requests",
+            #     "requests": "https://127.0.0.1:5000/api/communities/55d2af81-fa4e-4ac0-866f-a8d99c333c6d/requests",  # noqa
             #     "records": "https://127.0.0.1:5000/api/communities/55d2af81-fa4e-4ac0-866f-a8d99c333c6d/records",  # noqa # },
             "slug": "the-inklings",
             "metadata": {
                 "title": "The Inklings",
                 "description": "A collection managed by The Inklings, a Knowledge Commons group",  # noqa
                 "curation_policy": "",
-                "page": "This is a collection of works curated by The Inklings, a Knowledge Commons group",
+                "page": "This is a collection of works curated by The Inklings, a Knowledge Commons group",  # noqa
                 "website": "https://hcommons-dev.org/groups/the-inklings/",  # noqa
                 "organizations": [
                     {"name": "The Inklings"},

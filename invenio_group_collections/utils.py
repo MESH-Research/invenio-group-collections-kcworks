@@ -53,7 +53,8 @@ def convert_remote_roles(
     upload_roles: list,
     other_roles: list = ["member"],
 ) -> dict:
-    """Convert remote group roles to Invenio group names organized by their community permissions role level.
+    """Convert remote group roles to Invenio group names organized by
+    their community permissions role level.
 
     params:
         slug: The slug of the group in Invenio. Should have the form
@@ -122,7 +123,8 @@ def make_group_slug(
     If the slug already exists then
     - if the collection belongs to another group, it will append an
     incrementer number to the slug.
-    - if the collection belongs to this group but is deleted, it will append an incrementer to the slug but return the deleted group's slug as well.
+    - if the collection belongs to this group but is deleted, it will append
+    an incrementer to the slug but return the deleted group's slug as well.
     - if the collection belongs to this group and is not deleted, it will
     raise a RuntimeError.
 

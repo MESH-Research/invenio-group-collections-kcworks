@@ -205,7 +205,7 @@ sample_communities_data = {
             404,
             {
                 "message": "No Works collection found matching the parameters"
-                " +_exists_:custom_fields.kcr\:commons_instance +custom_fields.kcr\:commons_instance:nonexistentCommons ",
+                " +_exists_:custom_fields.kcr\:commons_instance +custom_fields.kcr\:commons_instance:nonexistentCommons ",  # noqa
                 "status": 404,
             },
         ),
@@ -216,8 +216,8 @@ sample_communities_data = {
             404,
             {
                 "message": "No Works collection found matching the parameters"
-                " +_exists_:custom_fields.kcr\:commons_instance +custom_fields.kcr\:commons_instance:msuCommons "
-                "+custom_fields.kcr\:commons_group_id:77777",
+                " +_exists_:custom_fields.kcr\:commons_instance +custom_fields.kcr\:commons_instance:msuCommons "  # noqa
+                "+custom_fields.kcr\:commons_group_id:77777",  # noqa: W605
                 "status": 404,
             },
         ),
@@ -256,10 +256,10 @@ def test_group_collections_resource_search(
         if idx == 3:
             expected_json["links"][
                 "next"
-            ] = "https://127.0.0.1:5000/api/communities?page=2&q=&size=4&sort=newest"
+            ] = "https://127.0.0.1:5000/api/communities?page=2&q=&size=4&sort=newest"  # noqa
             expected_json["links"] = {
-                "prev": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20&size=4&sort=newest",
-                "self": "https://127.0.0.1:5000/api/communities?page=2&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20&size=4&sort=newest",
+                "prev": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20&size=4&sort=newest",  # noqa
+                "self": "https://127.0.0.1:5000/api/communities?page=2&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20&size=4&sort=newest",  # noqa
             }
             for a in expected_json["aggregations"]:
                 for b in expected_json["aggregations"][a]["buckets"]:
@@ -276,7 +276,7 @@ def test_group_collections_resource_search(
                 for b in expected_json["aggregations"][a]["buckets"]:
                     b["doc_count"] = 1
             expected_json["links"] = {
-                "self": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20%2Bcustom_fields.kcr%5C%3Acommons_instance%3AknowledgeCommons%20%2Bcustom_fields.kcr%5C%3Acommons_group_id%3A456&size=25&sort=newest"
+                "self": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20%2Bcustom_fields.kcr%5C%3Acommons_instance%3AknowledgeCommons%20%2Bcustom_fields.kcr%5C%3Acommons_group_id%3A456&size=25&sort=newest"  # noqa
             }
         if idx == 1:
             expected_json["hits"]["total"] = 4
@@ -290,11 +290,11 @@ def test_group_collections_resource_search(
                 for b in expected_json["aggregations"][a]["buckets"]:
                     b["doc_count"] = 4
             expected_json["links"] = {
-                "self": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20%2Bcustom_fields.kcr%5C%3Acommons_instance%3AknowledgeCommons%20&size=25&sort=newest"
+                "self": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20%2Bcustom_fields.kcr%5C%3Acommons_instance%3AknowledgeCommons%20&size=25&sort=newest"  # noqa
             }
         if idx == 0:
             expected_json["links"] = {
-                "self": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20&size=25&sort=newest"
+                "self": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20&size=25&sort=newest"  # noqa
             }
 
         print("actual hits", [h["slug"] for h in actual.json["hits"]["hits"]])
@@ -433,7 +433,7 @@ def test_group_collections_resource_create(
             json=sample_community1["api_response"],
         )
         requests_mock.get(
-            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",
+            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",  # noqa
             status_code=404,
         )
 
@@ -475,12 +475,6 @@ def test_collections_resource_create_unauthorized(
 ):
     with app.test_client() as client:
         token_actual = "invalid-token"
-
-        update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
-            "knowledgeCommons"
-        ][
-            "url"
-        ]  # noqa
 
         headers = {
             "Authorization": f"Bearer {token_actual}",
@@ -555,7 +549,8 @@ def test_collections_resource_not_found(
         )
         assert actual_resp.status_code == 404
         assert actual_resp.json == {
-            "message": "No such group 100429011 could be found on Knowledge Commons",
+            "message": ("No such group 100429011 could be found on "
+                        "Knowledge Commons"),
             "status": 404,
         }
 
@@ -587,7 +582,7 @@ def test_collections_resource_delete(
             json=sample_community1["api_response"],
         )
         requests_mock.get(
-            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",
+            "https://hcommons-dev.org/app/plugins/buddypress/bp-core/images/mystery-group.png",  # noqa
             status_code=404,
         )
 

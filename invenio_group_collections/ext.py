@@ -7,7 +7,8 @@
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
-"""Extension providing collections administered by remote social groups for InvenioRDM."""
+"""Extension providing collections administered by remote social groups
+for InvenioRDM."""
 
 from invenio_group_collections.views import (
     GroupCollectionsResource,
