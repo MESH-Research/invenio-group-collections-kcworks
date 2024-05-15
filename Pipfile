@@ -15,8 +15,8 @@ invenio-administration = "*"
 invenio-communities = "*"
 invenio-remote-user-data = {file = "../invenio-remote-user-data", editable = true}
 requests-mock = "*"
-invenio-groups = {file = ".", editable = true}
 invenio-cli = "*"
+invenio-group-collections = {file = ".", editable = true}
 
 [dev-packages]
 

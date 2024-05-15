@@ -1,11 +1,11 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "invenio-groups"
-version = "2023.07.05"
-description = "Provides social groups infrastructure for InvenioRDM"
+name = "invenio-group-collections"
+version = "2024.05.14"
+description = "Provides collections administered by remote social groups for InvenioRDM"
 readme = "README.md"
 authors = [{ name = "MESH Research", email = "scottia4@msu.edu" }]
 license = { file = "LICENSE" }
@@ -22,7 +22,16 @@ classifiers = [
 ]
 keywords = ["invenio", "inveniordm", "groups", "social", "research"]
 dependencies = [
-    "click>=7.0"
+    "click>=7.0",
+    "invenio-app-rdm~=12.0.0b2.dev72",
+    "docker-services-cli",
+    "check-manifest",
+    "psycopg2",
+    "opensearch-dsl",
+    "invenio-administration",
+    "invenio-communities",
+    "invenio-remote-user-data",
+    "invenio-cli = "*"
 ]
 requires-python = ">=3.9"
 
@@ -31,38 +40,27 @@ dev = [
     "check-manifest",
     "pip-tools",
     "pytest>=7.3.2",
+    "pytest-invenio",
     "pytest-runner",
+    "requests-mock",
 ]
 
 
 [project.urls]
-Homepage = "https://github.com/MESH-Research/invenio-groups"
-
+Homepage = "https://github.com/MESH-Research/invenio-group-collections"
 
 [tool.pytest.ini_options]
 addopts = "--doctest-glob='*.rst' --doctest-modules"
-testpaths = [ "tests", "invenio_groups" ]
+testpaths = [ "tests", "invenio_group_collections" ]
 
 [project.scripts]
-invenio-groups = "invenio_groups.cli:cli"
-
-[project.entry-points."invenio_db.models"]
-invenio_groups = "invenio_groups.models"
-
-[project.entry-points."invenio_db.alembic"]
-invenio_groups = "invenio_groups:alembic"
+invenio-group-collections = "invenio_group_collections.cli:cli"
 
 [project.entry-points."invenio_base.apps"]
-invenio_groups = "invenio_groups.ext:InvenioGroups"
+invenio_group_collections = "invenio_group_collections.ext:InvenioGroupCollections"
 
 [project.entry-points."invenio_base.api_apps"]
-invenio_groups = "invenio_groups.ext:InvenioGroups"
+invenio_group_collections = "invenio_group_collections.ext:InvenioGroupCollections"
 
 [project.entry-points."invenio_base.api_blueprints"]
-invenio_groups = "invenio_groups.views:create_api_blueprint"
-
-[project.entry-points."invenio_jsonschemas.schemas"]
-invenio_groups = "invenio_groups.jsonschemas"
-
-[project.entry-points."invenio_search.mappings"]
-invenio_groups = "invenio_groups.mappings"
+invenio_group_collections = "invenio_group_collections.views:create_api_blueprint"

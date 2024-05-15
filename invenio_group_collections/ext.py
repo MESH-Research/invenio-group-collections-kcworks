@@ -1,31 +1,29 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the invenio-groups package.
-# Copyright (C) 2023, MESH Research.
+# This file is part of the invenio-group-collections package.
+# Copyright (C) 2024, MESH Research.
 #
-# invenio-groups is free software; you can redistribute it
+# invenio-group-collections is free software; you can redistribute it
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
-"""Groups extension for Invenio."""
+"""Extension providing collections administered by remote social groups for InvenioRDM."""
 
-from invenio_groups.views import (
+from invenio_group_collections.views import (
     GroupCollectionsResource,
     GroupCollectionsResourceConfig,
 )
 from . import config
 from .service_config import (
     GroupCollectionsServiceConfig,
-    GroupsMetadataServiceConfig,
 )
 from .service import (
     GroupCollectionsService,
-    GroupsMetadataService,
 )
 
 
-class InvenioGroups(object):
-    """Invenio-Groups extension."""
+class InvenioGroupCollections(object):
+    """Invenio-Group-Collections extension."""
 
     def __init__(self, app=None, **kwargs):
         """Extension initialization."""
@@ -40,13 +38,10 @@ class InvenioGroups(object):
         self.init_config(app)
         self.init_service(app)
         self.init_resources(app)
-        app.extensions["invenio-groups"] = self
+        app.extensions["invenio-group-collections"] = self
 
     def init_service(self, app):
         """Initialize service."""
-        self.service = GroupsMetadataService(
-            GroupsMetadataServiceConfig.build(app)
-        )
         self.collections_service = GroupCollectionsService(
             GroupCollectionsServiceConfig.build(app)
         )
@@ -56,9 +51,6 @@ class InvenioGroups(object):
 
         :param app: The Flask application.
         """
-        for k in dir(config):
-            if k.startswith("GROUPS_"):
-                app.config.setdefault(k, getattr(config, k))
         for k in dir(config):
             if k.startswith("GROUP_COLLECTIONS_"):
                 app.config.setdefault(k, getattr(config, k))

@@ -1,12 +1,14 @@
-# -*- coding: utf-8 -*- # # This file is part of the invenio-groups package.
-# Copyright (C) 2023-2024, MESH Research.
-# invenio-groups is free software; you can redistribute it
+# -*- coding: utf-8 -*-
+#
+# This file is part of the invenio-group-collections package.
+# Copyright (C) 2024, MESH Research.
+#
+# invenio-group-collections is free software; you can redistribute it
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
 """Views for Commons group collections API endpoints."""
 
-# from flask import render_template
 from flask import (
     jsonify,
 )
@@ -57,23 +59,12 @@ class GroupCollectionsResourceConfig(ResourceConfig):
     default_content_type = "application/json"
 
     response_handlers = {
-        # Define JSON serializer for "application/json"
         "application/json": ResponseHandler(JSONSerializer())
     }
 
     request_body_parsers = {
         "application/json": RequestBodyParser(JSONDeserializer())
     }
-
-    # request_data = request_body_parser(
-    #     parsers=from_conf("request_body_parsers"),
-    #     default_content_type=from_conf("default_content_type"),
-    # )
-
-
-# request_headers = request_parser(
-#     {"if_match": ma.fields.Int()}, location="headers"
-# )
 
 
 class GroupCollectionsResource(Resource):
@@ -227,10 +218,9 @@ class GroupCollectionsResource(Resource):
     def create(self):
         commons_instance = resource_requestctx.data.get("commons_instance")
         commons_group_id = resource_requestctx.data.get("commons_group_id")
-        commons_group_name = resource_requestctx.data.get("commons_group_name")
         restore_deleted = resource_requestctx.args.get("restore_deleted")
-        commons_group_visibility = resource_requestctx.data.get(
-            "commons_group_visibility"
+        collection_visibility = resource_requestctx.data.get(
+            "collection_visibility"
         )
 
         new_collection = current_group_collections_service.create(
@@ -238,7 +228,7 @@ class GroupCollectionsResource(Resource):
             commons_group_id,
             commons_instance,
             restore_deleted=restore_deleted,
-            commons_group_visibility=commons_group_visibility,
+            collection_visibility=collection_visibility,
         )
 
         # Construct the response
@@ -311,7 +301,8 @@ class GroupCollectionsResource(Resource):
 
         # Return appropriate response status
         return (
-            f"Successfully deleted collection {deleted_collection.slug} "
+            f"Successfully deleted collection "
+            f"{deleted_collection.data['slug']} "
             f"along with its user roles for {commons_instance} group "
             f"{commons_group_id}",
             204,
@@ -325,7 +316,7 @@ class GroupCollectionsResource(Resource):
 def create_api_blueprint(app):
     """Register blueprint on api app."""
 
-    ext = app.extensions["invenio-groups"]
+    ext = app.extensions["invenio-group-collections"]
     blueprint = ext.group_collections_resource.as_blueprint()
 
     return blueprint

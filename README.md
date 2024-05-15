@@ -3,7 +3,11 @@
 Copyright 2024 Mesh Research
 Contributors: Ian Scott
 
-Social groups integration between the InvenioRDM repository system and a Knowledge Commons instance as a part of *Knowledge Commons Works*. The package provides integration between Commons groups and InvenioRDM collections. It exposes a `group_collections` API endpoint that can be used for automatic creation of an InvenioRDM record collection linked to a Commons group. Updates to Commons Search for group collection events is not handled in this package but rather in the `invenio_remote_api_provisioner` package. Updates to Commons group metadata in a linked Invenio collection are handled by the `invenio_remote_user_data` package.
+The package provides integration between Commons groups and InvenioRDM collections (communities). It exposes a `group_collections` API endpoint that can be used for automatic creation of an InvenioRDM record collection linked to a group on a remote service. This package is intended for use with the Knowledge Commons Works instance of InvenioRDM, although it could be customized to work with other instances. If there is interest in using this package with other instances, please contact the package maintainer to discuss how the package could be updated to work for your use case.
+
+This package is also intended to be used in conjunction with the `invenio_remote_user_data` package, which provides a similar integration between group and user metadata from a remote service and InvenioRDM.
+
+Updates to external apis (like a search index) for group collection events is not handled in this package but rather in the `invenio_remote_api_provisioner` package. Updates to Commons group metadata in a linked Invenio collection are handled by the `invenio_remote_user_data` package.
 
 (Note: The Knowledge Commons Works instance of InvenioRDM uses the term "collection" in place of the default term "community" employed in standard InvenioRDM installations.)
 
@@ -562,6 +566,19 @@ The POST request will trigger a callback to the Commons instance to get the meta
 
 If the metadata returned from the Commons instance includes a url for an avatar, that avatar will be downloaded and stored in the Invenio instance's file storage. Since we do not want to use a placeholder avatar for the group, the instance's configuration can include a `placeholder_avatar` key. If the file name or last segment of the supplied avatar url matches this `placeholder_avatar` value, it will be ignored.
 
+#### Permissions and access in newly created collections
+
+By default, the newly created collection will have the following access settings:
+
+- Visibility: "restricted"
+- Member policy: "closed"
+- Record policy: "closed"
+- Review policy: "closed"
+
+They will not appear in any search results or be visible to non-members of the collection. Users who are not group members will not be able to request membership, and all submissions to the group will be held for review by the collection curators.
+
+The collection's administrators can change these settings in the Invenio UI.
+
 #### Handling group name changes
 
 Note that when a collection is created for a group, the collection's slug will be generated from the group's name. If the group's name is changed in the Commons instance, the collection's slug will not be automatically updated. This is to avoid breaking links to the collection. If the group's name is changed, the collection's slug will remain the same, but the collection's metadata will be updated to reflect the new group name.
@@ -577,6 +594,16 @@ If a group collection is deleted, its slug will be reserved in the Invenio PID s
 In future it may be possible to restore deleted collections, but this is not currently implemented.
 <!-- TODO: Implement collection restoration -->
 
+#### Request body
+
+The request body must be a JSON object with the following fields:
+
+| Field name | Required | Description |
+| -----------|----------|-------------|
+| `commons_instance` | Y | The name of the Commons instance to which the group belongs. This must be the same string used to identify the instance in the `GROUP_COLLECTIONS_METADATA_ENDPOINTS` config variable. |
+| `commons_group_id` | Y | The ID of the Commons group that will own the collection. |
+| `collection_visibility` | N | The visibility setting for the collection to be created. Must be either "public" or "restricted". [default: "restricted"]|
+
 #### Request
 
 ```http
@@ -589,10 +616,11 @@ POST https://example.org/api/group_collections HTTP/1.1
 {
     "commons_instance": "knowledgeCommons",
     "commons_group_id": "12345",
-    "commons_group_name": "Panda Research Group",
-    "commons_group_visibility": "public",
+    "collection_visibility": "public",
 }
 ```
+
+
 
 #### Successful response status code
 
@@ -638,7 +666,7 @@ PATCH https://example.org/api/group_collections/my-collection-slug HTTP/1.1
     "old_commons_group_id": "12345",
     "new_commons_group_id": "67890",
     "new_commons_group_name": "My Group",
-    "new_commons_group_visibility": "public",
+    "collection_visibility": "public",
 }
 ```
 
@@ -707,13 +735,7 @@ The module will log each POST, PATCH, or DELETE request to the `group_collection
 
 ### Endpoint security
 
-The endpoint is secured by a token that must be obtained by the Commons instance administrator from the Knowledge Commons Works administrator. The token must be provided in the "Authorization" request header.
-
-## Utility functions
-
-### `utils.make_group_slug`
-
-This function takes a string and returns a slug suitable for use as a URL slug for a group collection. The slug is generated by converting the string to lowercase, replacing spaces with hyphens, and removing any characters that are not alphanumeric or hyphens. The slug is also truncated to 50 characters to ensure that it fits within the Invenio database constraints.
+POST, PUT, and DELETE requests to the endpoint are secured by an oauth token that must be obtained by the Commons instance administrator from the Knowledge Commons Works administrator. The token must be provided in the "Authorization" request header.
 
 ## Versions
 

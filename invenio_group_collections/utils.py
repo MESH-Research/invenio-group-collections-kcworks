@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the invenio-groups
-# Copyright (C) 2023-2024, MESH Research.
+# This file is part of the invenio-group-collections package.
+# Copyright (C) 2024, MESH Research.
 #
-# invenio-groups is free software; you can redistribute it
+# invenio-group-collections is free software; you can redistribute it
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
-"""Utility functions for invenio-groups."""
+"""Utility functions for invenio-group-collections."""
 
 from flask import current_app
 from invenio_access.permissions import system_identity
@@ -53,7 +53,7 @@ def convert_remote_roles(
     upload_roles: list,
     other_roles: list = ["member"],
 ) -> dict:
-    """Convert remote group roles to Invenio community permissions roles.
+    """Convert remote group roles to Invenio group names organized by their community permissions role level.
 
     params:
         slug: The slug of the group in Invenio. Should have the form
@@ -67,8 +67,8 @@ def convert_remote_roles(
             converted to the Invenio "reader" role. Defaults to ["member"].
 
     returns:
-        Returns a dictionary with the remote group roles as keys and the
-        corresponding Invenio community permissions roles as values.
+        Returns a dictionary with the community permission levels as keys
+        and the corresponding Invenio group names as values.
     """
     invenio_roles = {}
     seen_roles = []

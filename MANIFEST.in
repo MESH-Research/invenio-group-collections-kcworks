@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2023 MESH Research
+# This file is part of the invenio-group-collections package.
+# Copyright (C) 2024, MESH Research.
 #
-# invenio-subjects-fast is free software; you can redistribute it and/or
-# modify it under the terms of the MIT License; see LICENSE file for more
-# details.
+# invenio-group-collections is free software; you can redistribute it
+# and/or modify it under the terms of the MIT License; see
+# LICENSE file for more details.
 
 # Update this manifest file by running the following commands:
 # (please sort the lines in this file after running below commands)
@@ -19,18 +20,17 @@ include *.sh
 include *.txt
 include Pipfile
 exclude .DS_Store
-exclude invenio_groups/alembic/script.py.mako
 recursive-include tests .gitkeep
 recursive-include tests *.py
 recursive-exclude tests .DS_Store
-recursive-include invenio_groups .gitkeep
-recursive-include invenio_groups *.py
-recursive-include invenio_groups *.json
-recursive-include invenio_groups *.log
-recursive-exclude invenio_groups .DS_Store
+recursive-include invenio_group_collections .gitkeep
+recursive-include invenio_group_collections *.py
+recursive-include invenio_group_collections *.json
+recursive-include invenio_group_collections *.log
+recursive-exclude invenio_group_collections .DS_Store
 
 # added by check-manifest
 recursive-include tests *.lock
 
 # added by check-manifest
-recursive-include invenio_groups *.mako
+recursive-include invenio_group_collections *.mako

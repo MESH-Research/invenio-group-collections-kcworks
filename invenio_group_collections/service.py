@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the invenio-groups package.
-# Copyright (C) 2023, MESH Research.
+# This file is part of the invenio-group-collections package.
+# Copyright (C) 2024, MESH Research.
 #
-# invenio-groups is free software; you can redistribute it
+# invenio-group-collections is free software; you can redistribute it
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
-from email.mime import base
 from flask import current_app as app
 from flask_principal import Identity
-from invenio_accounts import current_accounts
 from invenio_accounts.proxies import current_datastore as accounts_datastore
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
@@ -27,15 +25,12 @@ from invenio_communities.members.errors import AlreadyMemberError
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.services.records.service import RecordService
 from invenio_remote_user_data.components.groups import GroupRolesComponent
-from invenio_users_resources.proxies import (
-    current_users_service as current_users,
-)
 from io import BytesIO
 import marshmallow as ma
 import os
 from pprint import pformat
 import requests
-from typing import Optional, Union
+from typing import Optional
 from werkzeug.exceptions import (
     Forbidden,
     NotFound,
@@ -57,14 +52,6 @@ from .utils import (
     convert_remote_roles,
     add_user_to_community,
 )
-
-
-class GroupsMetadataService(RecordService):
-    """Service for managing group metadata records."""
-
-    def __init__(self, config: dict = {}, **kwargs):
-        """Constructor."""
-        super().__init__(config=config, **kwargs)
 
 
 class GroupCollectionsService(RecordService):
@@ -238,6 +225,7 @@ class GroupCollectionsService(RecordService):
         commons_group_id: str,
         commons_instance: str,
         restore_deleted: bool = False,
+        collection_visibility: str = "private",
         **kwargs,
     ) -> CommunityItem:
         """Create a in Invenio collection (community) belonging to a KC group.
@@ -375,7 +363,7 @@ class GroupCollectionsService(RecordService):
         new_record = None
         data = {
             "access": {
-                "visibility": "restricted",
+                "visibility": collection_visibility,
                 "member_policy": "closed",
                 "record_policy": "closed",
                 "review_policy": "closed",

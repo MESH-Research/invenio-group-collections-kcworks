@@ -1,10 +1,6 @@
 from copy import deepcopy
 import json
-from invenio_access.permissions import system_identity
-from invenio_communities import current_communities
 import pytest
-
-from invenio_groups.utils import logger
 
 communities_data = {
     "knowledgeCommons": [
@@ -397,8 +393,7 @@ def test_group_collections_resource_read(
             {
                 "commons_instance": "knowledgeCommons",
                 "commons_group_id": "1004290",
-                "commons_group_name": "The Inklings",
-                "commons_group_visibility": "public",
+                "collection_visibility": "public",
             },
             {
                 "commons_group_id": "1004290",
@@ -499,8 +494,7 @@ def test_collections_resource_create_unauthorized(
                 {
                     "commons_instance": "knowledgeCommons",
                     "commons_group_id": "1004290",
-                    "commons_group_name": "The Inklings",
-                    "commons_group_visibility": "public",
+                    "collection_visibility": "public",
                 }
             ),
             follow_redirects=True,
@@ -553,8 +547,7 @@ def test_collections_resource_not_found(
                 {
                     "commons_instance": "knowledgeCommons",
                     "commons_group_id": "100429011",
-                    "commons_group_name": "The Inklings",
-                    "commons_group_visibility": "public",
+                    "collection_visibility": "public",
                 }
             ),
             follow_redirects=True,
@@ -565,6 +558,7 @@ def test_collections_resource_not_found(
             "message": "No such group 100429011 could be found on Knowledge Commons",
             "status": 404,
         }
+
 
 def test_collections_resource_delete(
     app,
@@ -577,6 +571,7 @@ def test_collections_resource_delete(
     sample_community1,
     search_clear,
     requests_mock,
+    custom_fields,
 ):
     with app.test_client() as client:
         token_actual = admin.allowed_token
@@ -602,27 +597,50 @@ def test_collections_resource_delete(
             "accept": "application/json",
         }
 
-        created_collection = current_communities.service.create(
-            system_identity,
-            data=sample_community1["creation_payload"],
-        )
-
+        created_collection = sample_community1["create_func"]()
+        assert created_collection.data["slug"] == "the-inklings"
 
         actual_resp = client.delete(
-            "/group_collections/collection-the-inklings",
+            "/group_collections/the-inklings",
+            follow_redirects=True,
+            headers=headers,
+        )
+        assert actual_resp.status_code == 400
+        assert actual_resp.json == {
+            "message": "No commons_instance provided",
+            "status": 400,
+        }
+
+        actual_resp = client.delete(
+            "/group_collections/the-inklings",
+            query_string={"commons_instance": "knowledgeCommons"},
+            follow_redirects=True,
+            headers=headers,
+        )
+        assert actual_resp.status_code == 400
+        assert actual_resp.json == {
+            "message": "No commons_group_id provided",
+            "status": 400,
+        }
+
+        actual_resp = client.delete(
+            "/group_collections/the-inklings",
+            query_string={
+                "commons_instance": "knowledgeCommons",
+                "commons_group_id": "1004290",
+            },
             follow_redirects=True,
             headers=headers,
         )
         assert actual_resp.status_code == 204
 
         actual_resp = client.get(
-            "/group_collections/collection-the-inklings",
+            "/group_collections/the-inklings",
             follow_redirects=True,
             headers=headers,
         )
         assert actual_resp.status_code == 404
         assert actual_resp.json == {
-            "message": "No collection found with the slug collection-the-inklings",
+            "message": "No collection found with the slug the-inklings",
             "status": 404,
         }
-)

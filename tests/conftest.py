@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2023 MESH Research
+# This file is part of the invenio-group-collections package.
+# Copyright (C) 2024, MESH Research.
 #
-# invenio-groups is free software; you can redistribute it and/or
-# modify it under the terms of the MIT License; see LICENSE file for more
-# details.
+# invenio-group-collections is free software; you can redistribute it
+# and/or modify it under the terms of the MIT License; see
+# LICENSE file for more details.
 
-"""Pytest configuration for invenio-groups.
+"""Pytest configuration for invenio-group-collections.
 
 See https://pytest-invenio.readthedocs.io/ for documentation on which test
 fixtures are available.
@@ -320,21 +321,6 @@ def app_config(app_config) -> dict:
     for k, v in test_config.items():
         app_config[k] = v
     return app_config
-
-
-@compiles(DropTable, "postgresql")
-def _compile_drop_table(element, compiler, **kwargs):
-    return compiler.visit_drop_table(element) + " CASCADE"
-
-
-@compiles(DropConstraint, "postgresql")
-def _compile_drop_constraint(element, compiler, **kwargs):
-    return compiler.visit_drop_constraint(element) + " CASCADE"
-
-
-@compiles(DropSequence, "postgresql")
-def _compile_drop_sequence(element, compiler, **kwargs):
-    return compiler.visit_drop_sequence(element) + " CASCADE"
 
 
 @pytest.fixture(scope="module")
@@ -681,7 +667,7 @@ def not_found_response_body():
 
 
 @pytest.fixture(scope="function")
-def sample_community1():
+def sample_community1(app, communities_service, user_factory):
     sample1 = {
         "api_response": {
             "id": "1004290",
@@ -709,8 +695,7 @@ def sample_community1():
             #     "public_members": "https://127.0.0.1:5000/api/communities/55d2af81-fa4e-4ac0-866f-a8d99c333c6d/members/public",  # noqa
             #     "invitations": "https://127.0.0.1:5000/api/communities/55d2af81-fa4e-4ac0-866f-a8d99c333c6d/invitations",  # noqa
             #     "requests": "https://127.0.0.1:5000/api/communities/55d2af81-fa4e-4ac0-866f-a8d99c333c6d/requests",
-            #     "records": "https://127.0.0.1:5000/api/communities/55d2af81-fa4e-4ac0-866f-a8d99c333c6d/records",  # noqa
-            # },
+            #     "records": "https://127.0.0.1:5000/api/communities/55d2af81-fa4e-4ac0-866f-a8d99c333c6d/records",  # noqa # },
             "slug": "the-inklings",
             "metadata": {
                 "title": "The Inklings",
@@ -757,4 +742,44 @@ def sample_community1():
             "children",
         ]
     }
+
+    def create_sample1():
+        rec = communities_service.create(
+            identity=system_identity, data=sample1["creation_metadata"]
+        )
+
+        for r in [
+            "knowledgeCommons---1004290|admin",
+            "knowledgeCommons---1004290|moderator",
+            "knowledgeCommons---1004290|member",
+            "knowledgeCommons---1004290|administrator",
+        ]:
+            current_accounts.datastore.find_or_create_role(r)
+
+        myuser = user_factory()
+
+        current_accounts.datastore.add_role_to_user(
+            myuser.user, "knowledgeCommons---1004290|admin"
+        )
+
+        communities_service.members.add(
+            system_identity,
+            rec.id,
+            data={
+                "members": [
+                    {
+                        "id": "knowledgeCommons---1004290|admin",
+                        "type": "group",
+                    }
+                ],
+                "role": "manager",
+            },
+        )
+
+        Community.index.refresh()
+
+        return rec
+
+    sample1["create_func"] = create_sample1
+
     return sample1

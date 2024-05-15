@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2023 MESH Research
 #
-# invenio-groups is free software; you can redistribute it and/or
+# invenio-group-collections is free software; you can redistribute it and/or
 # modify it under the terms of the MIT License; see LICENSE file for more
 # details.
 
@@ -34,20 +34,19 @@ extras_require['all'] = []
 for reqs in extras_require.values():
     extras_require['all'].extend(reqs)
 
-packages = find_packages(include=['invenio_groups',
-                                  'invenio_groups.*',
-                                  'invenio_groups/alembic'])
+packages = find_packages(include=['invenio_group_collections',
+                                  'invenio_group_collections.*'])
 
 setup(
-    name='invenio-groups',
+    name='invenio-group-collections',
     description=__doc__,
     long_description=readme + '\n\n' + history,
     long_description_content_type='text/markdown',
-    keywords='invenio inveniordm groups social',
+    keywords='invenio inveniordm groups collections social',
     license='MIT',
     author='MESH Research',
     author_email='scottia4@msu.edu',
-    url='https://github.com/MESH-Research/invenio-groups',
+    url='https://github.com/MESH-Research/invenio-group-collections',
     packages=packages,
     include_package_data=True,
     platforms='any',
