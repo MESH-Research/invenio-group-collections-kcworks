@@ -27,7 +27,6 @@ from invenio_group_collections.proxies import (
 
 # from pprint import pprint
 import pytest
-from invenio_group_collections.utils import logger
 
 
 def test_collections_service_init(app):
@@ -137,7 +136,9 @@ def test_collections_service_create_already_deleted(
     """Test service creation when a group for the requested community
     already exists but was deleted.
     """
-    logger.debug("test_collections_service_create_already_deleted***********")
+    app.logger.debug(
+        "test_collections_service_create_already_deleted***********"
+    )
     with app.app_context():
         update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
             "knowledgeCommons"
@@ -155,9 +156,9 @@ def test_collections_service_create_already_deleted(
         )
 
         admin = admin.user
-        logger.debug("admin.id")
-        logger.debug(admin.id)
-        logger.debug(current_accounts.datastore.get_user(1))
+        app.logger.debug("admin.id")
+        app.logger.debug(admin.id)
+        app.logger.debug(current_accounts.datastore.get_user(1))
 
         existing = current_communities.service.create(
             system_identity, data=sample_community1["creation_metadata"]
@@ -200,10 +201,12 @@ def test_collections_service_create_already_exists(
     """Test service creation when a group for the requested community
     already exists.
     """
-    logger.debug("test_collections_service_create_already_exists***********")
+    app.logger.debug(
+        "test_collections_service_create_already_exists***********"
+    )
     with app.app_context():
-        logger.debug("admin.id")
-        logger.debug(admin.user.id)
+        app.logger.debug("admin.id")
+        app.logger.debug(admin.user.id)
 
         update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
             "knowledgeCommons"

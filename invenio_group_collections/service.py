@@ -47,7 +47,6 @@ from .errors import (
     RoleNotCreatedError,
 )
 from .utils import (
-    logger,
     make_base_group_slug,
     convert_remote_roles,
     add_user_to_community,
@@ -78,11 +77,11 @@ class GroupCollectionsService(RecordService):
         try:
             avatar_response = requests.get(commons_avatar_url, timeout=15)
         except requests.exceptions.Timeout:
-            logger.error(
+            app.logger.error(
                 "Request to Commons instance for group avatar timed out"
             )
         except requests.exceptions.ConnectionError:
-            logger.error(
+            app.logger.error(
                 "Could not connect to "
                 "Commons instance to fetch group avatar"
             )
@@ -94,41 +93,41 @@ class GroupCollectionsService(RecordService):
                     stream=BytesIO(avatar_response.content),
                 )
                 if logo_result is not None:
-                    logger.info("Logo uploaded successfully.")
+                    app.logger.info("Logo uploaded successfully.")
                     success = True
                 else:
-                    logger.error("Logo upload failed silently in Invenio.")
+                    app.logger.error("Logo upload failed silently in Invenio.")
             except Exception as e:
-                logger.error(f"Logo upload failed: {e}")
+                app.logger.error(f"Logo upload failed: {e}")
         elif avatar_response.status_code in [400, 405, 406, 412, 413]:
-            logger.error(
+            app.logger.error(
                 "Request was not accepted when trying to access "
                 f"the provided avatar at {commons_avatar_url}"
             )
-            logger.error(f"Response: {avatar_response.text}")
+            app.logger.error(f"Response: {avatar_response.text}")
         elif avatar_response.status_code in [401, 403, 407]:
-            logger.error(
+            app.logger.error(
                 "Access the provided avatar was not allowed "
                 f"at {commons_avatar_url}"
             )
-            logger.error(f"Response: {avatar_response.text}")
+            app.logger.error(f"Response: {avatar_response.text}")
         elif avatar_response.status_code in [404, 410]:
-            logger.error(
+            app.logger.error(
                 f"Provided avatar was not found at {commons_avatar_url}"
             )
-            logger.error(f"Response: {avatar_response.text}")
+            app.logger.error(f"Response: {avatar_response.text}")
         elif avatar_response.status_code == 403:
-            logger.error(
+            app.logger.error(
                 "Access to the provided avatar was forbidden"
                 f" at {commons_avatar_url}"
             )
-            logger.error(f"Response: {avatar_response.text}")
+            app.logger.error(f"Response: {avatar_response.text}")
         elif avatar_response.status_code in [500, 502, 503, 504, 509, 511]:
-            logger.error(
+            app.logger.error(
                 f"Connection failed when trying to access the "
                 f"provided avatar at {commons_avatar_url}"
             )
-            logger.error(f"Response: {avatar_response.text}")
+            app.logger.error(f"Response: {avatar_response.text}")
 
         return success
 
@@ -316,23 +315,23 @@ class GroupCollectionsService(RecordService):
                 slug = base_slug
 
         elif meta_response.status_code == 404:
-            logger.error(
+            app.logger.error(
                 f"Failed to get metadata for group {commons_group_id} on "
                 f"{instance_name}"
             )
-            logger.error(f"Response: {meta_response.text}")
-            logger.error(headers)
+            app.logger.error(f"Response: {meta_response.text}")
+            app.logger.error(headers)
             raise CommonsGroupNotFoundError(
                 f"No such group {commons_group_id} could be found "
                 f"on {instance_name}"
             )
         else:
-            logger.error(
+            app.logger.error(
                 f"Failed to get metadata for group {commons_group_id} on "
                 f"{instance_name}"
             )
-            logger.error(f"Response: {meta_response.text}")
-            logger.error(headers)
+            app.logger.error(f"Response: {meta_response.text}")
+            app.logger.error(headers)
             raise UnprocessableEntity(
                 f"Something went wrong requesting group {commons_group_id} "
                 f"on {instance_name}"
@@ -400,7 +399,9 @@ class GroupCollectionsService(RecordService):
                 new_record_result = current_communities.service.create(
                     identity=system_identity, data=data
                 )
-                logger.info(f"New record created successfully: {new_record}")
+                app.logger.info(
+                    f"New record created successfully: {new_record}"
+                )
                 new_record = new_record_result
                 if not new_record_result:
                     raise CollectionNotCreatedError(
@@ -408,14 +409,14 @@ class GroupCollectionsService(RecordService):
                     )
             except ma.ValidationError as e:
                 # group with slug already exists
-                logger.error(f"Validation error: {e}")
+                app.logger.error(f"Validation error: {e}")
                 if "A community with this identifier already exists" in str(e):
                     community_list = current_communities.service.search(
                         identity=system_identity, q=f"slug:{slug}"
                     )
                     if community_list.total < 1:
                         msg = f"Collection for {instance_name} group {commons_group_id} seems to have been deleted previously and has not been restored. Continuing with a new url slug."  # noqa: E501
-                        logger.error(msg)
+                        app.logger.error(msg)
                         # raise DeletionStatusError(False, msg)
                         # TODO: provide the option of restoring a deleted
                         # collection here? `restore_deleted` query param is
@@ -448,18 +449,6 @@ class GroupCollectionsService(RecordService):
                 else:
                     raise CollectionNotCreatedError(str(e))
 
-        # assign admins as members of the new collection
-        try:
-            manage_payload = [{"type": "group", "id": "admin"}]
-            manage_members = current_communities.service.members.add(
-                system_identity,
-                new_record["id"],
-                data={"members": manage_payload, "role": "manager"},
-            )
-            logger.error(f"Manage members: {pformat(manage_members)}")
-        except AlreadyMemberError:
-            logger.error("adminstrator role is already a manager")
-
         # assign the administrative user as the owner of the new collection
 
         owner_role = accounts_datastore.find_or_create_role(
@@ -479,6 +468,18 @@ class GroupCollectionsService(RecordService):
                 "role": "owner",
             },
         )
+
+        # assign admins as members of the new collection
+        try:
+            manage_payload = [{"type": "group", "id": "admin"}]
+            manage_members = current_communities.service.members.add(
+                system_identity,
+                new_record["id"],
+                data={"members": manage_payload, "role": "owner"},
+            )
+            app.logger.error(f"Admin owner members: {pformat(manage_members)}")
+        except AlreadyMemberError:
+            app.logger.error("adminstrator role is already an owner")
 
         # assign the group roles as members of the new collection
         for coll_perm, remote_roles in invenio_roles.items():
@@ -500,8 +501,10 @@ class GroupCollectionsService(RecordService):
                     )
                     assert member
                 except AlreadyMemberError:
-                    logger.error(f"{role} role was was already a group member")
-        logger.error(pformat(new_record))
+                    app.logger.error(
+                        f"{role} role was was already a group member"
+                    )
+        app.logger.error(pformat(new_record))
 
         # download the group avatar and upload it to the Invenio instance
         if commons_avatar_url:
@@ -543,43 +546,43 @@ class GroupCollectionsService(RecordService):
             )
             if not collection_record:
                 msg = f"No collection found with the slug {collection_slug}. Could not delete."  # noqa: E501
-                logger.error(msg)
+                app.logger.error(msg)
                 raise NotFound(msg)
             elif (
                 collection_record["custom_fields"].get("kcr:commons_instance")
                 != commons_instance
             ):
                 msg = f"Collection {collection_slug} does not belong to {commons_instance}. Could not delete."  # noqa: E501
-                logger.error(msg)
+                app.logger.error(msg)
                 raise Forbidden(msg)
             elif (
                 collection_record["custom_fields"].get("kcr:commons_group_id")
                 != commons_group_id
             ):
                 msg = f"Collection {collection_slug} does not belong to group {commons_group_id}. Could not delete."  # noqa: E501
-                logger.error(msg)
+                app.logger.error(msg)
                 raise Forbidden(msg)
 
             deleted = current_communities.service.delete(
                 system_identity, collection_slug
             )
             if deleted:
-                logger.info(
+                app.logger.info(
                     f"Collection {collection_slug} belonging to "
                     f"{commons_instance} group {commons_group_id}"
                     "deleted successfully."
                 )
             else:
                 msg = f"Failed to delete collection {collection_slug} belonging to {commons_instance} group {commons_group_id}"  # noqa: E501
-                logger.error(msg)
+                app.logger.error(msg)
                 raise RuntimeError(msg)
         except (DeletionStatusError, CommunityDeletedError) as e:
             msg = f"Collection has already been deleted: {str(e)}"
-            logger.error(msg)
+            app.logger.error(msg)
             raise UnprocessableEntity(msg)
         except OpenRequestsForCommunityDeletionError as oe:
             msg = "Cannot delete a collection with open" f"requests: {str(oe)}"
-            logger.error(msg)
+            app.logger.error(msg)
             raise UnprocessableEntity(msg)
 
         Community.index.refresh()
@@ -623,7 +626,7 @@ class GroupCollectionsService(RecordService):
             the remote group's metadata should be removed from its
             custom_fields.
         """
-        logger.info(
+        app.logger.info(
             f"GroupCollectionsService: Disowning collection "
             f"{collection_slug} from {remote_instance_name} "
             f"group {remote_group_id}"
@@ -635,16 +638,16 @@ class GroupCollectionsService(RecordService):
             )
         )
         group_members = [(g.group_id, g.role) for g in query.all()]
-        logger.info(f"Group members to remove: {group_members}")
+        app.logger.info(f"Group members to remove: {group_members}")
 
         individual_memberships = []
         failures = []
         for member_role in group_members:
-            logger.info(f"Group member to remove: {member_role}")
+            app.logger.info(f"Group member to remove: {member_role}")
             individuals = GroupRolesComponent.get_current_members_of_group(
                 member_role[0]
             )
-            logger.info(f"Individuals: {pformat(individuals)}")
+            app.logger.info(f"Individuals: {pformat(individuals)}")
 
             for member in individuals:
                 # assign member to the group collection community
@@ -655,7 +658,9 @@ class GroupCollectionsService(RecordService):
                 )
                 if add_result:
                     individual_memberships.append((member.id, member_role[1]))
-                    logger.info(f"Member {member.id} reassigned successfully.")
+                    app.logger.info(
+                        f"Member {member.id} reassigned successfully."
+                    )
                 else:
                     failures.append(member)
 
@@ -665,7 +670,7 @@ class GroupCollectionsService(RecordService):
                     members=[{"type": "group", "id": member_role[0]}],
                 )
             )
-            logger.info(f"Members to remove: {pformat(members)}")
+            app.logger.info(f"Members to remove: {pformat(members)}")
             if members:
                 current_communities.service.members.delete(
                     system_identity,

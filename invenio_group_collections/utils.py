@@ -15,36 +15,36 @@ from invenio_communities.members.errors import AlreadyMemberError
 from invenio_communities.members.records.api import Member
 from invenio_communities.proxies import current_communities
 
-import logging
-import os
-from pathlib import Path
+# import logging
+# import os
+# from pathlib import Path
 import re
 from typing import Union
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s:%(levelname)s : %(message)s")
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)
+# formatter = logging.Formatter("%(asctime)s:%(levelname)s : %(message)s")
 
-instance_path = os.environ.get("INVENIO_INSTANCE_PATH")
-if not instance_path:
-    instance_path = Path(__file__).parent.parent
+# instance_path = os.environ.get("INVENIO_INSTANCE_PATH")
+# if not instance_path:
+#     instance_path = Path(__file__).parent.parent
 
-log_file_path = Path(instance_path) / "logs" / "invenio-group-collections.log"
-print("log_file_path", log_file_path)
+# log_file_path = Path(instance_path) / "logs" / "invenio-group-collections.log"
+# print("log_file_path", log_file_path)
 
-if not log_file_path.exists():
-    log_file_path.parent.mkdir(parents=True, exist_ok=True)
-    log_file_path.touch()
+# if not log_file_path.exists():
+#     log_file_path.parent.mkdir(parents=True, exist_ok=True)
+#     log_file_path.touch()
 
-file_handler = logging.handlers.RotatingFileHandler(
-    log_file_path,
-    maxBytes=1000000,
-    backupCount=5,
-)
-file_handler.setFormatter(formatter)
-if logger.hasHandlers():
-    logger.handlers.clear()
-logger.addHandler(file_handler)
+# file_handler = logging.handlers.RotatingFileHandler(
+#     log_file_path,
+#     maxBytes=1000000,
+#     backupCount=5,
+# )
+# file_handler.setFormatter(formatter)
+# if logger.hasHandlers():
+#     logger.handlers.clear()
+# logger.addHandler(file_handler)
 
 
 def convert_remote_roles(
@@ -80,7 +80,7 @@ def convert_remote_roles(
         moderate_roles.append("admin")
 
     for r in list(set(moderate_roles)):
-        invenio_roles.setdefault("manager", []).append(f"{slug}|{r}")
+        invenio_roles.setdefault("owner", []).append(f"{slug}|{r}")
         seen_roles.append(r)
     for u in [r for r in list(set(upload_roles)) if r not in seen_roles]:
         invenio_roles.setdefault("curator", []).append(f"{slug}|{u}")

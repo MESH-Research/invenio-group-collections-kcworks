@@ -11,6 +11,7 @@
 
 from flask import (
     jsonify,
+    current_app as app,
 )
 from flask_resources import (
     from_conf,
@@ -38,7 +39,6 @@ from werkzeug.exceptions import (
     # Unauthorized,
 )
 
-from .utils import logger
 from .errors import (
     CollectionAlreadyExistsError,
     CollectionNotFoundError,
@@ -58,9 +58,7 @@ class GroupCollectionsResourceConfig(ResourceConfig):
 
     default_content_type = "application/json"
 
-    response_handlers = {
-        "application/json": ResponseHandler(JSONSerializer())
-    }
+    response_handlers = {"application/json": ResponseHandler(JSONSerializer())}
 
     request_body_parsers = {
         "application/json": RequestBodyParser(JSONDeserializer())
@@ -277,19 +275,19 @@ class GroupCollectionsResource(Resource):
         collection_slug = resource_requestctx.view_args.get("slug")
         commons_instance = resource_requestctx.args.get("commons_instance")
         commons_group_id = resource_requestctx.args.get("commons_group_id")
-        logger.info(
+        app.logger.info(
             f"Attempting to delete collection {collection_slug} for "
             f"{commons_instance} group {commons_group_id}"
         )
 
         if not collection_slug:
-            logger.error("No collection slug provided. Could not delete.")
+            app.logger.error("No collection slug provided. Could not delete.")
             raise BadRequest("No collection slug provided")
         elif not commons_instance:
-            logger.error("No commons_instance provided. Could not delete.")
+            app.logger.error("No commons_instance provided. Could not delete.")
             raise BadRequest("No commons_instance provided")
         elif not commons_group_id:
-            logger.error("No commons_group_id provided. Could not delete.")
+            app.logger.error("No commons_group_id provided. Could not delete.")
             raise BadRequest("No commons_group_id provided")
 
         deleted_collection = current_group_collections_service.delete(
