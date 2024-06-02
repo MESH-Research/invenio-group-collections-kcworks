@@ -185,7 +185,7 @@ class GroupCollectionsService(RecordService):
         collections belonging to that group will be returned.
 
         raises:
-            CommonsGroupNotFoundError: If no collections are found matching
+            CollectionNotFoundError: If no collections are found matching
                 the parameters.
             UnprocessableEntityError: If the query parameters are invalid.
 
@@ -214,7 +214,7 @@ class GroupCollectionsService(RecordService):
         )
 
         if community_list.to_dict()["hits"]["total"] == 0:
-            raise NotFound(
+            raise CollectionNotFoundError(
                 "No Works collection found matching the parameters "
                 f"{query_params}"
             )
@@ -294,7 +294,11 @@ class GroupCollectionsService(RecordService):
             )
         if meta_response.status_code == 200:
             content = meta_response.json()
-            if not content or content["id"] != commons_group_id:
+            app.logger.error(f"Group metadata: {pformat(content)}")
+            if not content or commons_group_id not in [
+                content["id"],
+                str(content["id"]),
+            ]:
                 raise CommonsGroupNotFoundError(
                     f"No such group {commons_group_id} could be found "
                     f"on {instance_name}"
@@ -313,6 +317,7 @@ class GroupCollectionsService(RecordService):
                 base_slug = make_base_group_slug(commons_group_name)
                 slug_incrementer = 0
                 slug = base_slug
+                app.logger.error(f"Base slug: {slug}")
 
         elif meta_response.status_code == 404:
             app.logger.error(
@@ -393,6 +398,7 @@ class GroupCollectionsService(RecordService):
                 "kcr:commons_group_visibility": commons_group_visibility,  # noqa: E501
             },
         }
+        app.logger.debug(f"New collection data: {pformat(data)}")
 
         while not new_record:
             try:
@@ -449,21 +455,20 @@ class GroupCollectionsService(RecordService):
                 else:
                     raise CollectionNotCreatedError(str(e))
 
-        # assign the administrative user as the owner of the new collection
-
-        owner_role = accounts_datastore.find_or_create_role(
-            name="group-collections-owner"
-        )
-        accounts_datastore.commit()
-        owner_role_holders = [
-            u for u in accounts_datastore.find_role(owner_role.name).users
+        # assign the first administrative user as an owner of the new collection
+        # NOTE: this allows the admin to manage the collection in the UI
+        # is also ensures that the collection will be marked as "verified"
+        admin_role = accounts_datastore.find_role_by_id("admin")
+        admin_role_holders = [
+            u for u in accounts_datastore.find_role(admin_role.name).users
         ]
+        assert len(admin_role_holders) > 0  # should be at least one admin
         member = current_communities.service.members.add(
             system_identity,
             new_record["id"],
             data={
                 "members": [
-                    {"type": "user", "id": str(owner_role_holders[0].id)}
+                    {"type": "user", "id": str(admin_role_holders[0].id)}
                 ],
                 "role": "owner",
             },
@@ -507,10 +512,13 @@ class GroupCollectionsService(RecordService):
         app.logger.error(pformat(new_record))
 
         # download the group avatar and upload it to the Invenio instance
-        if commons_avatar_url:
+        if (
+            commons_avatar_url
+            and "mystery-group.png" not in commons_avatar_url
+        ):
             self.update_avatar(commons_avatar_url, new_record["id"])
 
-        Community.index.refresh()
+        # current_communities.service.record_cls.index.refresh()
 
         return new_record
 
