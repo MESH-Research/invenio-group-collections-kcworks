@@ -227,7 +227,7 @@ class GroupCollectionsService(RecordService):
         commons_group_id: str,
         commons_instance: str,
         restore_deleted: bool = False,
-        collection_visibility: str = "restricted",
+        collection_visibility: str = "public",
         **kwargs,
     ) -> CommunityItem:
         """Create a in Invenio collection (community) belonging to a KC group.
@@ -248,6 +248,8 @@ class GroupCollectionsService(RecordService):
             restore_deleted: If True, the collection will be restored if it
                 was previously deleted. If False, a new collection will be
                 created with a new slug. [default: False]
+            collection_visibility: The visibility of the collection. May be
+                either "public" or "restricted" [default: "public"]
             **kwargs: Additional keyword arguments.
 
         raises:

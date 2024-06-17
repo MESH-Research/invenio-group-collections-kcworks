@@ -14,37 +14,10 @@ from invenio_access.permissions import system_identity
 from invenio_communities.members.errors import AlreadyMemberError
 from invenio_communities.members.records.api import Member
 from invenio_communities.proxies import current_communities
-
-# import logging
-# import os
-# from pathlib import Path
 import re
 from typing import Union
-
-# logger = logging.getLogger(__name__)
-# logger.setLevel(logging.DEBUG)
-# formatter = logging.Formatter("%(asctime)s:%(levelname)s : %(message)s")
-
-# instance_path = os.environ.get("INVENIO_INSTANCE_PATH")
-# if not instance_path:
-#     instance_path = Path(__file__).parent.parent
-
-# log_file_path = Path(instance_path) / "logs" / "invenio-group-collections.log"
-# print("log_file_path", log_file_path)
-
-# if not log_file_path.exists():
-#     log_file_path.parent.mkdir(parents=True, exist_ok=True)
-#     log_file_path.touch()
-
-# file_handler = logging.handlers.RotatingFileHandler(
-#     log_file_path,
-#     maxBytes=1000000,
-#     backupCount=5,
-# )
-# file_handler.setFormatter(formatter)
-# if logger.hasHandlers():
-#     logger.handlers.clear()
-# logger.addHandler(file_handler)
+from unidecode import unidecode
+from urllib.parse import quote
 
 
 def convert_remote_roles(
@@ -97,8 +70,8 @@ def make_base_group_slug(group_name: str) -> str:
     """Create a slug from a group name.
 
     The slug is based on the group name converted to lowercase and with
-    spaces replaced by dashes. Any non-alphanumeric characters are removed and
-    slugs longer than 50 characters are truncated.
+    spaces replaced by dashes. Any non-alphanumeric characters are removed,
+    and slugs longer than 100 characters are truncated.
 
     Args:
         group_name: The Commons group name.
@@ -106,9 +79,10 @@ def make_base_group_slug(group_name: str) -> str:
     Returns:
         The slug based on the group name.
     """
-    base_slug = group_name.lower().replace(" ", "-")[:50]
-    base_slug = re.sub(r"[^\w-]+", "", base_slug)
-    return base_slug
+    base_slug = unidecode(group_name.lower().replace(" ", "-"))[:100]
+    base_slug = re.sub(r"\W+", "", base_slug)
+    url_encoded_base_slug = quote(base_slug)
+    return url_encoded_base_slug
 
 
 def make_group_slug(
@@ -140,8 +114,8 @@ def make_group_slug(
         name that are not available because they belong to a (soft)
         deleted collection owned by the same group.
     """
-    base_slug = group_name.lower().replace(" ", "-")[:50]
-    base_slug = re.sub(r"[^\w-]+", "", base_slug)
+    base_slug = group_name.lower().replace(" ", "-")[:100]
+    base_slug = re.sub(r"\W+", "", base_slug)
     incrementer = 0
     fresh_slug = base_slug
     deleted_slugs = []

@@ -17,6 +17,7 @@ invenio-remote-user-data = {file = "../invenio-remote-user-data", editable = tru
 requests-mock = "*"
 invenio-cli = "*"
 invenio-group-collections = {file = ".", editable = true}
+unidecode = "*"
 
 [dev-packages]
 
