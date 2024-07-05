@@ -233,6 +233,7 @@ class GroupCollectionsResource(Resource):
         response_data = {
             "commons_group_id": commons_group_id,
             "collection": new_collection.data["slug"],
+            "collection_id": new_collection.data["id"],
         }
 
         return jsonify(response_data), 201
