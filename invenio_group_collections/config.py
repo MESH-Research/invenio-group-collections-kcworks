@@ -6,7 +6,6 @@
 # invenio-group-collections is free software; you can redistribute it
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
-
 GROUP_COLLECTIONS_METADATA_ENDPOINTS = {
     "knowledgeCommons": {
         "url": "https://hcommons-dev.org/wp-json/commons/v1/groups/{id}",
@@ -14,3 +13,5 @@ GROUP_COLLECTIONS_METADATA_ENDPOINTS = {
         "placeholder_avatar": "mystery-group.png",
     },
 }
+
+GROUP_COLLECTIONS_ADMIN_EMAIL = ""

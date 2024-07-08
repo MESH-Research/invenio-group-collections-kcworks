@@ -457,21 +457,26 @@ class GroupCollectionsService(RecordService):
                 else:
                     raise CollectionNotCreatedError(str(e))
 
-        # assign the first administrative user as an owner of the new collection
+        # assign the configured administrative user as owner of the
+        # new collection
+        # if no account is configured, assign the first administrative user
         # NOTE: this allows the admin to manage the collection in the UI
         # is also ensures that the collection will be marked as "verified"
-        admin_role = accounts_datastore.find_role_by_id("admin")
-        admin_role_holders = [
-            u for u in accounts_datastore.find_role(admin_role.name).users
-        ]
-        assert len(admin_role_holders) > 0  # should be at least one admin
+        admin_email = app.config.get("GROUP_COLLECTIONS_ADMIN_EMAIL")
+        if admin_email:
+            admin_id = accounts_datastore.find_user_by_email(admin_email).id
+        else:
+            admin_role = accounts_datastore.find_role_by_id("admin")
+            admin_role_holders = [
+                u for u in accounts_datastore.find_role(admin_role.name).users
+            ]
+            assert len(admin_role_holders) > 0  # should be at least one admin
+            admin_id = admin_role_holders[0].id
         member = current_communities.service.members.add(
             system_identity,
             new_record["id"],
             data={
-                "members": [
-                    {"type": "user", "id": str(admin_role_holders[0].id)}
-                ],
+                "members": [{"type": "user", "id": str(admin_id)}],
                 "role": "owner",
             },
         )

@@ -55,6 +55,10 @@ class InvenioGroupCollections(object):
         for k in dir(config):
             if k.startswith("GROUP_COLLECTIONS_"):
                 app.config.setdefault(k, getattr(config, k))
+        if not app.config.get("GROUP_COLLECTIONS_ADMIN_EMAIL"):
+            app.config.setdefault(
+                "GROUP_COLLECTIONS_ADMIN_EMAIL", app.config.get("ADMIN_EMAIL")
+            )
 
     def init_resources(self, app):
         """Initialize resources."""
