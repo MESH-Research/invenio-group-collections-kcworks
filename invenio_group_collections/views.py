@@ -73,15 +73,15 @@ class GroupCollectionsResource(Resource):
 
     error_handlers = {
         Forbidden: lambda e: (
-            {"message": str(e.description), "status": 403},
+            {"message": str(e), "status": 403},
             403,
         ),
         MethodNotAllowed: lambda e: (
-            {"message": str(e.description), "status": 405},
+            {"message": str(e), "status": 405},
             405,
         ),
         NotFound: lambda e: (
-            {"message": str(e.description), "status": 404},
+            {"message": str(e), "status": 404},
             404,
         ),
         CommonsGroupNotFoundError: lambda e: (
@@ -89,23 +89,23 @@ class GroupCollectionsResource(Resource):
             404,
         ),
         BadRequest: lambda e: (
-            {"message": str(e.description), "status": 400},
+            {"message": str(e), "status": 400},
             400,
         ),
         ma.ValidationError: lambda e: (
-            {"message": str(e.messages), "status": 400},
+            {"message": str(e), "status": 400},
             400,
         ),
         UnprocessableEntity: lambda e: (
-            {"message": str(e.description), "status": 422},
+            {"message": str(e), "status": 422},
             422,
         ),
         RuntimeError: lambda e: (
-            {"message": str(e.description), "status": 500},
+            {"message": str(e), "status": 500},
             500,
         ),
         CollectionAlreadyExistsError: lambda e: (
-            {"message": str(e.description), "status": 409},
+            {"message": str(e), "status": 409},
             409,
         ),
         CollectionNotFoundError: lambda e: (

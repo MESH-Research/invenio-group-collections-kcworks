@@ -464,7 +464,7 @@ class GroupCollectionsService(RecordService):
         # is also ensures that the collection will be marked as "verified"
         admin_email = app.config.get("GROUP_COLLECTIONS_ADMIN_EMAIL")
         if admin_email:
-            admin_id = accounts_datastore.find_user_by_email(admin_email).id
+            admin_id = accounts_datastore.get_user_by_email(admin_email).id
         else:
             admin_role = accounts_datastore.find_role_by_id("admin")
             admin_role_holders = [
@@ -600,7 +600,9 @@ class GroupCollectionsService(RecordService):
             app.logger.error(msg)
             raise UnprocessableEntity(msg)
 
-        Community.index.refresh()
+        # TODO: Is this manual refresh necessary?
+        # This manual refresh resulted in a 404 error for the index
+        # Community.index.refresh()
 
         return deleted
 

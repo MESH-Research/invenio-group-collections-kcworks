@@ -80,7 +80,7 @@ def make_base_group_slug(group_name: str) -> str:
         The slug based on the group name.
     """
     base_slug = unidecode(group_name.lower().replace(" ", "-"))[:100]
-    base_slug = re.sub(r"\W+", "", base_slug)
+    base_slug = re.sub(r"[^\w-]+", "", base_slug, flags=re.UNICODE)
     url_encoded_base_slug = quote(base_slug)
     return url_encoded_base_slug
 
