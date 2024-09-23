@@ -5,21 +5,23 @@ name = "pypi"
 
 [packages]
 alembic = "1.10.4"
-invenio-app-rdm = {version = "<13.0.0", extras = ["opensearch2"]}
 docker-services-cli = "*"
-check-manifest = "*"
-pytest-invenio = "*"
-psycopg2 = "*"
-opensearch-dsl = "*"
 invenio-administration = "*"
-invenio-communities = "*"
-invenio-remote-user-data-kcworks = "*"
-requests-mock = "*"
+invenio-app-rdm = {version = "<13.0.0", extras = ["opensearch2"]}
 invenio-cli = "*"
+invenio-communities = "*"
 invenio-group-collections = {file = ".", editable = true}
+invenio-remote-user-data-kcworks = "*"
+opensearch-dsl = "*"
+psycopg2 = "*"
+requests-mock = "*"
 unidecode = "*"
 
 [dev-packages]
+bumpver = "*"
+check-manifest = "*"
+pytest = "*"
+pytest-invenio = "*"
 
 [requires]
-python_version = "3.9"
+python_version = ">=3.9"

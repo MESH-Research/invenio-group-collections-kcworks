@@ -1,16 +1,13 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
-name = "invenio-group-collections"
-version = "2024.05.14"
-description = "Provides collections administered by remote social groups for InvenioRDM"
+name = "invenio-group-collections-kcworks"
+version = "0.1.0-dev1"
+description = "Provides collections administered by remote social groups for the Knowledge Commons Works instance of InvenioRDM"
 readme = "README.md"
 authors = [{ name = "MESH Research", email = "scottia4@msu.edu" }]
 license = { file = "LICENSE" }
 classifiers = [
     "License :: OSI Approved :: MIT License",
+    "Development Status :: 3 - Alpha",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
@@ -22,16 +19,17 @@ classifiers = [
 ]
 keywords = ["invenio", "inveniordm", "groups", "social", "research"]
 dependencies = [
+    "alembic",
     "click>=7.0",
-    "invenio-app-rdm~=12.0.0b2.dev72",
     "docker-services-cli",
-    "check-manifest",
-    "psycopg2",
-    "opensearch-dsl",
     "invenio-administration",
+    "invenio-app-rdm[opensearch2]<13.0.0",
+    "invenio-cli",
     "invenio-communities",
     "invenio-remote-user-data-kcworks",
-    "invenio-cli",
+    "opensearch-dsl",
+    "psycopg2",
+    "unidecode",
 ]
 requires-python = ">=3.9"
 
@@ -44,7 +42,12 @@ dev = [
     "pytest-runner",
     "requests-mock",
 ]
-
+tests = [
+    "pytest>=7.3.2",
+    "pytest-invenio",
+    "pytest-runner",
+    "requests-mock",
+]
 
 [project.urls]
 Homepage = "https://github.com/MESH-Research/invenio-group-collections"
@@ -64,3 +67,59 @@ invenio_group_collections = "invenio_group_collections.ext:InvenioGroupCollectio
 
 [project.entry-points."invenio_base.api_blueprints"]
 invenio_group_collections = "invenio_group_collections.views:create_api_blueprint"
+
+[tool.check-manifest]
+ignore = [
+  "PKG-INFO",
+  ".egg-info",
+  ".egg-info/*",
+  "setup.cfg",
+  ".DS_Store",
+  ".hgtags",
+  ".hgsigs",
+  ".hgignore",
+  ".gitignore",
+  ".bzrignore",
+  ".gitattributes",
+  ".github/*",
+  ".travis.yml",
+  "Jenkinsfile",
+  "* .mo",
+  "dist/*",
+  "build/*",
+  "invenio_group_collections/dependencies/*",
+  "*.gitkeep",
+]
+
+[tool.bumpver]
+current_version = "0.1.0-dev1"
+version_pattern = "MAJOR.MINOR.PATCH[-TAGNUM]"
+commit_message = "bump version {old_version} -> {new_version}"
+tag_message = "{new_version}"
+tag_scope = "default"
+pre_commit_hook = ""
+post_commit_hook = ""
+commit = true
+tag = true
+push = true
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'version = "{version}"',
+]
+"README.md" = [
+    "Version {version}",
+]
+"VERSION" = [
+    '^"{version}"',
+]
+"invenio_group_collections/__init__.py" = [
+    '^__version__ = "{version}"',
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.bdist_wheel]
+universal = 1

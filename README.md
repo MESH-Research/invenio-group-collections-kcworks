@@ -1,5 +1,7 @@
 # invenio-group-collections
 
+Version 0.1.0-dev1
+
 Copyright 2024 Mesh Research
 Contributors: Ian Scott
 

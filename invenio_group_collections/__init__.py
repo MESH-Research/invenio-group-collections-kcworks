@@ -7,7 +7,6 @@
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
-"""Collections administered by remote social groups for InvenioRDM.
-"""
+"""Collections administered by remote social groups for InvenioRDM."""
 
-__version__ = '2024.05.14'
+__version__ = "0.1.0-dev1"
