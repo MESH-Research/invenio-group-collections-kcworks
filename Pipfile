@@ -13,7 +13,7 @@ psycopg2 = "*"
 opensearch-dsl = "*"
 invenio-administration = "*"
 invenio-communities = "*"
-invenio-remote-user-data = {file = "../invenio-remote-user-data", editable = true}
+invenio-remote-user-data-kcworks = {file = "../invenio-remote-user-data", editable = true}
 requests-mock = "*"
 invenio-cli = "*"
 invenio-group-collections = {file = ".", editable = true}
