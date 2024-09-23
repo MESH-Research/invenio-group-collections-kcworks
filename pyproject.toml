@@ -30,7 +30,7 @@ dependencies = [
     "opensearch-dsl",
     "invenio-administration",
     "invenio-communities",
-    "invenio-remote-user-data",
+    "invenio-remote-user-data-kcworks",
     "invenio-cli",
 ]
 requires-python = ">=3.9"
