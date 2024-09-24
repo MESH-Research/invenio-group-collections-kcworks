@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the invenio-group-collections package.
+# This file is part of the invenio-group-collections-kcworks package.
 # Copyright (C) 2024, MESH Research.
 #
-# invenio-group-collections is free software; you can redistribute it
+# invenio-group-collections-kcworks is free software; you can redistribute it
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
 """Extension providing collections administered by remote social groups
 for InvenioRDM."""
 
-from invenio_group_collections.views import (
+from invenio_group_collections_kcworks.views import (
     GroupCollectionsResource,
     GroupCollectionsResourceConfig,
 )
@@ -24,7 +24,7 @@ from .service import (
 
 
 class InvenioGroupCollections(object):
-    """Invenio-Group-Collections extension."""
+    """invenio-group-collections-kcworks extension."""
 
     def __init__(self, app=None, **kwargs):
         """Extension initialization."""
@@ -39,7 +39,7 @@ class InvenioGroupCollections(object):
         self.init_config(app)
         self.init_service(app)
         self.init_resources(app)
-        app.extensions["invenio-group-collections"] = self
+        app.extensions["invenio-group-collections-kcworks"] = self
 
     def init_service(self, app):
         """Initialize service."""

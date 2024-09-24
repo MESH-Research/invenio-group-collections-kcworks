@@ -1,8 +1,8 @@
 Installation
 ============
 
-invenio-group-collections is on PyPI so all you need is:
+invenio-group-collections-kcworks is not on PyPI so you need to install it from GitHub:
 
 .. code-block:: console
 
-   $ pip install invenio-group-collections
+   $ pip install git+https://github.com/MESH-Research/invenio-group-collections-kcworks.git

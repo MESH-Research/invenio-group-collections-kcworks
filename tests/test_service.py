@@ -1,26 +1,26 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the invenio-group-collections package.
+# This file is part of the invenio-group-collections-kcworks package.
 # Copyright (C) 2024, MESH Research.
 #
-# invenio-group-collections is free software; you can redistribute it
+# invenio-group-collections-kcworks is free software; you can redistribute it
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
-"""Unit tests for the invenio-group-collections service."""
+"""Unit tests for the invenio-group-collections-kcworks service."""
 
 from invenio_access.permissions import system_identity
 from invenio_accounts import current_accounts
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
-from invenio_group_collections.errors import (
+from invenio_group_collections_kcworks.errors import (
     CommonsGroupNotFoundError,
     CollectionAlreadyExistsError,
 )
-from invenio_group_collections.service import (
+from invenio_group_collections_kcworks.service import (
     GroupCollectionsService,
 )
-from invenio_group_collections.proxies import (
+from invenio_group_collections_kcworks.proxies import (
     current_group_collections,
     current_group_collections_service as current_collections,
 )

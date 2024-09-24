@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the invenio-group-collections package.
+# This file is part of the invenio-group-collections-kcworks package.
 # Copyright (C) 2024, MESH Research.
 #
-# invenio-group-collections is free software; you can redistribute it
+# invenio-group-collections-kcworks is free software; you can redistribute it
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
@@ -23,14 +23,14 @@ exclude .DS_Store
 recursive-include tests .gitkeep
 recursive-include tests *.py
 recursive-exclude tests .DS_Store
-recursive-include invenio_group_collections .gitkeep
-recursive-include invenio_group_collections *.py
-recursive-include invenio_group_collections *.json
-recursive-include invenio_group_collections *.log
-recursive-exclude invenio_group_collections .DS_Store
+recursive-include invenio_group_collections_kcworks .gitkeep
+recursive-include invenio_group_collections_kcworks *.py
+recursive-include invenio_group_collections_kcworks *.json
+recursive-include invenio_group_collections_kcworks *.log
+recursive-exclude invenio_group_collections_kcworks .DS_Store
 
 # added by check-manifest
 recursive-include tests *.lock
 
 # added by check-manifest
-recursive-include invenio_group_collections *.mako
+recursive-include invenio_group_collections_kcworks *.mako

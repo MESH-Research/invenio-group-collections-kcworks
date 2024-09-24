@@ -1,11 +1,11 @@
-# invenio-group-collections
+# Invenio Group Collections for Knowledge Commons Works
 
 Version 0.1.0-dev1
 
 Copyright 2024 Mesh Research
 Contributors: Ian Scott
 
-The package provides integration between Commons groups and InvenioRDM collections (communities). It exposes a `group_collections` API endpoint that can be used for automatic creation of an InvenioRDM record collection linked to a group on a remote service. This package is intended for use with the Knowledge Commons Works instance of InvenioRDM, although it could be customized to work with other instances. If there is interest in using this package with other instances, please contact the package maintainer to discuss how the package could be updated to work for your use case.
+The package provides integration between Knowledge Commons groups and InvenioRDM collections (communities). It exposes a `group_collections` API endpoint that can be used for automatic creation of an InvenioRDM record collection linked to a group on a remote service. This package is intended for use with the Knowledge Commons Works instance of InvenioRDM, although it could be customized to work with other instances. If there is interest in using this package with other instances, please contact the package maintainer to discuss how the package could be updated to work for your use case.
 
 This package is also intended to be used in conjunction with the `invenio_remote_user_data` package, which provides a similar integration between group and user metadata from a remote service and InvenioRDM.
 
@@ -18,7 +18,7 @@ Updates to external apis (like a search index) for group collection events is no
 From your InvenioRDM instance directory:
 
 ```shell
-    pipenv install invenio-group-collections
+    pipenv install invenio-group-collections-kcworks
 ```
 
 This will add the package to your Pipfile and install it in your InvenioRDM instance's virtual environment.
@@ -35,7 +35,7 @@ The `group_collections` REST API endpoint allows a Commons instance to create, r
 
 InvenioRDM does not allow groups to be owners of a collection (community). When a collection is created for a group, though, we do not know which of the group's administrators to assign as the individual owner. It is also awkward to change ownership of a collection later on if the group's administrativer personnel change. So the collection is owned by an administrative user who is assigned the role `group-collections-owner`. The group's administrators are then assigned privileges as "managers" of the group collection. This allows them to manage the collection's settings and membership, but not to delete the collection or change its ownership.
 
-Before the invenio_group_collections module can be used, the administrator must create a role called `group-collections-owner` and assign membership in that role to one administrative user account. If multiple user accounts belong to that role, the first user account in the list will be assigned as the owner of group collections. If no user accounts belong to the role, the group collection creation will fail with a NoOwnerAvailable error.
+Before the invenio_group_collections_kcworks module can be used, the administrator must create a role called `group-collections-owner` and assign membership in that role to one administrative user account. If multiple user accounts belong to that role, the first user account in the list will be assigned as the owner of group collections. If no user accounts belong to the role, the group collection creation will fail with a NoOwnerAvailable error.
 
 ### Endpoint configuration
 
@@ -733,7 +733,7 @@ DELETE https://example.org/api/group_collections/my-collection-slug?commons_inst
 
 ### Logging
 
-The module will log each POST, PATCH, or DELETE request to the `group_collections` endpoint (as well as any errors) in a dedicated log file, `logs/invenio-group-collections.log`.
+The module will log each POST, PATCH, or DELETE request to the `group_collections` endpoint (as well as any errors) in a dedicated log file, `logs/invenio-group-collections-kcworks.log`.
 
 ### Endpoint security
 

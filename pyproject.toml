@@ -50,23 +50,23 @@ tests = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/MESH-Research/invenio-group-collections"
+Homepage = "https://github.com/MESH-Research/invenio-group-collections-kcworks"
 
 [tool.pytest.ini_options]
 addopts = "--doctest-glob='*.rst' --doctest-modules"
-testpaths = [ "tests", "invenio_group_collections" ]
+testpaths = [ "tests", "invenio_group_collections_kcworks" ]
 
 [project.scripts]
-invenio-group-collections = "invenio_group_collections.cli:cli"
+invenio-group-collections-kcworks = "invenio_group_collections_kcworks.cli:cli"
 
 [project.entry-points."invenio_base.apps"]
-invenio_group_collections = "invenio_group_collections.ext:InvenioGroupCollections"
+invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
 
 [project.entry-points."invenio_base.api_apps"]
-invenio_group_collections = "invenio_group_collections.ext:InvenioGroupCollections"
+invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
 
 [project.entry-points."invenio_base.api_blueprints"]
-invenio_group_collections = "invenio_group_collections.views:create_api_blueprint"
+invenio_group_collections_kcworks = "invenio_group_collections_kcworks.views:create_api_blueprint"
 
 [tool.check-manifest]
 ignore = [
@@ -87,7 +87,7 @@ ignore = [
   "* .mo",
   "dist/*",
   "build/*",
-  "invenio_group_collections/dependencies/*",
+  "invenio_group_collections_kcworks/dependencies/*",
   "*.gitkeep",
 ]
 
@@ -113,13 +113,14 @@ push = true
 "VERSION" = [
     '^"{version}"',
 ]
-"invenio_group_collections/__init__.py" = [
+"invenio_group_collections_kcworks/__init__.py" = [
     '^__version__ = "{version}"',
 ]
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
 
 [tool.bdist_wheel]
 universal = 1
