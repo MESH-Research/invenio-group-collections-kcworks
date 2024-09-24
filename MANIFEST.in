@@ -13,12 +13,15 @@
 #  check-manifest -u
 
 include .gitignore
+include .gitmodules
 include *.lock
 include *.md
 include *.rst
 include *.sh
 include *.txt
 include Pipfile
+include VERSION
+include LICENSE
 exclude .DS_Store
 recursive-include tests .gitkeep
 recursive-include tests *.py
@@ -28,6 +31,7 @@ recursive-include invenio_group_collections_kcworks *.py
 recursive-include invenio_group_collections_kcworks *.json
 recursive-include invenio_group_collections_kcworks *.log
 recursive-exclude invenio_group_collections_kcworks .DS_Store
+recursive-exclude invenio_group_collections_kcworks/dependencies *
 
 # added by check-manifest
 recursive-include tests *.lock

@@ -739,8 +739,36 @@ The module will log each POST, PATCH, or DELETE request to the `group_collection
 
 POST, PUT, and DELETE requests to the endpoint are secured by an oauth token that must be obtained by the Commons instance administrator from the Knowledge Commons Works administrator. The token must be provided in the "Authorization" request header.
 
-## Versions
+## Developing this package
 
-This repository follows [calendar versioning](https://calver.org/):
+### Versioning
 
-`2021.06.18` is both a valid semantic version and an indicator of the date when the current version was released.
+This repository follows [semantic versioning](https://semver.org/).
+
+#### Version history
+
+The version history for this package is available in the [CHANGES.md](./CHANGES.md) file. If you make changes to the code that prompt a version change, you must also update the [CHANGES.md](./CHANGES.md) file to indicate the new version number and the changes made to the code.
+
+#### Updating the version number
+
+This project uses the [bumpver](https://pypi.org/project/bumpver/) utility to manage versioning.
+
+To update the version number, run the following command:
+
+```bash
+bumpver update --<part of version to update>
+```
+where `<part of version to update>` is one of `major`, `minor`, `patch`, or `tag-num`.
+
+
+### Dependencies
+
+At present this package has no dependencies on other packages that are not available in the Python Package Index and installable via pip.
+
+**NOTE:** The `invenio-communities` package has currently been forked for use in KCWorks and is not available on the Python Package Index. The fork is available at [MESH-Research/invenio-communities](https://github.com/MESH-Research/invenio-communities). The fork is currently included in the `dependencies` subdirectory of this repository, but is not presently being used because the vanilla version of `invenio-communities` is currently compatible with `invenio-group-collections-kcworks`. This may change in the future.
+
+### Running tests
+
+```bash
+bash run-tests.sh
+```
