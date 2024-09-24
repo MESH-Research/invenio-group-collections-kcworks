@@ -10,7 +10,6 @@ invenio-administration = "*"
 invenio-app-rdm = {version = "<13.0.0", extras = ["opensearch2"]}
 invenio-cli = "*"
 invenio-communities = "*"
-invenio-remote-user-data-kcworks = "*"
 invenio-group-collections-kcworks = {file = ".", editable = true}
 opensearch-dsl = "*"
 psycopg2 = "*"

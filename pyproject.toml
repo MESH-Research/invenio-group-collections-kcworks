@@ -26,7 +26,6 @@ dependencies = [
     "invenio-app-rdm[opensearch2]<13.0.0",
     "invenio-cli",
     "invenio-communities",
-    "invenio-remote-user-data-kcworks",
     "opensearch-dsl",
     "psycopg2",
     "unidecode",

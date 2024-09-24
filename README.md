@@ -7,9 +7,9 @@ Contributors: Ian Scott
 
 The package provides integration between Knowledge Commons groups and InvenioRDM collections (communities). It exposes a `group_collections` API endpoint that can be used for automatic creation of an InvenioRDM record collection linked to a group on a remote service. This package is intended for use with the Knowledge Commons Works instance of InvenioRDM, although it could be customized to work with other instances. If there is interest in using this package with other instances, please contact the package maintainer to discuss how the package could be updated to work for your use case.
 
-This package is also intended to be used in conjunction with the `invenio_remote_user_data` package, which provides a similar integration between group and user metadata from a remote service and InvenioRDM.
+This package is also intended to be used in conjunction with the `invenio_remote_user_data_kcworks` package, which provides a similar integration between group and user metadata from a remote service and InvenioRDM.
 
-Updates to external apis (like a search index) for group collection events is not handled in this package but rather in the `invenio_remote_api_provisioner` package. Updates to Commons group metadata in a linked Invenio collection are handled by the `invenio_remote_user_data` package.
+Updates to external apis (like a search index) for group collection events is not handled in this package but rather in the `invenio_remote_api_provisioner` package. Updates to Commons group metadata in a linked Invenio collection are handled by the `invenio_remote_user_data_kcworks` package.
 
 (Note: The Knowledge Commons Works instance of InvenioRDM uses the term "collection" in place of the default term "community" employed in standard InvenioRDM installations.)
 

@@ -24,7 +24,6 @@ from invenio_communities.errors import (
 from invenio_communities.members.errors import AlreadyMemberError
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.services.records.service import RecordService
-from invenio_remote_user_data.components.groups import GroupRolesComponent
 from io import BytesIO
 import marshmallow as ma
 import os
@@ -661,9 +660,9 @@ class GroupCollectionsService(RecordService):
         failures = []
         for member_role in group_members:
             app.logger.info(f"Group member to remove: {member_role}")
-            individuals = GroupRolesComponent.get_current_members_of_group(
-                member_role[0]
-            )
+            individuals = [
+                u for u in accounts_datastore.find_role(member_role[0]).users
+            ]
             app.logger.info(f"Individuals: {pformat(individuals)}")
 
             for member in individuals:
