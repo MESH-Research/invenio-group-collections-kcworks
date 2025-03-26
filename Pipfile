@@ -12,7 +12,7 @@ invenio-cli = "*"
 invenio-communities = "*"
 invenio-group-collections-kcworks = {file = ".", editable = true}
 opensearch-dsl = "*"
-psycopg2 = "*"
+psycopg2-binary = "*"
 requests-mock = "*"
 unidecode = "*"
 

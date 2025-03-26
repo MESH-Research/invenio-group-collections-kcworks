@@ -27,7 +27,7 @@ dependencies = [
     "invenio-cli",
     "invenio-communities",
     "opensearch-dsl",
-    "psycopg2",
+    "psycopg2-binary",
     "unidecode",
 ]
 requires-python = ">=3.9"
