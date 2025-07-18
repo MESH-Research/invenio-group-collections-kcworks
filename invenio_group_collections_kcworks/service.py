@@ -46,9 +46,9 @@ from .errors import (
     RoleNotCreatedError,
 )
 from .utils import (
-    make_base_group_slug,
-    convert_remote_roles,
     add_user_to_community,
+    make_base_group_slug,
+    map_remote_roles_to_permissions,
 )
 
 
@@ -330,10 +330,13 @@ class GroupCollectionsService(RecordService):
             )
 
         # create roles for the new collection's group members
-        invenio_roles = convert_remote_roles(
+        all_roles = commons_moderate_roles + commons_upload_roles
+        if "member" not in all_roles:
+            all_roles.append("member")
+
+        invenio_roles = map_remote_roles_to_permissions(
             f"{commons_instance}---{commons_group_id}",
-            commons_moderate_roles,
-            commons_upload_roles,
+            all_roles,
         )
         print("GroupCollectionService creating roles")
         print(invenio_roles)
@@ -446,13 +449,11 @@ class GroupCollectionsService(RecordService):
         # is also ensures that the collection will be marked as "verified"
         admin_email = app.config.get("GROUP_COLLECTIONS_ADMIN_EMAIL")
         admin_by_email = accounts_datastore.get_user_by_email(admin_email)
+        admin_role = accounts_datastore.find_role("admin")
         if admin_by_email:
             admin_id = admin_by_email.id
         else:
-            admin_role = accounts_datastore.find_role_by_id("admin")
-            admin_role_holders = [
-                u for u in accounts_datastore.find_role(admin_role.name).users
-            ]
+            admin_role_holders = [u for u in admin_role.users]
             assert len(admin_role_holders) > 0  # should be at least one admin
             admin_id = admin_role_holders[0].id
         member = current_communities.service.members.add(
@@ -464,9 +465,9 @@ class GroupCollectionsService(RecordService):
             },
         )
 
-        # assign admins as members of the new collection
+        # assign admin group as member of the new collection
         try:
-            manage_payload = [{"type": "group", "id": "admin"}]
+            manage_payload = [{"type": "group", "id": admin_role.id}]
             manage_members = current_communities.service.members.add(
                 system_identity,
                 new_record["id"],
@@ -479,13 +480,19 @@ class GroupCollectionsService(RecordService):
         # assign the group roles as members of the new collection
         for coll_perm, remote_roles in invenio_roles.items():
             for role in remote_roles:
-                payload = [
-                    {
-                        "type": "group",
-                        "id": role,
-                    }
-                ]
                 try:
+                    role_id = accounts_datastore.find_role(role).id
+                except AttributeError:
+                    app.logger.error(f"Role {role} not found in accounts_datastore")
+                    continue
+
+                try:
+                    payload = [
+                        {
+                            "type": "group",
+                            "id": role_id,
+                        }
+                    ]
                     member = current_communities.service.members.add(
                         system_identity,
                         new_record["id"],
@@ -497,6 +504,8 @@ class GroupCollectionsService(RecordService):
                     assert member
                 except AlreadyMemberError:
                     app.logger.error(f"{role} role was was already a group member")
+                except Exception as e:
+                    app.logger.error(f"Error adding {role} role to collection: {e}")
         app.logger.error(pformat(new_record))
 
         # download the group avatar and upload it to the Invenio instance

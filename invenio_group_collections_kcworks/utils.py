@@ -15,55 +15,100 @@ from invenio_communities.members.errors import AlreadyMemberError
 from invenio_communities.members.records.api import Member
 from invenio_communities.proxies import current_communities
 import re
-from typing import Union
+from typing import Union, Dict, List, Optional
 from unidecode import unidecode
 from urllib.parse import quote
 
 
-def convert_remote_roles(
+def map_remote_roles_to_permissions(
     slug: str,
-    moderate_roles: list,
-    upload_roles: list,
-    other_roles: list = ["member"],
-) -> dict:
-    """Convert remote group roles to Invenio group names organized by
+    all_roles: list,
+) -> Dict[str, List[str]]:
+    """Map remote group roles to Invenio group names organized by
     their community permissions role level.
+
+    The mapping is based on the group_roles configuration in the
+    REMOTE_USER_DATA_API_ENDPOINTS configuration. But we also ensure that
+    the remote group roles provided by the API request for group information
+    are all mapped to at least "reader" permission level, even if they don't
+    appear in the group_roles configuration.
 
     params:
         slug: The slug of the group in Invenio. Should have the form
             {idp name}---{group name} with the group name in lower-case and
             with spaces replaced by hyphens.
-        moderate_roles: A list of the remote group roles that should be
-            converted to the Invenio "manager" role.
-        upload_roles: A list of the remote group roles that should be
-            converted to the Invenio "curator" role.
-        other_roles: A list of the remote group roles that should be
-            converted to the Invenio "reader" role. Defaults to ["member"].
+        all_roles: A list of all remote group roles from the API.
 
     returns:
         Returns a dictionary with the community permission levels as keys
         and the corresponding Invenio group names as values.
     """
     invenio_roles = {}
-    seen_roles = []
-    # FIXME: In api user response "admin" is used, but in api group
-    # response "administrator" is used
-    # FIXME: Should upload_roles be given only "reader" permissions?
-    if "administrator" in moderate_roles:
-        moderate_roles.append("admin")
 
-    for r in list(set(moderate_roles)):
-        invenio_roles.setdefault("owner", []).append(f"{slug}|{r}")
-        seen_roles.append(r)
-    for u in [r for r in list(set(upload_roles)) if r not in seen_roles]:
-        invenio_roles.setdefault("curator", []).append(f"{slug}|{u}")
-        seen_roles.append(u)
-    for o in [r for r in list(set(other_roles)) if r not in seen_roles]:
-        invenio_roles.setdefault("reader", []).append(f"{slug}|{o}")
-    # ensure reader role is created even if members all have higher perms
-    if "reader" not in invenio_roles.keys():
-        invenio_roles["reader"] = []
+    if "---" in slug:
+        idp, group_id = slug.split("---", 1)
+    else:
+        raise ValueError(f"Invalid slug: {slug}")
+
+    # Get role mapping from configuration
+    endpoints_config = current_app.config.get("REMOTE_USER_DATA_API_ENDPOINTS", {})
+    idp_config = endpoints_config.get(idp, {})
+    groups_config = idp_config.get("groups", {})
+    group_roles_config = groups_config.get("group_roles", {})
+
+    if not group_roles_config:
+        raise ValueError(f"No group_roles configuration found for IDP '{idp}'")
+
+    # Track which roles have been assigned to permission levels
+    assigned_roles = set()
+
+    # Iterate over permission levels (config keys)
+    for permission_level, remote_roles in group_roles_config.items():
+        invenio_roles[permission_level] = []
+
+        # For each remote role that maps to this permission level
+        for role in all_roles:
+            if role in remote_roles:
+                community_role_names = format_group_role_name(role, idp, group_id)
+                invenio_roles[permission_level].extend(community_role_names)
+                assigned_roles.add(role)
+
+    # Handle any roles that weren't in the config (default to reader)
+    unassigned_roles = set(all_roles) - assigned_roles
+    if unassigned_roles:
+        invenio_roles.setdefault("reader", [])
+        for role in unassigned_roles:
+            community_role_names = format_group_role_name(role, idp, group_id)
+            invenio_roles["reader"].extend(community_role_names)
+
     return invenio_roles
+
+
+def format_group_role_name(remote_role: str, idp: str, group_id: str) -> list[str]:
+    """Format a remote group role into a community role name.
+
+    This function provides centralized role name formatting that can be used
+    by both GroupCollectionsService and RemoteUserDataService to ensure
+    consistent role naming across the system.
+
+    Args:
+        remote_role: The role from the remote API (e.g., "administrator", "member")
+        idp: The identity provider name
+        group_id: The remote group ID
+
+    Returns:
+        List of community role names that should be created for this user
+    """
+    slug = f"{idp}---{group_id}"
+
+    # Standardize role names for admins, since there's inconsistency in the
+    # remote API.
+    if remote_role in ["admin", "administrator"]:
+        standardized_role = "administrator"
+    else:
+        standardized_role = remote_role
+
+    return [f"{slug}|{standardized_role}"]
 
 
 def make_base_group_slug(group_name: str) -> str:
@@ -87,7 +132,7 @@ def make_base_group_slug(group_name: str) -> str:
 
 def make_group_slug(
     group_id: Union[str, int], group_name: str, instance_name: str
-) -> dict[str, str]:
+) -> Dict[str, Union[str, List[str]]]:
     """Create a slug from a group name.
 
     The slug is based on the group name converted to lowercase and with
@@ -131,10 +176,8 @@ def make_group_slug(
         else:
             community = community_list.hits[0]
             if (
-                community["custom_fields"]["kcr:commons_instance"]
-                == instance_name
-                and community["custom_fields"]["kcr:commons_group_id"]
-                == group_id
+                community["custom_fields"]["kcr:commons_instance"] == instance_name
+                and community["custom_fields"]["kcr:commons_group_id"] == group_id
             ):
                 if community["is_deleted"]:
                     deleted_slugs.append(fresh_slug)
@@ -153,7 +196,7 @@ def make_group_slug(
 
 def add_user_to_community(
     user_id: int, role: str, community_id: int
-) -> Member:
+) -> Optional[Member]:
     """Add a user to a community with a given role."""
 
     members = None
