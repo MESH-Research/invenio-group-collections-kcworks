@@ -1,5 +1,6 @@
-from copy import deepcopy
 import json
+from copy import deepcopy
+
 import pytest
 
 communities_data = {

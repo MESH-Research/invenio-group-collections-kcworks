@@ -7,10 +7,17 @@
 # and/or modify it under the terms of the MIT License; see
 # LICENSE file for more details.
 
+import os
+from io import BytesIO
+from pprint import pformat
+from typing import Optional
+
+import marshmallow as ma
+import requests
 from flask import current_app as app
 from flask_principal import Identity
-from invenio_accounts.proxies import current_datastore as accounts_datastore
 from invenio_access.permissions import system_identity
+from invenio_accounts.proxies import current_datastore as accounts_datastore
 from invenio_communities.communities.services.results import (
     CommunityItem,
     CommunityListResult,
@@ -24,24 +31,17 @@ from invenio_communities.members.errors import AlreadyMemberError
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.services.records.service import RecordService
 from invenio_search.proxies import current_search_client
-from io import BytesIO
-import marshmallow as ma
-import os
-from pprint import pformat
-import requests
-from typing import Optional
-from werkzeug.exceptions import (
+from werkzeug.exceptions import (  # Unauthorized,
     Forbidden,
     NotFound,
     RequestTimeout,
     UnprocessableEntity,
-    # Unauthorized,
 )
 
 from .errors import (
     CollectionAlreadyExistsError,
-    CollectionNotFoundError,
     CollectionNotCreatedError,
+    CollectionNotFoundError,
     CommonsGroupNotFoundError,
     RoleNotCreatedError,
 )

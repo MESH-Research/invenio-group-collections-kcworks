@@ -9,24 +9,25 @@
 
 """Unit tests for the invenio-group-collections-kcworks service."""
 
+# from pprint import pprint
+import pytest
 from invenio_access.permissions import system_identity
 from invenio_accounts import current_accounts
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 from invenio_group_collections_kcworks.errors import (
-    CommonsGroupNotFoundError,
     CollectionAlreadyExistsError,
+    CommonsGroupNotFoundError,
+)
+from invenio_group_collections_kcworks.proxies import (
+    current_group_collections,
+)
+from invenio_group_collections_kcworks.proxies import (
+    current_group_collections_service as current_collections,
 )
 from invenio_group_collections_kcworks.service import (
     GroupCollectionsService,
 )
-from invenio_group_collections_kcworks.proxies import (
-    current_group_collections,
-    current_group_collections_service as current_collections,
-)
-
-# from pprint import pprint
-import pytest
 
 
 def test_collections_service_init(app):

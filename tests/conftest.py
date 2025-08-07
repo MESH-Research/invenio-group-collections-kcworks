@@ -15,14 +15,16 @@ fixtures are available.
 
 # from traceback import format_exc
 import traceback
-from invenio_accounts import current_accounts
+
+import marshmallow as ma
 import pytest
 from invenio_access.models import ActionRoles, Role
 from invenio_access.permissions import superuser_access, system_identity
+from invenio_accounts import current_accounts
 from invenio_administration.permissions import administration_access_action
 from invenio_app.factory import create_api
-from invenio_communities.proxies import current_communities
 from invenio_communities.communities.records.api import Community
+from invenio_communities.proxies import current_communities
 from invenio_oauth2server.models import Token
 from invenio_records_resources.services.custom_fields import TextCF
 from invenio_records_resources.services.custom_fields.errors import (
@@ -38,7 +40,6 @@ from invenio_search.engine import search as search_engine
 from invenio_search.utils import build_alias_name
 from invenio_vocabularies.proxies import current_service as vocabulary_service
 from invenio_vocabularies.records.api import Vocabulary
-import marshmallow as ma
 
 pytest_plugins = ("celery.contrib.pytest",)
 

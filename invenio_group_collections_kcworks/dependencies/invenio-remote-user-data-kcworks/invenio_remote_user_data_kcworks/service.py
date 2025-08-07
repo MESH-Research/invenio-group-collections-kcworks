@@ -8,25 +8,26 @@
 # LICENSE file for more details.
 
 import datetime
+import json
+import os
+import traceback
 from pprint import pformat
+from typing import Optional
+
+# from pprint import pprint
+import requests
 
 # frm pprint import pformat
 from invenio_access.permissions import system_identity
 from invenio_accounts.models import User, UserIdentity
 from invenio_accounts.proxies import current_accounts
-from invenio_group_collections_kcworks.proxies import (
+from invenio_group_collections_kcworks.proxies import (  # noqa
     current_group_collections_service,
-)  # noqa
+)
 from invenio_queues.proxies import current_queues
 from invenio_records_resources.services import Service
-import json
-import os
-
-# from pprint import pprint
-import requests
-import traceback
-from typing import Optional
 from werkzeug.local import LocalProxy
+
 from .components.groups import GroupRolesComponent
 from .signals import remote_data_updated
 from .tasks import do_group_data_update, do_user_data_update

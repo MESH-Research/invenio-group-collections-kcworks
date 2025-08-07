@@ -9,15 +9,16 @@
 
 """Utility functions for invenio-group-collections-kcworks."""
 
+import re
+from typing import Dict, List, Optional, Union
+from urllib.parse import quote
+
 from flask import current_app
 from invenio_access.permissions import system_identity
 from invenio_communities.members.errors import AlreadyMemberError
 from invenio_communities.members.records.api import Member
 from invenio_communities.proxies import current_communities
-import re
-from typing import Union, Dict, List, Optional
 from unidecode import unidecode
-from urllib.parse import quote
 
 
 def map_remote_roles_to_permissions(

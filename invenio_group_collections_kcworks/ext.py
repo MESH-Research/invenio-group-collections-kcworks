@@ -14,12 +14,13 @@ from invenio_group_collections_kcworks.views import (
     GroupCollectionsResource,
     GroupCollectionsResourceConfig,
 )
+
 from . import config
-from .service_config import (
-    GroupCollectionsServiceConfig,
-)
 from .service import (
     GroupCollectionsService,
+)
+from .service_config import (
+    GroupCollectionsServiceConfig,
 )
 
 

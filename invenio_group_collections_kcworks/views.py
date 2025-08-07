@@ -9,34 +9,33 @@
 
 """Views for Commons group collections API endpoints."""
 
-from flask import (
-    jsonify,
-    current_app as app,
-)
-from flask_resources import (
-    from_conf,
-    JSONSerializer,
-    JSONDeserializer,
-    request_parser,
-    request_body_parser,
-    RequestBodyParser,
-    ResponseHandler,
-    Resource,
-    ResourceConfig,
-    route,
-    resource_requestctx,
-)
-from invenio_access.permissions import system_identity
 import marshmallow as ma
 import requests
-from werkzeug.exceptions import (
+from flask import current_app as app
+from flask import (
+    jsonify,
+)
+from flask_resources import (
+    JSONDeserializer,
+    JSONSerializer,
+    RequestBodyParser,
+    Resource,
+    ResourceConfig,
+    ResponseHandler,
+    from_conf,
+    request_body_parser,
+    request_parser,
+    resource_requestctx,
+    route,
+)
+from invenio_access.permissions import system_identity
+from werkzeug.exceptions import (  # Unauthorized,
     BadRequest,
     Forbidden,
     MethodNotAllowed,
     NotFound,
     RequestTimeout,
     UnprocessableEntity,
-    # Unauthorized,
 )
 
 from .errors import (
