@@ -281,7 +281,6 @@ class GroupCollectionsService(RecordService):
             )
         if meta_response.status_code == 200:
             content = meta_response.json()
-            app.logger.error(f"Group metadata: {pformat(content)}")
             if not content or commons_group_id not in [
                 content["id"],
                 str(content["id"]),
@@ -390,7 +389,6 @@ class GroupCollectionsService(RecordService):
                 "kcr:commons_group_visibility": commons_group_visibility,  # noqa: E501
             },
         }
-        app.logger.debug(f"New collection data: {pformat(data)}")
 
         while not new_record:
             try:
@@ -473,7 +471,6 @@ class GroupCollectionsService(RecordService):
                 new_record["id"],
                 data={"members": manage_payload, "role": "owner"},
             )
-            app.logger.error(f"Admin owner members: {pformat(manage_members)}")
         except AlreadyMemberError:
             app.logger.error("adminstrator role is already an owner")
 
@@ -506,7 +503,6 @@ class GroupCollectionsService(RecordService):
                     app.logger.error(f"{role} role was was already a group member")
                 except Exception as e:
                     app.logger.error(f"Error adding {role} role to collection: {e}")
-        app.logger.error(pformat(new_record))
 
         # download the group avatar and upload it to the Invenio instance
         if commons_avatar_url and "mystery-group.png" not in commons_avatar_url:
