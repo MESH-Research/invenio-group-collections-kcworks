@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of the invenio-group-collections-kcworks package.
 # Copyright (C) 2024, MESH Research.
@@ -586,7 +585,6 @@ def admin_role_need(db):
 @pytest.fixture()
 def admin(UserFixture, app, db, admin_role_need):
     """Admin user for requests."""
-
     email = "admin@inveniosoftware.org"
     password = "admin"
     u = UserFixture(

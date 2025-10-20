@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of the invenio-remote-user-data-kcworks package.
 # Copyright (C) 2023, MESH Research.
@@ -12,7 +11,6 @@ import json
 import os
 import traceback
 from pprint import pformat
-from typing import Optional
 
 # from pprint import pprint
 import requests
@@ -63,7 +61,6 @@ class RemoteGroupDataService(Service):
             """Update group roles and metadata data from remote server
             when webhook is triggered.
             """
-
             self.logger.debug(
                 "RemoteGroupDataService: webhook update signal received"
             )
@@ -130,7 +127,7 @@ class RemoteGroupDataService(Service):
 
     def update_group_from_remote(
         self, identity, idp: str, remote_group_id: str, **kwargs
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """Update group data from remote server.
 
         If Invenio group roles for the remote group do not exist,
@@ -372,7 +369,7 @@ class RemoteUserDataService(Service):
 
     def update_user_from_remote(
         self, identity, user_id: int, idp: str, remote_id: str, **kwargs
-    ) -> tuple[Optional[User], dict, list[str], dict]:
+    ) -> tuple[User | None, dict, list[str], dict]:
         """Main method to update user data from remote server.
 
         Parameters:

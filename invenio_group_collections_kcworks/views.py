@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of the invenio-group-collections-kcworks package.
 # Copyright (C) 2024, MESH Research.
@@ -313,7 +312,6 @@ class GroupCollectionsResource(Resource):
 
 def create_api_blueprint(app):
     """Register blueprint on api app."""
-
     ext = app.extensions["invenio-group-collections-kcworks"]
     blueprint = ext.group_collections_resource.as_blueprint()
 

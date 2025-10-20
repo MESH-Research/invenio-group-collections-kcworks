@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of the invenio-group-collections-kcworks package.
 # Copyright (C) 2024, MESH Research.
@@ -10,7 +9,6 @@
 """Utility functions for invenio-group-collections-kcworks."""
 
 import re
-from typing import Dict, List, Optional, Union
 from urllib.parse import quote
 
 from flask import current_app
@@ -24,7 +22,7 @@ from unidecode import unidecode
 def map_remote_roles_to_permissions(
     slug: str,
     all_roles: list,
-) -> Dict[str, List[str]]:
+) -> dict[str, list[str]]:
     """Map remote group roles to Invenio group names organized by
     their community permissions role level.
 
@@ -40,7 +38,7 @@ def map_remote_roles_to_permissions(
             with spaces replaced by hyphens.
         all_roles: A list of all remote group roles from the API.
 
-    returns:
+    Returns:
         Returns a dictionary with the community permission levels as keys
         and the corresponding Invenio group names as values.
     """
@@ -132,8 +130,8 @@ def make_base_group_slug(group_name: str) -> str:
 
 
 def make_group_slug(
-    group_id: Union[str, int], group_name: str, instance_name: str
-) -> Dict[str, Union[str, List[str]]]:
+    group_id: str | int, group_name: str, instance_name: str
+) -> dict[str, str | list[str]]:
     """Create a slug from a group name.
 
     The slug is based on the group name converted to lowercase and with
@@ -197,9 +195,8 @@ def make_group_slug(
 
 def add_user_to_community(
     user_id: int, role: str, community_id: int
-) -> Optional[Member]:
+) -> Member | None:
     """Add a user to a community with a given role."""
-
     members = None
     try:
         payload = [{"type": "user", "id": str(user_id)}]

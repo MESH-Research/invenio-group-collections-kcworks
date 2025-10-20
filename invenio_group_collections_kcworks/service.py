@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of the invenio-group-collections-kcworks package.
 # Copyright (C) 2024, MESH Research.
@@ -10,7 +9,6 @@
 import os
 from io import BytesIO
 from pprint import pformat
-from typing import Optional
 
 import marshmallow as ma
 import requests
@@ -66,10 +64,9 @@ class GroupCollectionsService(RecordService):
             commons_avatar_url: The URL of the avatar to fetch.
             community_record_id: The ID of the community to update.
 
-        returns:
+        Returns:
             True if the avatar was updated successfully, otherwise False.
         """
-
         success = False
         try:
             avatar_response = requests.get(commons_avatar_url, timeout=15)
@@ -129,14 +126,13 @@ class GroupCollectionsService(RecordService):
     ) -> CommunityItem:
         """Read a collection (community) by its slug.
 
-        raises:
+        Raises:
             CollectionNotFoundError: If no collection is found in Invenio with
             the given slug.
 
-        returns:
+        Returns:
             A CommunityItem object representing the collection.
         """
-
         community_list = current_communities.service.search(
             identity=identity, q=f"slug:{slug}"
         )
@@ -151,10 +147,10 @@ class GroupCollectionsService(RecordService):
         self,
         identity: Identity,
         commons_instance: str,
-        commons_group_id: Optional[str] = None,
-        sort: Optional[str] = "updated-desc",
-        size: Optional[int] = 10,
-        page: Optional[int] = 1,
+        commons_group_id: str | None = None,
+        sort: str | None = "updated-desc",
+        size: int | None = 10,
+        page: int | None = 1,
     ) -> CommunityListResult:
         """Search collections (communities) by Commons instance and group ID.
 
@@ -173,12 +169,12 @@ class GroupCollectionsService(RecordService):
         that instance will be returned. If the group ID is also provided, all
         collections belonging to that group will be returned.
 
-        raises:
+        Raises:
             CollectionNotFoundError: If no collections are found matching
                 the parameters.
             UnprocessableEntityError: If the query parameters are invalid.
 
-        returns:
+        Returns:
             Returns a CommunityListResult object.
         """
         query_params = "+_exists_:custom_fields.kcr\:commons_instance "  # noqa
@@ -240,7 +236,7 @@ class GroupCollectionsService(RecordService):
                 either "public" or "restricted" [default: "public"]
             **kwargs: Additional keyword arguments.
 
-        raises:
+        Raises:
             CommonsGroupNotFoundError: If the group is not found on the
                 Commons instance.
             CollectionAlreadyExistsError: If a collection for the group
@@ -250,7 +246,7 @@ class GroupCollectionsService(RecordService):
             RequestTimeout: If the request to the Commons instance api
                 endpoint times out.
 
-        returns:
+        Returns:
             The created collection record.
         """
         instance_name = app.config["SSO_SAML_IDPS"][commons_instance]["title"]
@@ -534,10 +530,9 @@ class GroupCollectionsService(RecordService):
             commons_instance: The name of the Commons instance.
             commons_group_id: The ID of the group on the Commons instance.
 
-        returns:
+        Returns:
             A CommunityItem object representing the deleted collection.
         """
-
         try:
             collection_record = current_communities.service.read(
                 system_identity, collection_slug
@@ -620,7 +615,7 @@ class GroupCollectionsService(RecordService):
             instance.
             remote_instance_name: The name of the remote Commons instance.
 
-        returns:
+        Returns:
             A CommunityItem object representing the disowned collection. This
             should have no group-based members linked to the remote group, and
             the remote group's metadata should be removed from its

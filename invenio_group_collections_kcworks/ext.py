@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of the invenio-group-collections-kcworks package.
 # Copyright (C) 2024, MESH Research.
@@ -8,7 +7,8 @@
 # LICENSE file for more details.
 
 """Extension providing collections administered by remote social groups
-for InvenioRDM."""
+for InvenioRDM.
+"""
 
 from invenio_group_collections_kcworks.views import (
     GroupCollectionsResource,
@@ -24,7 +24,7 @@ from .service_config import (
 )
 
 
-class InvenioGroupCollections(object):
+class InvenioGroupCollections:
     """invenio-group-collections-kcworks extension."""
 
     def __init__(self, app=None, **kwargs):
