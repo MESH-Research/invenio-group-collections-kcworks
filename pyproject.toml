@@ -46,6 +46,7 @@ tests = [
     "pytest-invenio",
     "pytest-runner",
     "requests-mock",
+    "invenio-remote-user-data-kcworks",
 ]
 
 [project.urls]
@@ -120,6 +121,8 @@ push = true
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.uv.sources]
+invenio-remote-user-data-kcworks = { path = "../invenio-remote-user-data-kcworks", editable = true }
 
 [tool.bdist_wheel]
 universal = 1
