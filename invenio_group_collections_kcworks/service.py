@@ -74,7 +74,7 @@ class GroupCollectionsService(RecordService):
             app.logger.error("Request to Commons instance for group avatar timed out")
         except requests.exceptions.ConnectionError:
             app.logger.error(
-                "Could not connect to " "Commons instance to fetch group avatar"
+                "Could not connect to Commons instance to fetch group avatar"
             )
         if avatar_response.status_code == 200:
             try:
@@ -106,8 +106,7 @@ class GroupCollectionsService(RecordService):
             app.logger.error(f"Response: {avatar_response.text}")
         elif avatar_response.status_code == 403:
             app.logger.error(
-                "Access to the provided avatar was forbidden"
-                f" at {commons_avatar_url}"
+                f"Access to the provided avatar was forbidden at {commons_avatar_url}"
             )
             app.logger.error(f"Response: {avatar_response.text}")
         elif avatar_response.status_code in [500, 502, 503, 504, 509, 511]:
@@ -249,7 +248,6 @@ class GroupCollectionsService(RecordService):
         Returns:
             The created collection record.
         """
-        instance_name = app.config["SSO_SAML_IDPS"][commons_instance]["title"]
         # make API request to commons instance to get group metadata
         commons_group_name = ""
         commons_group_description = ""
@@ -260,6 +258,7 @@ class GroupCollectionsService(RecordService):
         api_details = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
             commons_instance
         ]
+        instance_name = api_details.get("title")
         headers = {"Authorization": f"Bearer {os.environ[api_details['token_name']]}"}
         try:
             meta_response = requests.get(
@@ -309,8 +308,7 @@ class GroupCollectionsService(RecordService):
             app.logger.error(f"Response: {meta_response.text}")
             app.logger.error(headers)
             raise CommonsGroupNotFoundError(
-                f"No such group {commons_group_id} could be found "
-                f"on {instance_name}"
+                f"No such group {commons_group_id} could be found on {instance_name}"
             )
         else:
             app.logger.error(
@@ -379,9 +377,7 @@ class GroupCollectionsService(RecordService):
                 "kcr:commons_instance": commons_instance,
                 "kcr:commons_group_id": commons_group_id,
                 "kcr:commons_group_name": commons_group_name,
-                "kcr:commons_group_description": (
-                    commons_group_description
-                ),  # noqa: E501
+                "kcr:commons_group_description": (commons_group_description),  # noqa: E501
                 "kcr:commons_group_visibility": commons_group_visibility,  # noqa: E501
             },
         }
@@ -574,7 +570,7 @@ class GroupCollectionsService(RecordService):
             app.logger.error(msg)
             raise UnprocessableEntity(msg)
         except OpenRequestsForCommunityDeletionError as oe:
-            msg = "Cannot delete a collection with open" f"requests: {str(oe)}"
+            msg = f"Cannot delete a collection with openrequests: {str(oe)}"
             app.logger.error(msg)
             raise UnprocessableEntity(msg)
 
