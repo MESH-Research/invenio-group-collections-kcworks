@@ -1,72 +1,69 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=61", "wheel"]
+
 [project]
 name = "invenio-group-collections-kcworks"
 version = "0.1.0-dev1"
 description = "Provides collections administered by remote social groups for the Knowledge Commons Works instance of InvenioRDM"
 readme = "README.md"
-authors = [{ name = "MESH Research", email = "scottia4@msu.edu" }]
+keywords = ["groups", "invenio", "inveniordm", "research", "social"]
 license = { file = "LICENSE" }
-classifiers = [
-    "License :: OSI Approved :: MIT License",
-    "Development Status :: 3 - Alpha",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Environment :: Web Environment",
-    "Intended Audience :: Developers",
-    "Operating System :: OS Independent",
-    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
-    "Topic :: Software Development :: Libraries :: Python Modules"
-]
-keywords = ["invenio", "inveniordm", "groups", "social", "research"]
-dependencies = [
-    "alembic",
-    "click>=7.0",
-    "docker-services-cli",
-    "invenio-administration",
-    "invenio-app-rdm[opensearch2]<13.0.0",
-    "invenio-cli",
-    "invenio-communities",
-    "opensearch-dsl",
-    "psycopg2-binary",
-    "unidecode",
-]
+authors = [{ name = "MESH Research", email = "scottia4@msu.edu" }]
 requires-python = ">=3.9"
 
-[project.optional-dependencies]
-dev = [
-    "check-manifest",
-    "pip-tools",
-    "pytest>=7.3.2",
-    "pytest-invenio",
-    "pytest-runner",
-    "requests-mock",
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Web Environment",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+  "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-tests = [
-    "pytest>=7.3.2",
-    "pytest-invenio",
-    "pytest-runner",
-    "requests-mock",
-    "invenio-remote-user-data-kcworks",
+dependencies = [
+  "alembic",
+  "click>=7",
+  "docker-services-cli",
+  "invenio-administration",
+  "invenio-app-rdm[opensearch2]<13",
+  "invenio-cli",
+  "invenio-communities",
+  "opensearch-dsl",
+  "psycopg2-binary",
+  "unidecode",
 ]
+optional-dependencies.dev = [
+  "check-manifest",
+  "pip-tools",
+  "pytest>=7.3.2",
+  "pytest-invenio",
+  "pytest-runner",
+  "requests-mock",
+]
+optional-dependencies.tests = [
+  "invenio-remote-user-data-kcworks",
+  "pytest>=7.3.2",
+  "pytest-invenio",
+  "pytest-runner",
+  "requests-mock",
+]
+urls.Homepage = "https://github.com/MESH-Research/invenio-group-collections-kcworks"
+scripts.invenio-group-collections-kcworks = "invenio_group_collections_kcworks.cli:cli"
+entry-points."invenio_base.api_apps".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
+entry-points."invenio_base.api_blueprints".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.views:create_api_blueprint"
+entry-points."invenio_base.apps".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
 
-[project.urls]
-Homepage = "https://github.com/MESH-Research/invenio-group-collections-kcworks"
-
-[tool.pytest.ini_options]
-addopts = "--doctest-glob='*.rst' --doctest-modules"
-testpaths = [ "tests", "invenio_group_collections_kcworks" ]
-
-[project.scripts]
-invenio-group-collections-kcworks = "invenio_group_collections_kcworks.cli:cli"
-
-[project.entry-points."invenio_base.apps"]
-invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
-
-[project.entry-points."invenio_base.api_apps"]
-invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
-
-[project.entry-points."invenio_base.api_blueprints"]
-invenio_group_collections_kcworks = "invenio_group_collections_kcworks.views:create_api_blueprint"
+[tool.uv.sources]
+invenio-remote-user-data-kcworks = { path = "../invenio-remote-user-data-kcworks", editable = true }
 
 [tool.check-manifest]
 ignore = [
@@ -91,6 +88,10 @@ ignore = [
   "*.gitkeep",
 ]
 
+[tool.pytest.ini_options]
+addopts = "--doctest-glob='*.rst' --doctest-modules"
+testpaths = ["tests", "invenio_group_collections_kcworks"]
+
 [tool.bumpver]
 current_version = "0.1.0-dev1"
 version_pattern = "MAJOR.MINOR.PATCH[-TAGNUM]"
@@ -104,25 +105,10 @@ tag = true
 push = true
 
 [tool.bumpver.file_patterns]
-"pyproject.toml" = [
-    'version = "{version}"',
-]
-"README.md" = [
-    "Version {version}",
-]
-"VERSION" = [
-    '^"{version}"',
-]
-"invenio_group_collections_kcworks/__init__.py" = [
-    '^__version__ = "{version}"',
-]
-
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[tool.uv.sources]
-invenio-remote-user-data-kcworks = { path = "../invenio-remote-user-data-kcworks", editable = true }
+"pyproject.toml" = ['version = "{version}"']
+"README.md" = ["Version {version}"]
+"VERSION" = ['^"{version}"']
+"invenio_group_collections_kcworks/__init__.py" = ['^__version__ = "{version}"']
 
 [tool.bdist_wheel]
 universal = 1
