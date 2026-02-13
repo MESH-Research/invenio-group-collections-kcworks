@@ -45,7 +45,7 @@ optional-dependencies.dev = [
   "check-manifest",
   "pip-tools",
   "pytest>=7.3.2",
-  "pytest-invenio",
+  "pytest-invenio>=3.3,<4",
   "pytest-runner",
   "requests-mock",
 ]
@@ -108,4 +108,3 @@ push = true
 
 [tool.bdist_wheel]
 universal = 1
-
