@@ -177,16 +177,14 @@ class GroupCollectionsService(RecordService):
         Returns:
             Returns a CommunityListResult object.
         """
-        query_params = "+_exists_:custom_fields.kcr\:commons_instance "  # noqa
+        query_params = r"+_exists_:custom_fields.kcr\:commons_instance "
         if commons_instance:
             query_params += (
-                f"+custom_fields.kcr\:commons_instance:"  # noqa: W605
-                f"{commons_instance} "
+                f"+custom_fields.kcr\\:commons_instance:{commons_instance} "
             )
         if commons_group_id:
             query_params += (
-                f"+custom_fields.kcr\:commons_group_id:"  # noqa: W605
-                f"{commons_group_id}"
+                f"+custom_fields.kcr\\:commons_group_id:{commons_group_id}"
             )
         community_list = current_communities.service.search(
             identity=identity,

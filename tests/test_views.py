@@ -206,7 +206,7 @@ sample_communities_data = {
             404,
             {
                 "message": "No Works collection found matching the parameters"
-                " +_exists_:custom_fields.kcr\:commons_instance +custom_fields.kcr\:commons_instance:nonexistentCommons ",  # noqa
+                r" +_exists_:custom_fields.kcr\:commons_instance +custom_fields.kcr\:commons_instance:nonexistentCommons ",
                 "status": 404,
             },
         ),
@@ -217,8 +217,8 @@ sample_communities_data = {
             404,
             {
                 "message": "No Works collection found matching the parameters"
-                " +_exists_:custom_fields.kcr\:commons_instance +custom_fields.kcr\:commons_instance:msuCommons "  # noqa
-                "+custom_fields.kcr\:commons_group_id:77777",  # noqa: W605
+                r" +_exists_:custom_fields.kcr\:commons_instance +custom_fields.kcr\:commons_instance:msuCommons "
+                r"+custom_fields.kcr\:commons_group_id:77777",
                 "status": 404,
             },
         ),
