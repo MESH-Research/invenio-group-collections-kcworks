@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["groups", "invenio", "inveniordm", "research", "social"]
 license = { file = "LICENSE" }
 authors = [{ name = "MESH Research", email = "scottia4@msu.edu" }]
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -20,9 +20,6 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
@@ -39,6 +36,7 @@ dependencies = [
   "invenio-communities",
   "opensearch-dsl",
   "psycopg2-binary",
+  "standard-pkg-resources",
   "unidecode",
 ]
 optional-dependencies.dev = [
@@ -60,6 +58,9 @@ scripts.invenio-group-collections-kcworks = "invenio_group_collections_kcworks.c
 entry-points."invenio_base.api_apps".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
 entry-points."invenio_base.api_blueprints".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.views:create_api_blueprint"
 entry-points."invenio_base.apps".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
+
+[tool.uv.sources]
+invenio-communities = { path = "../invenio-communities/", editable = true }
 
 [tool.check-manifest]
 ignore = [
