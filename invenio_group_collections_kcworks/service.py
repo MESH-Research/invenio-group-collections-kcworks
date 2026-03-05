@@ -276,9 +276,6 @@ class GroupCollectionsService(RecordService):
             )
         if meta_response.status_code == 200:
             raw_content = meta_response.json()
-            app.logger.debug(
-                f"response raw_content for {commons_group_id}: {raw_content}"
-            )
             # API may return group at top level or under "results"
             content = raw_content.get("results", raw_content)
             if not content or commons_group_id not in [
@@ -290,7 +287,6 @@ class GroupCollectionsService(RecordService):
                     f"No such group {commons_group_id} could be found "
                     f"on {instance_name}"
                 )
-            app.logger.debug(f"response content for {commons_group_id}: {content}")
             commons_group_name = content["name"]
             commons_group_description = content["description"]
             commons_group_visibility = content["visibility"]
