@@ -301,8 +301,7 @@ class GroupCollectionsService(RecordService):
             commons_upload_roles = content["upload_roles"]
             commons_moderate_roles = content["moderate_roles"]
 
-            base_slug = make_base_group_slug(commons_group_name)
-            # base_slug = content["slug"]
+            base_slug = content.get("slug") or make_base_group_slug(commons_group_name)
             slug_incrementer = 0
             slug = base_slug
             app.logger.debug(f"Base slug: {slug}")
