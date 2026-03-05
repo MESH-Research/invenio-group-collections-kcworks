@@ -7,6 +7,7 @@
 # LICENSE file for more details.
 
 import os
+from enum import Enum
 from io import BytesIO
 from pprint import pformat
 
@@ -27,6 +28,7 @@ from invenio_communities.errors import (
 )
 from invenio_communities.members.errors import AlreadyMemberError
 from invenio_communities.proxies import current_communities
+from invenio_communities.communities.records.systemfields.access import VisibilityEnum
 from invenio_records_resources.services.records.service import RecordService
 from invenio_search.proxies import current_search_client
 from werkzeug.exceptions import (  # Unauthorized,
@@ -48,6 +50,37 @@ from .utils import (
     make_base_group_slug,
     map_remote_roles_to_permissions,
 )
+
+
+class RemoteAPIVisibility(str, Enum):
+    """Enum for the possible visibility values on the remote service."""
+
+    PUBLIC = "public"
+    PRIVATE = "private"
+    HIDDEN = "hidden"
+
+
+REMOTE_TO_INVENIO_VISIBILITY = {
+    RemoteAPIVisibility.PUBLIC: VisibilityEnum.PUBLIC,
+    RemoteAPIVisibility.PRIVATE: VisibilityEnum.RESTRICTED,
+    RemoteAPIVisibility.HIDDEN: VisibilityEnum.RESTRICTED,
+}
+
+
+def remote_to_invenio_visibility(remote_value: str) -> str:
+    """Transform visibility to invenio-communities values.
+
+    Accepts either a remote API value (e.g. 'public', 'private', 'hidden')
+    or an existing Invenio value ('public', 'restricted'). Returns the
+    Invenio visibility string ('public' or 'restricted').
+    """
+    if VisibilityEnum.validate(remote_value):
+        return remote_value
+    try:
+        remote = RemoteAPIVisibility(remote_value)
+    except ValueError:
+        return VisibilityEnum.PUBLIC.value
+    return REMOTE_TO_INVENIO_VISIBILITY[remote].value
 
 
 class GroupCollectionsService(RecordService):
@@ -210,7 +243,7 @@ class GroupCollectionsService(RecordService):
         commons_group_id: str,
         commons_instance: str,
         restore_deleted: bool = False,
-        collection_visibility: str = "public",
+        collection_visibility: str | None = None,
         **kwargs,
     ) -> CommunityItem:
         """Create a in Invenio collection (community) belonging to a KC group.
@@ -231,8 +264,11 @@ class GroupCollectionsService(RecordService):
             restore_deleted: If True, the collection will be restored if it
                 was previously deleted. If False, a new collection will be
                 created with a new slug. [default: False]
-            collection_visibility: The visibility of the collection. May be
-                either "public" or "restricted" [default: "public"]
+            collection_visibility: Optional override for the visibility of
+                the collection. Must be either "public" or "restricted" and
+                will be converted to a value from invenio-communities
+                VisibilityEnum. (Will default to VisibilityEnum.PUBLIC in
+                this method.)
             **kwargs: Additional keyword arguments.
 
         Raises:
@@ -347,9 +383,12 @@ class GroupCollectionsService(RecordService):
 
         # create the new collection
         new_record = None
+        access_visibility = remote_to_invenio_visibility(
+            collection_visibility or commons_group_visibility
+        )
         data = {
             "access": {
-                "visibility": collection_visibility,
+                "visibility": access_visibility,
                 "member_policy": "closed",
                 "record_policy": "closed",
                 "review_policy": "closed",
@@ -380,7 +419,7 @@ class GroupCollectionsService(RecordService):
                 "kcr:commons_group_id": commons_group_id,
                 "kcr:commons_group_name": commons_group_name,
                 "kcr:commons_group_description": (commons_group_description),  # noqa: E501
-                "kcr:commons_group_visibility": commons_group_visibility,  # noqa: E501
+                "kcr:commons_group_visibility": commons_group_visibility,
             },
         }
 
