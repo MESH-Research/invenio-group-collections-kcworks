@@ -61,26 +61,23 @@ class RemoteAPIVisibility(str, Enum):
 
 
 REMOTE_TO_INVENIO_VISIBILITY = {
-    RemoteAPIVisibility.PUBLIC: VisibilityEnum.PUBLIC,
-    RemoteAPIVisibility.PRIVATE: VisibilityEnum.RESTRICTED,
-    RemoteAPIVisibility.HIDDEN: VisibilityEnum.RESTRICTED,
+    RemoteAPIVisibility.PUBLIC: VisibilityEnum.PUBLIC.value,
+    RemoteAPIVisibility.PRIVATE: VisibilityEnum.RESTRICTED.value,
+    RemoteAPIVisibility.HIDDEN: VisibilityEnum.RESTRICTED.value,
 }
 
 
 def remote_to_invenio_visibility(remote_value: str) -> str:
-    """Transform visibility to invenio-communities values.
+    """Map remote API visibility to invenio-communities value.
 
-    Accepts either a remote API value (e.g. 'public', 'private', 'hidden')
-    or an existing Invenio value ('public', 'restricted'). Returns the
-    Invenio visibility string ('public' or 'restricted').
+    Uses remote_value as key in REMOTE_TO_INVENIO_VISIBILITY (via RemoteAPIVisibility).
+    Returns 'public' or 'restricted'. Unknown values fall back to 'public'.
     """
-    if VisibilityEnum.validate(remote_value):
-        return remote_value
     try:
         remote = RemoteAPIVisibility(remote_value)
-    except ValueError:
+        return REMOTE_TO_INVENIO_VISIBILITY[remote]
+    except (ValueError, KeyError):
         return VisibilityEnum.PUBLIC.value
-    return REMOTE_TO_INVENIO_VISIBILITY[remote].value
 
 
 class GroupCollectionsService(RecordService):

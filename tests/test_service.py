@@ -26,7 +26,29 @@ from invenio_group_collections_kcworks.proxies import (
 )
 from invenio_group_collections_kcworks.service import (
     GroupCollectionsService,
+    remote_to_invenio_visibility,
 )
+
+
+def test_remote_to_invenio_visibility_public():
+    """remote_to_invenio_visibility maps 'public' to 'public'."""
+    assert remote_to_invenio_visibility("public") == "public"
+
+
+def test_remote_to_invenio_visibility_private():
+    """remote_to_invenio_visibility maps 'private' to 'restricted'."""
+    assert remote_to_invenio_visibility("private") == "restricted"
+
+
+def test_remote_to_invenio_visibility_hidden():
+    """remote_to_invenio_visibility maps 'hidden' to 'restricted'."""
+    assert remote_to_invenio_visibility("hidden") == "restricted"
+
+
+def test_remote_to_invenio_visibility_unknown_fallback():
+    """remote_to_invenio_visibility falls back to 'public' for unknown values."""
+    assert remote_to_invenio_visibility("unknown") == "public"
+    assert remote_to_invenio_visibility("") == "public"
 
 
 def test_collections_service_init(app):
