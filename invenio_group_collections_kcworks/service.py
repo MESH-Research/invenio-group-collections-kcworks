@@ -7,6 +7,7 @@
 # LICENSE file for more details.
 
 import os
+from enum import Enum
 from io import BytesIO
 from pprint import pformat
 
@@ -27,6 +28,7 @@ from invenio_communities.errors import (
 )
 from invenio_communities.members.errors import AlreadyMemberError
 from invenio_communities.proxies import current_communities
+from invenio_communities.communities.records.systemfields.access import VisibilityEnum
 from invenio_records_resources.services.records.service import RecordService
 from invenio_search.proxies import current_search_client
 from werkzeug.exceptions import (  # Unauthorized,
@@ -48,6 +50,37 @@ from .utils import (
     make_base_group_slug,
     map_remote_roles_to_permissions,
 )
+
+
+class RemoteAPIVisibility(str, Enum):
+    """Enum for the possible visibility values on the remote service."""
+
+    PUBLIC = "public"
+    PRIVATE = "private"
+    HIDDEN = "hidden"
+
+
+REMOTE_TO_INVENIO_VISIBILITY = {
+    RemoteAPIVisibility.PUBLIC: VisibilityEnum.PUBLIC,
+    RemoteAPIVisibility.PRIVATE: VisibilityEnum.RESTRICTED,
+    RemoteAPIVisibility.HIDDEN: VisibilityEnum.RESTRICTED,
+}
+
+
+def remote_to_invenio_visibility(remote_value: str) -> str:
+    """Transform visibility to invenio-communities values.
+
+    Accepts either a remote API value (e.g. 'public', 'private', 'hidden')
+    or an existing Invenio value ('public', 'restricted'). Returns the
+    Invenio visibility string ('public' or 'restricted').
+    """
+    if VisibilityEnum.validate(remote_value):
+        return remote_value
+    try:
+        remote = RemoteAPIVisibility(remote_value)
+    except ValueError:
+        return VisibilityEnum.PUBLIC.value
+    return REMOTE_TO_INVENIO_VISIBILITY[remote].value
 
 
 class GroupCollectionsService(RecordService):
@@ -204,7 +237,7 @@ class GroupCollectionsService(RecordService):
         commons_group_id: str,
         commons_instance: str,
         restore_deleted: bool = False,
-        collection_visibility: str = "public",
+        collection_visibility: str | None = None,
         **kwargs,
     ) -> CommunityItem:
         """Create a in Invenio collection (community) belonging to a KC group.
@@ -225,8 +258,11 @@ class GroupCollectionsService(RecordService):
             restore_deleted: If True, the collection will be restored if it
                 was previously deleted. If False, a new collection will be
                 created with a new slug. [default: False]
-            collection_visibility: The visibility of the collection. May be
-                either "public" or "restricted" [default: "public"]
+            collection_visibility: Optional override for the visibility of
+                the collection. Must be either "public" or "restricted" and
+                will be converted to a value from invenio-communities
+                VisibilityEnum. (Will default to VisibilityEnum.PUBLIC in
+                this method.)
             **kwargs: Additional keyword arguments.
 
         Raises:
@@ -242,9 +278,6 @@ class GroupCollectionsService(RecordService):
         Returns:
             The created collection record.
         """
-        instance_name = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
-            commons_instance
-        ]["title"]
         # make API request to commons instance to get group metadata
         commons_group_name = ""
         commons_group_description = ""
@@ -255,6 +288,7 @@ class GroupCollectionsService(RecordService):
         api_details = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
             commons_instance
         ]
+        instance_name = api_details.get("title")
         headers = {"Authorization": f"Bearer {os.environ[api_details['token_name']]}"}
         try:
             meta_response = requests.get(
@@ -272,9 +306,6 @@ class GroupCollectionsService(RecordService):
             )
         if meta_response.status_code == 200:
             raw_content = meta_response.json()
-            app.logger.debug(
-                f"response raw_content for {commons_group_id}: {raw_content}"
-            )
             # API may return group at top level or under "results"
             content = raw_content.get("results", raw_content)
             if not content or commons_group_id not in [
@@ -286,7 +317,6 @@ class GroupCollectionsService(RecordService):
                     f"No such group {commons_group_id} could be found "
                     f"on {instance_name}"
                 )
-            app.logger.debug(f"response content for {commons_group_id}: {content}")
             commons_group_name = content["name"]
             commons_group_description = content["description"]
             commons_group_visibility = content["visibility"]
@@ -297,8 +327,7 @@ class GroupCollectionsService(RecordService):
             commons_upload_roles = content["upload_roles"]
             commons_moderate_roles = content["moderate_roles"]
 
-            base_slug = make_base_group_slug(commons_group_name)
-            # base_slug = content["slug"]
+            base_slug = content.get("slug") or make_base_group_slug(commons_group_name)
             slug_incrementer = 0
             slug = base_slug
             app.logger.debug(f"Base slug: {slug}")
@@ -348,9 +377,12 @@ class GroupCollectionsService(RecordService):
 
         # create the new collection
         new_record = None
+        access_visibility = remote_to_invenio_visibility(
+            collection_visibility or commons_group_visibility
+        )
         data = {
             "access": {
-                "visibility": collection_visibility,
+                "visibility": access_visibility,
                 "member_policy": "closed",
                 "record_submission_policy": "closed",
                 "review_policy": "closed",

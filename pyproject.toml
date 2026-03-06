@@ -33,13 +33,21 @@ dependencies = [
   "click>=7",
   "docker-services-cli",
   "invenio-administration",
-  "invenio-app-rdm[opensearch2]",
+  "invenio-app-rdm[opensearch2]<14",
   "invenio-cli",
   "invenio-communities",
   "opensearch-dsl",
   "psycopg2-binary",
   "standard-pkg-resources",
   "unidecode",
+]
+optional-dependencies.dev = [
+  "check-manifest",
+  "pip-tools",
+  "pytest>=7.3.2",
+  "pytest-invenio",
+  "pytest-runner",
+  "requests-mock",
 ]
 optional-dependencies.tests = [
   "mypy>=1.8",
@@ -53,9 +61,7 @@ optional-dependencies.tests = [
   "ruff>=0.3",
   "selenium",
 ]
-
 urls.Homepage = "https://github.com/MESH-Research/invenio-group-collections-kcworks"
-
 scripts.invenio-group-collections-kcworks = "invenio_group_collections_kcworks.cli:cli"
 entry-points."invenio_base.api_apps".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
 entry-points."invenio_base.api_blueprints".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.views:create_api_blueprint"
@@ -226,7 +232,7 @@ push = true
 
 [tool.pylsp.plugins.jedi]
 extra_paths = [
-  "../../..",  # kcworks (site/)
+  "../../..",               # kcworks (site/)
   "../invenio-communities",
 ]
 
