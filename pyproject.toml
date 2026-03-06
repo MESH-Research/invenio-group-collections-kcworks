@@ -224,5 +224,11 @@ push = true
 "VERSION" = ['^"{version}"']
 "invenio_group_collections_kcworks/__init__.py" = ['^__version__ = "{version}"']
 
+[tool.pylsp.plugins.jedi]
+extra_paths = [
+  "../../..",  # kcworks (site/)
+  "../invenio-communities",
+]
+
 [tool.bdist_wheel]
 universal = 1
