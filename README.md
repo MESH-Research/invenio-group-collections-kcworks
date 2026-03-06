@@ -41,11 +41,11 @@ Before the invenio_group_collections_kcworks module can be used, the administrat
 
 The configuration variable `GROUP_COLLECTIONS_METADATA_ENDPOINTS` must be provided in the `invenio.cfg` file in order to use this endpoint. This variable should hold a dictionary whose keys are Commons instance names. The value for each key is a dictionary containing the following keys:
 
-| key | value type | required | value |
-| --- | ---------- | ----- | ----- |
-| `url` | str | Y | The url on the Commons instance where a GET request can retrieve the metadata for a group. The url should include the placeholder `{id}` where the Commons instance id for the requested group should be placed. |
-| `token_name` | str (upper case) | Y | The name of the environment variable that will hold the authentication token for requests to the Commons instance url for retrieving group metadata. |
-| `placeholder_avatar` | str | N | The filename or last url component that identifies a placeholder avatar in the avatar image url supplied for the Commons group avatar. |
+| key                  | value type       | required | value                                                                                                                                                                                                            |
+| -------------------- | ---------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `url`                | str              | Y        | The url on the Commons instance where a GET request can retrieve the metadata for a group. The url should include the placeholder `{id}` where the Commons instance id for the requested group should be placed. |
+| `token_name`         | str (upper case) | Y        | The name of the environment variable that will hold the authentication token for requests to the Commons instance url for retrieving group metadata.                                                             |
+| `placeholder_avatar` | str              | N        | The filename or last url component that identifies a placeholder avatar in the avatar image url supplied for the Commons group avatar.                                                                           |
 
 A typical configuration might look like the following:
 
@@ -70,25 +70,25 @@ all Commons groups. (Commons Works collections not linked to a Commons group wil
 
 Four optional query parameters can be used to filter the results:
 
-| Parameter name | Description |
-| ---------------|------------ |
+| Parameter name     | Description                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `commons_instance` | the name of the Commons instance to which the group belongs. If this parameter is provided, the response will only include collections owned by groups in that instance. |
-| `commons_group_id` | the ID of the Commons group. If this parameter is provided, the response will only include collections owned by that group. |
-| `collection` | the slug of the collection. If this parameter is provided, the response will include only metadata for that collection. |
-| `page` | the page number of the results |
-| `size` | the number of results to include on each page |
-| `sort` | the kind of sorting applied to the returned results |
+| `commons_group_id` | the ID of the Commons group. If this parameter is provided, the response will only include collections owned by that group.                                              |
+| `collection`       | the slug of the collection. If this parameter is provided, the response will include only metadata for that collection.                                                  |
+| `page`             | the page number of the results                                                                                                                                           |
+| `size`             | the number of results to include on each page                                                                                                                            |
+| `sort`             | the kind of sorting applied to the returned results                                                                                                                      |
 
 ###### Sorting
 
 The `sort` parameter can be set to one of the following sort types:
 
-| Field name | Description |
-| -----------|-------------|
-| newest | Descending order based on `created` date |
-| oldest | Ascending order based on `created` date |
+| Field name   | Description                              |
+| ------------ | ---------------------------------------- |
+| newest       | Descending order based on `created` date |
+| oldest       | Ascending order based on `created` date  |
 | updated-desc | Descending order based on `updated` date |
-| updated-asc | Ascending order based on `updated` date |
+| updated-asc  | Ascending order based on `updated` date  |
 
 By default the results are sorted by `updated-desc`
 
@@ -148,7 +148,7 @@ GET https://example.org/api/group_collections HTTP/1.1
                 "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
                 "access": {
                     "member_policy": "open",
-                    "record_policy": "open",
+                    "record_submission_policy": "open",
                     "review_policy": "closed",
                     "visibility": "public",
                 },
@@ -200,7 +200,7 @@ GET https://example.org/api/group_collections HTTP/1.1
                 "access": {
                     "visibility": "public",
                     "member_policy": "closed",
-                    "record_policy": "open",
+                    "record_submission_policy": "open",
                     "review_policy": "open",
                 }
             },
@@ -222,8 +222,8 @@ GET https://example.org/api/group_collections HTTP/1.1
 
 ###### Successful Response Headers
 
-| Header name | Header value |
-| ------------|-------------- |
+| Header name  | Header value       |
+| ------------ | ------------------ |
 | Content-Type | `application/json` |
 
 #### Requesting collections for a Commons instance
@@ -278,7 +278,7 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
                 "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
                 "access": {
                     "member_policy": "open",
-                    "record_policy": "open",
+                    "record_submission_policy": "open",
                     "review_policy": "closed",
                     "visibility": "public",
                 },
@@ -330,7 +330,7 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
                 "access": {
                     "visibility": "public",
                     "member_policy": "closed",
-                    "record_policy": "open",
+                    "record_submission_policy": "open",
                     "review_policy": "open",
                 }
             },
@@ -351,15 +351,14 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
 
 ###### Successful response headers
 
-| Header name | Header value |
-| ------------|-------------- |
-| Content-Type | `application/json` |
-| Link | `<https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=1>; rel="first", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=9>; rel="last", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=1>; rel="prev", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=2>; rel="next"` |
-
+| Header name  | Header value                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Content-Type | `application/json`                                                                                                                                                                                                                                                                                                                                                                                        |
+| Link         | `<https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=1>; rel="first", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=9>; rel="last", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=1>; rel="prev", <https://example.org/api/group_collections?commons_instance=knowledgeCommons&page=2>; rel="next"` |
 
 #### Requesting collections for a specific group
 
-Note that if you specify a `commons_group_id` value, you must *also* provide a `commons_instance` value. This is to avoid confusion if different Commons instances use the same internal id for groups.
+Note that if you specify a `commons_group_id` value, you must _also_ provide a `commons_instance` value. This is to avoid confusion if different Commons instances use the same internal id for groups.
 
 ###### Request
 
@@ -411,7 +410,7 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
                 "id": "5402d72b-b144-4891-aa8e-1038515d68f7",
                 "access": {
                     "member_policy": "open",
-                    "record_policy": "open",
+                    "record_submission_policy": "open",
                     "review_policy": "closed",
                     "visibility": "public",
                 },
@@ -463,7 +462,7 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
                 "access": {
                     "visibility": "public",
                     "member_policy": "closed",
-                    "record_policy": "open",
+                    "record_submission_policy": "open",
                     "review_policy": "open",
                 }
             },
@@ -484,8 +483,8 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
 
 ###### Successful response headers
 
-| Header name | Header value |
-| ------------|-------------- |
+| Header name  | Header value       |
+| ------------ | ------------------ |
 | Content-Type | `application/json` |
 
 #### Requesting a specific collection
@@ -554,7 +553,7 @@ GET https://example.org/api/group_collections/my-collection-slug HTTP/1.1
     "access": {
         "visibility": "public",
         "member_policy": "closed",
-        "record_policy": "open",
+        "record_submission_policy": "open",
         "review_policy": "open",
     }
 }
@@ -587,24 +586,25 @@ Note that when a collection is created for a group, the collection's slug will b
 
 #### Handling collection name collisions
 
-It is possible for two groups on Commons instances to share the same human readable name, even though their ids are different. Knowledge Commons Works *will* allow multiple collections to share identical human readable names, but group url *slugs* must be unique across all KC Works collections. So where group names collide, only the first of the identically-named collections will have its slug generated normally. Susequent collections with the same name will have a numerical disambiguator appended to the end of their slugs. So if we have three groups named "Panda Studies," the first collection created for one of the groups will have the slug `panda-studies`. The other collections created by these groups will be assigned the slugs `panda-studies-1` and `panda-studies-2`, in order of their creation in Knowledge Commons Works.
+It is possible for two groups on Commons instances to share the same human readable name, even though their ids are different. Knowledge Commons Works _will_ allow multiple collections to share identical human readable names, but group url _slugs_ must be unique across all KC Works collections. So where group names collide, only the first of the identically-named collections will have its slug generated normally. Susequent collections with the same name will have a numerical disambiguator appended to the end of their slugs. So if we have three groups named "Panda Studies," the first collection created for one of the groups will have the slug `panda-studies`. The other collections created by these groups will be assigned the slugs `panda-studies-1` and `panda-studies-2`, in order of their creation in Knowledge Commons Works.
 
 #### Handling deleted group collections
 
 If a group collection is deleted, its slug will be reserved in the Invenio PID store and cannot be re-used for a new collection. If a new collection is created for the same group, the slug will have a numerical disambiguator appended to the end, exactly as in cases of group name collision. E.g., if the group `panda-studies` were deleted earlier, a request to create a new collection for the "Panda Studies" group would be assigned the URL slug `panda-studies-1`. This is to avoid breaking links to the deleted collection.
 
 In future it may be possible to restore deleted collections, but this is not currently implemented.
+
 <!-- TODO: Implement collection restoration -->
 
 #### Request body
 
 The request body must be a JSON object with the following fields:
 
-| Field name | Required | Description |
-| -----------|----------|-------------|
-| `commons_instance` | Y | The name of the Commons instance to which the group belongs. This must be the same string used to identify the instance in the `GROUP_COLLECTIONS_METADATA_ENDPOINTS` config variable. |
-| `commons_group_id` | Y | The ID of the Commons group that will own the collection. |
-| `collection_visibility` | N | The visibility setting for the collection to be created. Must be either "public" or "restricted". [default: "restricted"]|
+| Field name              | Required | Description                                                                                                                                                                            |
+| ----------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `commons_instance`      | Y        | The name of the Commons instance to which the group belongs. This must be the same string used to identify the instance in the `GROUP_COLLECTIONS_METADATA_ENDPOINTS` config variable. |
+| `commons_group_id`      | Y        | The ID of the Commons group that will own the collection.                                                                                                                              |
+| `collection_visibility` | N        | The visibility setting for the collection to be created. Must be either "public" or "restricted". [default: "restricted"]                                                              |
 
 #### Request
 
@@ -616,13 +616,11 @@ POST https://example.org/api/group_collections HTTP/1.1
 
 ```json
 {
-    "commons_instance": "knowledgeCommons",
-    "commons_group_id": "12345",
-    "collection_visibility": "public",
+  "commons_instance": "knowledgeCommons",
+  "commons_group_id": "12345",
+  "collection_visibility": "public"
 }
 ```
-
-
 
 #### Successful response status code
 
@@ -632,15 +630,15 @@ POST https://example.org/api/group_collections HTTP/1.1
 
 ```json
 {
-    "commons_group_id": "12345",
-    "collection_slug": "new-collection-slug"
+  "commons_group_id": "12345",
+  "collection_slug": "new-collection-slug"
 }
 ```
 
 #### Unsuccessful response codes
 
 - 400 Bad Request: The request body is missing required fields or contains
-    invalid data.
+  invalid data.
 - 404 Not Found: The specified group could not be found by the callback to the Commons instance.
 - 403 Forbidden: The request is not authorized to modify the collection.
 - 409 Conflict: A collection already exists in Knowledge Commons Works linked to the specified group.
@@ -650,7 +648,7 @@ POST https://example.org/api/group_collections HTTP/1.1
 [!WARNING]
 PATCH requests to change group ownership of the collection are not yet implemented.
 
-A PATCH request to this endpoint modifies an existing collection in Invenio by changing the Commons group to which it belongs. This is the *only* modification that can be made to a collection via this endpoint. Other modifications to Commons group metadata should be handled by signalling the Invenio webhook for commons group metadata updates. Modifications to internal metadata or settings for the Invenio collection should be made view the Invenio "communities" API or the collection settings UI.
+A PATCH request to this endpoint modifies an existing collection in Invenio by changing the Commons group to which it belongs. This is the _only_ modification that can be made to a collection via this endpoint. Other modifications to Commons group metadata should be handled by signalling the Invenio webhook for commons group metadata updates. Modifications to internal metadata or settings for the Invenio collection should be made view the Invenio "communities" API or the collection settings UI.
 
 Note that the collection memberships in Invenio will be automatically transferred to the new Commons group. The corporate roles for the old Commons group will be removed from the collection and corporate roles for the new Commons group will be added to its membership with appropriate permissions. But any individual memberships that have been granted through the Invenio UI will be left unchanged. If the new collection administrators wish to change these individual memberships, they will need to do so through the Invenio UI.
 
@@ -664,11 +662,11 @@ PATCH https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 
 ```json
 {
-    "commons_instance": "knowledgeCommons",
-    "old_commons_group_id": "12345",
-    "new_commons_group_id": "67890",
-    "new_commons_group_name": "My Group",
-    "collection_visibility": "public",
+  "commons_instance": "knowledgeCommons",
+  "old_commons_group_id": "12345",
+  "new_commons_group_id": "67890",
+  "new_commons_group_name": "My Group",
+  "collection_visibility": "public"
 }
 ```
 
@@ -689,11 +687,11 @@ PATCH https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 #### Unsuccessful response codes
 
 - 400 Bad Request: The request body is missing required fields or contains
-    invalid data.
+  invalid data.
 - 404 Not Found: The collection does not exist.
 - 403 Forbidden: The request is not authorized to modify the collection.
 - 304 Not Modified: The collection is already owned by the specified
-    Commons group.
+  Commons group.
 
 ### Deleting a Group's Collection (DELETE)
 
@@ -758,8 +756,8 @@ To update the version number, run the following command:
 ```bash
 bumpver update --<part of version to update>
 ```
-where `<part of version to update>` is one of `major`, `minor`, `patch`, or `tag-num`.
 
+where `<part of version to update>` is one of `major`, `minor`, `patch`, or `tag-num`.
 
 ### Dependencies
 

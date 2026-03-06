@@ -60,7 +60,7 @@ for instance in communities_data:
             "access": {
                 "visibility": "public",
                 "member_policy": "open",
-                "record_policy": "open",
+                "record_submission_policy": "open",
                 "review_policy": "closed",
                 "members_visibility": "public",
             },
@@ -122,8 +122,7 @@ for instance in communities_data:
                 "self": "https://127.0.0.1:5000/api/"
                 "communities/"
                 "b3f00322-c724-40e2-88e3-da0a62756c5d",
-                "self_html": "https://127.0.0.1:5000/"
-                "communities/community-2",
+                "self_html": "https://127.0.0.1:5000/communities/community-2",
                 "settings_html": "https://127.0.0.1:5000/"
                 "communities/community-2/settings",
             },
@@ -163,8 +162,7 @@ sample_communities_data = {
         "total": 8,
     },
     "links": {
-        "self": "https://127.0.0.1:5000/api/communities"
-        "?page=1&q=&size=25&sort=newest",
+        "self": "https://127.0.0.1:5000/api/communities?page=1&q=&size=25&sort=newest",
     },
     "sortBy": "newest",
 }
@@ -181,8 +179,7 @@ sample_communities_data = {
         ),
         (
             1,
-            "/group_collections?commons_instance=knowledgeCommons"
-            "&sort=newest",
+            "/group_collections?commons_instance=knowledgeCommons&sort=newest",
             200,
             sample_communities_data,
         ),
@@ -201,8 +198,7 @@ sample_communities_data = {
         ),
         (
             4,
-            "/group_collections?commons_instance=nonexistentCommons"
-            "&sort=newest",
+            "/group_collections?commons_instance=nonexistentCommons&sort=newest",
             404,
             {
                 "message": "No Works collection found matching the parameters"
@@ -255,9 +251,9 @@ def test_group_collections_resource_search(
 
     if expected_response_code == 200:
         if idx == 3:
-            expected_json["links"][
-                "next"
-            ] = "https://127.0.0.1:5000/api/communities?page=2&q=&size=4&sort=newest"  # noqa
+            expected_json["links"]["next"] = (
+                "https://127.0.0.1:5000/api/communities?page=2&q=&size=4&sort=newest"  # noqa
+            )
             expected_json["links"] = {
                 "prev": "https://127.0.0.1:5000/api/communities?page=1&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20&size=4&sort=newest",  # noqa
                 "self": "https://127.0.0.1:5000/api/communities?page=2&q=%2B_exists_%3Acustom_fields.kcr%5C%3Acommons_instance%20&size=4&sort=newest",  # noqa
@@ -284,8 +280,7 @@ def test_group_collections_resource_search(
             expected_json["hits"]["hits"] = [
                 h
                 for h in expected_json["hits"]["hits"]
-                if h["custom_fields"]["kcr:commons_instance"]
-                == "knowledgeCommons"
+                if h["custom_fields"]["kcr:commons_instance"] == "knowledgeCommons"
             ]
             for a in expected_json["aggregations"]:
                 for b in expected_json["aggregations"][a]["buckets"]:
@@ -299,9 +294,7 @@ def test_group_collections_resource_search(
             }
 
         print("actual hits", [h["slug"] for h in actual.json["hits"]["hits"]])
-        print(
-            "expected hits", [h["slug"] for h in expected_json["hits"]["hits"]]
-        )
+        print("expected hits", [h["slug"] for h in expected_json["hits"]["hits"]])
         assert actual.json["aggregations"] == expected_json["aggregations"]
         assert actual.json["sortBy"] == expected_json["sortBy"]
         assert actual.json["links"] == expected_json["links"]
@@ -317,13 +310,8 @@ def test_group_collections_resource_search(
             # assert h["id"] == expected_json["hits"]["hits"][0]["id"]
             assert "links" in h.keys()
             # h['links'] == expected_json['hits']['hits'][0]['links']
-            assert (
-                h["metadata"] == expected_json["hits"]["hits"][i]["metadata"]
-            )
-            assert (
-                h["revision_id"]
-                == expected_json["hits"]["hits"][i]["revision_id"]
-            )
+            assert h["metadata"] == expected_json["hits"]["hits"][i]["metadata"]
+            assert h["revision_id"] == expected_json["hits"]["hits"][i]["revision_id"]
             assert h["slug"] == expected_json["hits"]["hits"][i]["slug"]
             assert "updated" in h.keys()
             # h['updated'] = expected_json['hits']['hits'][0]['updated']
@@ -338,8 +326,7 @@ def test_group_collections_resource_search(
             "/group_collections/collection-nonexistent",
             404,
             {
-                "message": "No collection found with the slug "
-                "collection-nonexistent",
+                "message": "No collection found with the slug collection-nonexistent",
                 "status": 404,
             },
         ),
@@ -425,9 +412,7 @@ def test_group_collections_resource_create(
 
         update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
             "knowledgeCommons"
-        ][
-            "url"
-        ]  # noqa
+        ]["url"]  # noqa
         requests_mock.get(
             update_url.replace("{id}", "1004290"),
             status_code=200,
@@ -454,9 +439,7 @@ def test_group_collections_resource_create(
         assert actual_resp.status_code == expected_response_code
         actual = actual_resp.json
         if expected_response_code == 201:
-            assert (
-                actual["commons_group_id"] == expected_json["commons_group_id"]
-            )
+            assert actual["commons_group_id"] == expected_json["commons_group_id"]
             assert actual["collection"] == expected_json["collection"]
         else:
             assert actual == expected_json
@@ -485,13 +468,11 @@ def test_collections_resource_create_unauthorized(
 
         actual_resp = client.post(
             "/group_collections",
-            data=json.dumps(
-                {
-                    "commons_instance": "knowledgeCommons",
-                    "commons_group_id": "1004290",
-                    "collection_visibility": "public",
-                }
-            ),
+            data=json.dumps({
+                "commons_instance": "knowledgeCommons",
+                "commons_group_id": "1004290",
+                "collection_visibility": "public",
+            }),
             follow_redirects=True,
             headers=headers,
         )
@@ -520,9 +501,7 @@ def test_collections_resource_not_found(
 
         update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
             "knowledgeCommons"
-        ][
-            "url"
-        ]  # noqa
+        ]["url"]  # noqa
 
         requests_mock.get(
             update_url.replace("{id}", "100429011"),
@@ -538,20 +517,17 @@ def test_collections_resource_not_found(
 
         actual_resp = client.post(
             "/group_collections",
-            data=json.dumps(
-                {
-                    "commons_instance": "knowledgeCommons",
-                    "commons_group_id": "100429011",
-                    "collection_visibility": "public",
-                }
-            ),
+            data=json.dumps({
+                "commons_instance": "knowledgeCommons",
+                "commons_group_id": "100429011",
+                "collection_visibility": "public",
+            }),
             follow_redirects=True,
             headers=headers,
         )
         assert actual_resp.status_code == 404
         assert actual_resp.json == {
-            "message": ("No such group 100429011 could be found on "
-                        "Knowledge Commons"),
+            "message": ("No such group 100429011 could be found on Knowledge Commons"),
             "status": 404,
         }
 
@@ -574,9 +550,7 @@ def test_collections_resource_delete(
 
         update_url = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
             "knowledgeCommons"
-        ][
-            "url"
-        ]  # noqa
+        ]["url"]  # noqa
         requests_mock.get(
             update_url.replace("{id}", "1004290"),
             status_code=200,

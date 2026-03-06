@@ -133,9 +133,7 @@ test_config["SSO_SAML_IDPS"] = {
                     # <Response> message. OneLogin Toolkit supports
                     # the HTTP-Redirect binding
                     # only for this endpoint.
-                    "binding": (
-                        "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                    ),
+                    "binding": ("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"),
                 },
                 # SLO endpoint info of the IdP.
                 "singleLogoutService": {
@@ -146,9 +144,7 @@ test_config["SSO_SAML_IDPS"] = {
                     # the <Response> message. OneLogin Toolkit supports
                     # the HTTP-Redirect binding
                     # only for this endpoint.
-                    "binding": (
-                        "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                    ),
+                    "binding": ("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"),
                 },
                 # Public X.509 certificate of the IdP
                 "x509cert": (
@@ -189,9 +185,7 @@ test_config["SSO_SAML_IDPS"] = {
             # "name": "urn:oid:2.5.4.3",  # "cn"
             "name": "urn:oid:2.5.4.42",  # "givenName"
             "surname": "urn:oid:2.5.4.4",  # "sn"
-            "external_id": (
-                "urn:oid:2.16.840.1.113730.3.1.3"
-            ),  # "employeeNumber"
+            "external_id": ("urn:oid:2.16.840.1.113730.3.1.3"),  # "employeeNumber"
         },  # FIXME: new entity id url, assertion consumer service url,
         # certificate
         # "title", 'urn:oid:2.5.4.12': ['Hc Developer'],
@@ -233,9 +227,7 @@ test_config["COMMUNITIES_CUSTOM_FIELDS_UI"] = [
     {
         "section": "Linked Commons Group",
         "hidden": False,
-        "description": (
-            "Information about a Commons group that owns the collection"
-        ),
+        "description": ("Information about a Commons group that owns the collection"),
         "fields": [
             {
                 "field": "kcr:commons_group_name",
@@ -327,9 +319,7 @@ def create_app():
 @pytest.fixture(scope="module")
 def community_type_type(app):
     """Resource type vocabulary type."""
-    return vocabulary_service.create_type(
-        system_identity, "communitytypes", "comtyp"
-    )
+    return vocabulary_service.create_type(system_identity, "communitytypes", "comtyp")
 
 
 @pytest.fixture(scope="module")
@@ -403,9 +393,7 @@ def create_communities_custom_fields(app):
 
     try:
         communities_index = dsl.Index(
-            build_alias_name(
-                current_communities.service.config.record_cls.index._name
-            ),
+            build_alias_name(current_communities.service.config.record_cls.index._name),
             using=current_search_client,
         )
         communities_index.put_mapping(body={"properties": properties})
@@ -484,7 +472,7 @@ def sample_communities(app, db):
                         "access": {
                             "visibility": "public",
                             "member_policy": "open",
-                            "record_policy": "open",
+                            "record_submission_policy": "open",
                             "review_policy": "closed",
                             "members_visibility": "public",
                         },
@@ -508,9 +496,7 @@ def sample_communities(app, db):
                             "kcr:commons_instance": instance,
                             "kcr:commons_group_id": c[0],
                             "kcr:commons_group_name": c[1],
-                            "kcr:commons_group_description": (
-                                f"{c[1]} description"
-                            ),
+                            "kcr:commons_group_description": (f"{c[1]} description"),
                             "kcr:commons_group_visibility": "public",
                         },
                     }
@@ -538,9 +524,7 @@ def sample_communities(app, db):
 
 @pytest.fixture(scope="function")
 def user_factory(app, db, UserFixture):
-    def make_user(
-        email="info@inveniosoftware.org", password="password", **kwargs
-    ):
+    def make_user(email="info@inveniosoftware.org", password="password", **kwargs):
         # with db.session.begin_nested():
         #     datastore = app.extensions["security"].datastore
         #     user1 = datastore.create_user(
@@ -573,9 +557,7 @@ def admin_role_need(db):
     role = Role(name="administration-access")
     db.session.add(role)
 
-    action_role = ActionRoles.create(
-        action=administration_access_action, role=role
-    )
+    action_role = ActionRoles.create(action=administration_access_action, role=role)
     db.session.add(action_role)
 
     db.session.commit()
@@ -601,15 +583,13 @@ def admin(UserFixture, app, db, admin_role_need):
 
     current_accounts.datastore.add_role_to_user(u.user, "admin")
 
-    current_accounts.datastore.add_role_to_user(
-        u.user, "administration-access"
-    )
-    current_accounts.datastore.add_role_to_user(
-        u.user, "group-collections-owner"
-    )
+    current_accounts.datastore.add_role_to_user(u.user, "administration-access")
+    current_accounts.datastore.add_role_to_user(u.user, "group-collections-owner")
 
     u.allowed_token = Token.create_personal(
-        "webhook", u.id, scopes=[]  # , is_internal=False
+        "webhook",
+        u.id,
+        scopes=[],  # , is_internal=False
     ).access_token
 
     current_accounts.datastore.commit()
@@ -707,7 +687,7 @@ def sample_community1(app, communities_service, user_factory):
                 "visibility": "restricted",
                 "members_visibility": "public",
                 "member_policy": "closed",
-                "record_policy": "closed",
+                "record_submission_policy": "closed",
                 "review_policy": "closed",
             },
             "custom_fields": {
