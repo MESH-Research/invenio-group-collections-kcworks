@@ -249,7 +249,7 @@ class GroupCollectionsService(RecordService):
         commons_group_name = ""
         commons_group_description = ""
         commons_group_url = ""
-        commons_avatar_url = ""
+        commons_avatar_url: str | None = ""
         commons_upload_roles = []
         commons_moderate_roles = []
         api_details = app.config["GROUP_COLLECTIONS_METADATA_ENDPOINTS"][
@@ -258,7 +258,7 @@ class GroupCollectionsService(RecordService):
         headers = {"Authorization": f"Bearer {os.environ[api_details['token_name']]}"}
         try:
             meta_response = requests.get(
-                api_details["url"].format(id=commons_group_id),
+                f"{api_details['url']}{commons_group_id}",
                 headers=headers,
                 timeout=15,
             )
@@ -271,30 +271,37 @@ class GroupCollectionsService(RecordService):
                 "Could not connect to Commons instance to fetch group metadata"
             )
         if meta_response.status_code == 200:
-            content = meta_response.json()
+            raw_content = meta_response.json()
+            app.logger.debug(
+                f"response raw_content for {commons_group_id}: {raw_content}"
+            )
+            # API may return group at top level or under "results"
+            content = raw_content.get("results", raw_content)
             if not content or commons_group_id not in [
-                content["id"],
-                str(content["id"]),
+                content.get("id"),
+                str(content.get("id") or ""),
             ]:
+                app.logger.debug("NOT FOUND ERROR!")
                 raise CommonsGroupNotFoundError(
                     f"No such group {commons_group_id} could be found "
                     f"on {instance_name}"
                 )
-            else:
-                commons_group_name = content["name"]
-                commons_group_description = content["description"]
-                commons_group_visibility = content["visibility"]
-                commons_group_url = content["url"]
-                commons_avatar_url = content["avatar"]
-                if commons_avatar_url == api_details.get("default_avatar"):
-                    commons_avatar_url = None
-                commons_upload_roles = content["upload_roles"]
-                commons_moderate_roles = content["moderate_roles"]
+            app.logger.debug(f"response content for {commons_group_id}: {content}")
+            commons_group_name = content["name"]
+            commons_group_description = content["description"]
+            commons_group_visibility = content["visibility"]
+            commons_group_url = content["url"]
+            commons_avatar_url = content["avatar"]
+            if commons_avatar_url == api_details.get("default_avatar"):
+                commons_avatar_url = None
+            commons_upload_roles = content["upload_roles"]
+            commons_moderate_roles = content["moderate_roles"]
 
-                base_slug = make_base_group_slug(commons_group_name)
-                slug_incrementer = 0
-                slug = base_slug
-                app.logger.error(f"Base slug: {slug}")
+            base_slug = make_base_group_slug(commons_group_name)
+            # base_slug = content["slug"]
+            slug_incrementer = 0
+            slug = base_slug
+            app.logger.debug(f"Base slug: {slug}")
 
         elif meta_response.status_code == 404:
             app.logger.error(
@@ -397,10 +404,6 @@ class GroupCollectionsService(RecordService):
                     if community_list.total < 1:
                         msg = f"Collection for {instance_name} group {commons_group_id} seems to have been deleted previously and has not been restored. Continuing with a new url slug."  # noqa: E501
                         app.logger.error(msg)
-                        # raise DeletionStatusError(False, msg)
-                        # TODO: provide the option of restoring a deleted
-                        # collection here? `restore_deleted` query param is
-                        # in place
 
                         if restore_deleted:
                             raise NotImplementedError(
