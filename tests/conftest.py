@@ -547,14 +547,14 @@ def user_factory(app, db, UserFixture):
 
 @pytest.fixture(scope="function")
 def admin_role_need(db):
-    """Store 1 role with 'superuser-access' ActionNeed.
+    """Store 1 role with 'administration' that has administration-access ActionNeed.
 
     WHY: This is needed because expansion of ActionNeed is
          done on the basis of a User/Role being associated with that Need.
          If no User/Role is associated with that Need (in the DB), the
          permission is expanded to an empty list.
     """
-    role = Role(name="administration-access")
+    role = Role(name="administration")
     db.session.add(role)
 
     action_role = ActionRoles.create(action=administration_access_action, role=role)
@@ -575,15 +575,14 @@ def admin(UserFixture, app, db, admin_role_need):
     )
     u.create(app, db)
 
-    current_accounts.datastore.find_or_create_role("admin")
+    current_accounts.datastore.find_or_create_role("administration")
 
     current_accounts.datastore.find_or_create_role("administrator")
 
     current_accounts.datastore.find_or_create_role("group-collections-owner")
 
-    current_accounts.datastore.add_role_to_user(u.user, "admin")
+    current_accounts.datastore.add_role_to_user(u.user, "administration")
 
-    current_accounts.datastore.add_role_to_user(u.user, "administration-access")
     current_accounts.datastore.add_role_to_user(u.user, "group-collections-owner")
 
     u.allowed_token = Token.create_personal(

@@ -470,12 +470,12 @@ class GroupCollectionsService(RecordService):
         # is also ensures that the collection will be marked as "verified"
         admin_email = app.config.get("GROUP_COLLECTIONS_ADMIN_EMAIL")
         admin_by_email = accounts_datastore.get_user_by_email(admin_email)
-        admin_role = accounts_datastore.find_role("admin")
+        admin_role = accounts_datastore.find_role("administration")
         if admin_by_email:
             admin_id = admin_by_email.id
         else:
             admin_role_holders = [u for u in admin_role.users]
-            assert len(admin_role_holders) > 0  # should be at least one admin
+            assert len(admin_role_holders) > 0  # should be at least one administration role holder
             admin_id = admin_role_holders[0].id
         member = current_communities.service.members.add(
             system_identity,
@@ -495,7 +495,7 @@ class GroupCollectionsService(RecordService):
                 data={"members": manage_payload, "role": "owner"},
             )
         except AlreadyMemberError:
-            app.logger.error("adminstrator role is already an owner")
+            app.logger.error("administration role is already an owner")
 
         # assign the group roles as members of the new collection
         for coll_perm, remote_roles in invenio_roles.items():
