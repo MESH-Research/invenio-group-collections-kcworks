@@ -10,7 +10,8 @@ description = "Provides collections administered by remote social groups for the
 readme = "README.md"
 keywords = ["groups", "invenio", "inveniordm", "research", "social"]
 
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "MESH Research", email = "scottia4@msu.edu" }]
 requires-python = ">=3.12"
 
