@@ -244,9 +244,8 @@ class GroupCollectionsService(RecordService):
         the Commons instance and constructs the collection metadata from that
         data.
 
-        Note that group collections are created with the administrative user
-        as the collection owner. The group's admins are added as managers of
-        the collection.
+        Note that group collections are created with the "administration" role
+        and the group's admins (per group_roles config) as owners.
 
         params:
             identity: The identity of the user creating the collection.
@@ -460,30 +459,8 @@ class GroupCollectionsService(RecordService):
                 else:
                     raise CollectionNotCreatedError(str(e))
 
-        # assign the configured administrative user as owner of the
-        # new collection
-        # if no account is configured, assign the first administrative user
-        # NOTE: this allows the admin to manage the collection in the UI
-        # is also ensures that the collection will be marked as "verified"
-        admin_email = app.config.get("GROUP_COLLECTIONS_ADMIN_EMAIL")
-        admin_by_email = accounts_datastore.get_user_by_email(admin_email)
+        # assign the administration role (group) as owner of the new collection
         admin_role = accounts_datastore.find_role("administration")
-        if admin_by_email:
-            admin_id = admin_by_email.id
-        else:
-            admin_role_holders = [u for u in admin_role.users]
-            assert len(admin_role_holders) > 0  # should be at least one administration role holder
-            admin_id = admin_role_holders[0].id
-        member = current_communities.service.members.add(
-            system_identity,
-            new_record["id"],
-            data={
-                "members": [{"type": "user", "id": str(admin_id)}],
-                "role": "owner",
-            },
-        )
-
-        # assign admin group as member of the new collection
         try:
             manage_payload = [{"type": "group", "id": admin_role.id}]
             manage_members = current_communities.service.members.add(
