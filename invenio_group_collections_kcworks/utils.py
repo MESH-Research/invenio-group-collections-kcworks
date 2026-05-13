@@ -19,37 +19,56 @@ from invenio_communities.proxies import current_communities
 from unidecode import unidecode
 
 
+def get_configured_remote_group_role_labels(idp: str) -> frozenset[str]:
+    """Return every remote group-role label listed under ``group_roles`` for IDP.
+
+    Args:
+        idp: Key in ``REMOTE_USER_DATA_API_ENDPOINTS`` (e.g. ``knowledgeCommons``).
+
+    Returns:
+        All strings appearing in any permission bucket's list; empty if none.
+    """
+    endpoints_config = current_app.config.get("REMOTE_USER_DATA_API_ENDPOINTS", {})
+    idp_config = endpoints_config.get(idp, {})
+    groups_config = idp_config.get("groups", {})
+    group_roles_config = groups_config.get("group_roles", {})
+    if not group_roles_config:
+        return frozenset()
+    return frozenset(
+        label for labels in group_roles_config.values() for label in labels
+    )
+
+
 def map_remote_roles_to_permissions(
     slug: str,
     all_roles: list,
 ) -> dict[str, list[str]]:
-    """Map remote group roles to Invenio group names organized by
-    their community permissions role level.
+    """Map remote group roles to Invenio accounts role names by community level.
 
-    The mapping is based on the group_roles configuration in the
-    REMOTE_USER_DATA_API_ENDPOINTS configuration. But we also ensure that
-    the remote group roles provided by the API request for group information
-    are all mapped to at least "reader" permission level, even if they don't
-    appear in the group_roles configuration.
+    Every label listed under ``group_roles`` for this IDP is materialized as
+    ``{idp}---{group_id}|{label}`` under the configured permission bucket.
 
-    params:
-        slug: The slug of the group in Invenio. Should have the form
-            {idp name}---{group name} with the group name in lower-case and
-            with spaces replaced by hyphens.
-        all_roles: A list of all remote group roles from the API.
+    Remote role strings present in ``all_roles`` but not listed anywhere in
+    ``group_roles`` are appended under the ``reader`` bucket and a warning is
+    logged.
+
+    Args:
+        slug: ``{idp}---{group_id}`` for the Commons group.
+        all_roles: Remote role strings from the group metadata API (e.g.
+            ``upload_roles`` and ``moderate_roles``).
 
     Returns:
-        Returns a dictionary with the community permission levels as keys
-        and the corresponding Invenio group names as values.
+        Dict mapping Invenio community member ``role`` (e.g. ``owner``) to
+        lists of local accounts role names for group-type members.
+
+    Raises:
+        ValueError: If ``slug`` is missing the ``---`` separator or this IDP
+            has no ``group_roles`` configuration.
     """
-    invenio_roles = {}
-
-    if "---" in slug:
-        idp, group_id = slug.split("---", 1)
-    else:
+    if "---" not in slug:
         raise ValueError(f"Invalid slug: {slug}")
+    idp, group_id = slug.split("---", 1)
 
-    # Get role mapping from configuration
     endpoints_config = current_app.config.get("REMOTE_USER_DATA_API_ENDPOINTS", {})
     idp_config = endpoints_config.get(idp, {})
     groups_config = idp_config.get("groups", {})
@@ -58,27 +77,39 @@ def map_remote_roles_to_permissions(
     if not group_roles_config:
         raise ValueError(f"No group_roles configuration found for IDP '{idp}'")
 
-    # Track which roles have been assigned to permission levels
-    assigned_roles = set()
+    invenio_roles: dict[str, list[str]] = {
+        permission_level: [] for permission_level in group_roles_config
+    }
 
-    # Iterate over permission levels (config keys)
-    for permission_level, remote_roles in group_roles_config.items():
-        invenio_roles[permission_level] = []
+    for permission_level, remote_labels in group_roles_config.items():
+        seen_names: set[str] = set()
+        for remote_label in remote_labels:
+            full_name = format_group_role_name(remote_label, idp, group_id)[0]
+            if full_name not in seen_names:
+                invenio_roles[permission_level].append(full_name)
+                seen_names.add(full_name)
 
-        # For each remote role that maps to this permission level
-        for role in all_roles:
-            if role in remote_roles:
-                community_role_names = format_group_role_name(role, idp, group_id)
-                invenio_roles[permission_level].extend(community_role_names)
-                assigned_roles.add(role)
-
-    # Handle any roles that weren't in the config (default to reader)
-    unassigned_roles = set(all_roles) - assigned_roles
-    if unassigned_roles:
+    configured_labels = frozenset(
+        label for labels in group_roles_config.values() for label in labels
+    )
+    extras = set(all_roles) - configured_labels
+    if extras:
         invenio_roles.setdefault("reader", [])
-        for role in unassigned_roles:
-            community_role_names = format_group_role_name(role, idp, group_id)
-            invenio_roles["reader"].extend(community_role_names)
+        reader_seen = set(invenio_roles["reader"])
+        for role in sorted(extras):
+            current_app.logger.warning(
+                "Remote group role %r is not listed in "
+                "REMOTE_USER_DATA_API_ENDPOINTS[%r]['groups']['group_roles']; "
+                "mapping slug %s to reader as %s.",
+                role,
+                idp,
+                slug,
+                format_group_role_name(role, idp, group_id)[0],
+            )
+            full_name = format_group_role_name(role, idp, group_id)[0]
+            if full_name not in reader_seen:
+                invenio_roles["reader"].append(full_name)
+                reader_seen.add(full_name)
 
     return invenio_roles
 
@@ -88,7 +119,8 @@ def format_group_role_name(remote_role: str, idp: str, group_id: str) -> list[st
 
     This function provides centralized role name formatting that can be used
     by both GroupCollectionsService and RemoteUserDataService to ensure
-    consistent role naming across the system.
+    consistent role naming across the system. The remote suffix is used as
+    given (no aliasing between ``admin`` and ``administrator``).
 
     Args:
         remote_role: The role from the remote API (e.g., "administrator", "member")
@@ -99,15 +131,7 @@ def format_group_role_name(remote_role: str, idp: str, group_id: str) -> list[st
         List of community role names that should be created for this user
     """
     slug = f"{idp}---{group_id}"
-
-    # Standardize role names for admins, since there's inconsistency in the
-    # remote API.
-    if remote_role in ["admin", "administrator"]:
-        standardized_role = "administrator"
-    else:
-        standardized_role = remote_role
-
-    return [f"{slug}|{standardized_role}"]
+    return [f"{slug}|{remote_role}"]
 
 
 def make_base_group_slug(group_name: str) -> str:
@@ -157,6 +181,10 @@ def make_group_slug(
         - deleted_slugs: A list of the slugs (if any) based on the group
         name that are not available because they belong to a (soft)
         deleted collection owned by the same group.
+
+    Raises:
+        RuntimeError: If an active collection already exists for this group
+            with the computed base slug.
     """
     base_slug = group_name.lower().replace(" ", "-")[:100]
     base_slug = re.sub(r"\W+", "", base_slug)
@@ -193,10 +221,12 @@ def make_group_slug(
     return {"fresh_slug": fresh_slug, "deleted_slugs": deleted_slugs}
 
 
-def add_user_to_community(
-    user_id: int, role: str, community_id: int
-) -> Member | None:
-    """Add a user to a community with a given role."""
+def add_user_to_community(user_id: int, role: str, community_id: int) -> Member | None:
+    """Add a user to a community with a given role.
+
+    Returns:
+        The created member record, or ``None`` on failure.
+    """
     members = None
     try:
         payload = [{"type": "user", "id": str(user_id)}]
@@ -208,8 +238,7 @@ def add_user_to_community(
         assert members
     except AlreadyMemberError:
         current_app.logger.error(
-            f"User {user_id} was already a {role} member of community "
-            f"{community_id}"
+            f"User {user_id} was already a {role} member of community {community_id}"
         )
     except AssertionError:
         current_app.logger.error(

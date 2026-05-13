@@ -418,8 +418,8 @@ class GroupCollectionsService(RecordService):
                 new_record_result = current_communities.service.create(
                     identity=system_identity, data=data
                 )
-                app.logger.info(f"New record created successfully: {new_record}")
                 new_record = new_record_result
+                app.logger.info(f"New record created successfully: {new_record}")
                 if not new_record_result:
                     raise CollectionNotCreatedError("Failed to create new collection")
             except ma.ValidationError as e:
