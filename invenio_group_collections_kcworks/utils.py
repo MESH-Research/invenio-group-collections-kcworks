@@ -221,7 +221,9 @@ def make_group_slug(
     return {"fresh_slug": fresh_slug, "deleted_slugs": deleted_slugs}
 
 
-def add_user_to_community(user_id: int, role: str, community_id: int) -> Member | None:
+def add_user_to_community(
+    user_id: int, role: str, community_id: str | int
+) -> Member | None:
     """Add a user to a community with a given role.
 
     Returns:

@@ -16,7 +16,9 @@ import requests
 from flask import current_app as app
 from flask_principal import Identity
 from invenio_access.permissions import system_identity
+from invenio_accounts.models import Role
 from invenio_accounts.proxies import current_datastore as accounts_datastore
+from invenio_communities.communities.records.systemfields.access import VisibilityEnum
 from invenio_communities.communities.services.results import (
     CommunityItem,
     CommunityListResult,
@@ -28,7 +30,6 @@ from invenio_communities.errors import (
 )
 from invenio_communities.members.errors import AlreadyMemberError
 from invenio_communities.proxies import current_communities
-from invenio_communities.communities.records.systemfields.access import VisibilityEnum
 from invenio_records_resources.services.records.service import RecordService
 from invenio_search.proxies import current_search_client
 from werkzeug.exceptions import (  # Unauthorized,
@@ -628,19 +629,42 @@ class GroupCollectionsService(RecordService):
             f"group {remote_group_id}"
         )
         model_class = current_communities.service.members.record_cls.model_cls
-        query = model_class.query.filter(
-            model_class.group_id.contains(f"{remote_instance_name}---{remote_group_id}")
+        # ``group_id`` stores ``Role.id`` (UUID), not the role name. Match roles
+        # for this Commons group by name prefix, then scope rows to this community.
+        role_name_prefix = f"{remote_instance_name}---{remote_group_id}"
+        group_role_ids = [
+            r.id
+            for r in accounts_datastore.role_model.query.filter(
+                Role.name.contains(role_name_prefix)
+            ).all()
+        ]
+        app.logger.info(
+            "GroupCollectionsService: group_role_ids for prefix %s: %s",
+            role_name_prefix,
+            group_role_ids,
         )
-        group_members = [(g.group_id, g.role) for g in query.all()]
+        if group_role_ids:
+            query = model_class.query.filter(
+                model_class.community_id == collection_id,
+                model_class.group_id.in_(group_role_ids),
+            )
+            group_members = [(g.group_id, g.role) for g in query.all()]
+        else:
+            group_members = []
         app.logger.info(f"Group members to remove: {group_members}")
 
         individual_memberships = []
         failures = []
         for member_role in group_members:
             app.logger.info(f"Group member to remove: {member_role}")
-            individuals = [
-                u for u in accounts_datastore.find_role(member_role[0]).users
-            ]
+            group_role = accounts_datastore.role_model.query.get(member_role[0])
+            if group_role is None:
+                app.logger.warning(
+                    "GroupCollectionsService: no Role for group_id=%s; skipping",
+                    member_role[0],
+                )
+                continue
+            individuals = [u for u in group_role.users]
             app.logger.info(f"Individuals: {pformat(individuals)}")
 
             for member in individuals:
@@ -648,7 +672,7 @@ class GroupCollectionsService(RecordService):
                 # directly with a community role based on their former
                 # group role
                 add_result = add_user_to_community(
-                    member.id, member_role[1], int(collection_id)
+                    member.id, member_role[1], collection_id
                 )
                 if add_result:
                     individual_memberships.append((member.id, member_role[1]))

@@ -1928,6 +1928,14 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+dev = [
+    { name = "check-manifest" },
+    { name = "pip-tools" },
+    { name = "pytest" },
+    { name = "pytest-invenio" },
+    { name = "pytest-runner" },
+    { name = "requests-mock" },
+]
 tests = [
     { name = "mypy" },
     { name = "pytest-cov" },
@@ -1944,28 +1952,34 @@ tests = [
 [package.metadata]
 requires-dist = [
     { name = "alembic" },
+    { name = "check-manifest", marker = "extra == 'dev'" },
     { name = "click", specifier = ">=7" },
     { name = "docker-services-cli" },
     { name = "invenio-administration" },
-    { name = "invenio-app-rdm", extras = ["opensearch2"] },
+    { name = "invenio-app-rdm", extras = ["opensearch2"], specifier = "<14" },
     { name = "invenio-cli" },
     { name = "invenio-communities", editable = "../invenio-communities" },
     { name = "mypy", marker = "extra == 'tests'", specifier = ">=1.8" },
     { name = "opensearch-dsl" },
+    { name = "pip-tools", marker = "extra == 'dev'" },
     { name = "psycopg2-binary" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.3.2" },
     { name = "pytest-cov", marker = "extra == 'tests'", specifier = ">=6.2.1" },
+    { name = "pytest-invenio", marker = "extra == 'dev'" },
     { name = "pytest-invenio", marker = "extra == 'tests'", specifier = ">=3.3,<4" },
     { name = "pytest-isort", marker = "extra == 'tests'", specifier = ">=4" },
     { name = "pytest-mock", marker = "extra == 'tests'" },
     { name = "pytest-mypy", marker = "extra == 'tests'", specifier = ">=0.10" },
     { name = "pytest-ruff", marker = "extra == 'tests'", specifier = ">=0.1" },
+    { name = "pytest-runner", marker = "extra == 'dev'" },
+    { name = "requests-mock", marker = "extra == 'dev'" },
     { name = "requests-mock", marker = "extra == 'tests'" },
     { name = "ruff", marker = "extra == 'tests'", specifier = ">=0.3" },
     { name = "selenium", marker = "extra == 'tests'" },
     { name = "standard-pkg-resources" },
     { name = "unidecode" },
 ]
-provides-extras = ["tests"]
+provides-extras = ["dev", "tests"]
 
 [[package]]
 name = "invenio-i18n"
@@ -3696,6 +3710,32 @@ wheels = [
 ]
 
 [[package]]
+name = "pip"
+version = "26.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b6/48/cb9b7a682f6fe01a4221e1728941dd4ac3cd9090a17db3779d6ff490b602/pip-26.1.1.tar.gz", hash = "sha256:d36762751d156a4ee895de8af39aa0abeeeb577f93a2eca6ab62467bbf0f8a78", size = 1840400, upload-time = "2026-05-04T19:02:21.248Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3a/eb/fea4d1d51c49832120f7f285d07306db3960f423a2612c6057caf3e8196f/pip-26.1.1-py3-none-any.whl", hash = "sha256:99cb1c2899893b075ff56e4ed0af55669a955b49ad7fb8d8603ecdaf4ed653fb", size = 1812777, upload-time = "2026-05-04T19:02:18.9Z" },
+]
+
+[[package]]
+name = "pip-tools"
+version = "7.5.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "build" },
+    { name = "click" },
+    { name = "pip" },
+    { name = "pyproject-hooks" },
+    { name = "setuptools" },
+    { name = "wheel" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4a/db/c6e2a02db5d98aa5f3250a305ce71e8bc3d1a022d1f47a54d14492ae23de/pip_tools-7.5.3.tar.gz", hash = "sha256:8fa364779ebc010cbfe17cb9de404457ac733e100840423f28f6955de7742d41", size = 176153, upload-time = "2026-02-11T18:25:07.72Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6e/74/59906d876c6cb1137f42a137164f2fe683b06283cde84bfcf7f5dd43970b/pip_tools-7.5.3-py3-none-any.whl", hash = "sha256:3aac0c473240ae90db7213c033401f345b05197293ccbdd2704e52e7a783785e", size = 71359, upload-time = "2026-02-11T18:25:06.119Z" },
+]
+
+[[package]]
 name = "pipenv"
 version = "2026.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -4091,6 +4131,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/32/5a/bee55130757fb4a14e0ac5d2c6558323275b5dccfa2f5353f3893299ff7d/pytest_ruff-0.5.tar.gz", hash = "sha256:f611c780fc2b9b8d7041fa0e7589f0a9f352b288d0cfc330881101b35d382063", size = 3854, upload-time = "2025-06-19T07:26:24.607Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1d/ca/abfce6de0bb0f017ed05ef9f2330596235cc5a3341b4d8d40895682b3814/pytest_ruff-0.5-py3-none-any.whl", hash = "sha256:d9db170d86fb167008e6702b4d79e2cccd8287f069c3a57f9261831cebdc4a31", size = 4680, upload-time = "2025-06-19T07:26:23.897Z" },
+]
+
+[[package]]
+name = "pytest-runner"
+version = "6.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d7/7d/60976d532519c3a0b41e06a59ad60949e2be1af937cf02738fec91bfd808/pytest-runner-6.0.1.tar.gz", hash = "sha256:70d4739585a7008f37bf4933c013fdb327b8878a5a69fcbb3316c88882f0f49b", size = 16056, upload-time = "2023-12-04T01:03:30.835Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/23/2b/73982c02d28538b6a1182c0a2faf764ca6a76a6dbe89a69288184051a67b/pytest_runner-6.0.1-py3-none-any.whl", hash = "sha256:ea326ed6f6613992746062362efab70212089a4209c08d67177b3df1c52cd9f2", size = 7186, upload-time = "2023-12-04T01:03:28.706Z" },
 ]
 
 [[package]]
@@ -5217,6 +5266,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/5a/70/1469ef1d3542ae7c2c7b72bd5e3a4e6ee69d7978fa8a3af05a38eca5becf/werkzeug-3.1.5.tar.gz", hash = "sha256:6a548b0e88955dd07ccb25539d7d0cc97417ee9e179677d22c7041c8f078ce67", size = 864754, upload-time = "2026-01-08T17:49:23.247Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ad/e4/8d97cca767bcc1be76d16fb76951608305561c6e056811587f36cb1316a8/werkzeug-3.1.5-py3-none-any.whl", hash = "sha256:5111e36e91086ece91f93268bb39b4a35c1e6f1feac762c9c822ded0a4e322dc", size = 225025, upload-time = "2026-01-08T17:49:21.859Z" },
+]
+
+[[package]]
+name = "wheel"
+version = "0.47.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/39/62/75f18a0f03b4219c456652c7780e4d749b929eb605c098ce3a5b6b6bc081/wheel-0.47.0.tar.gz", hash = "sha256:cc72bd1009ba0cf63922e28f94d9d83b920aa2bb28f798a31d0691b02fa3c9b3", size = 63854, upload-time = "2026-04-22T15:51:27.727Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/87/1b/9e33c09813d65e248f7f773119148a612516a4bea93e9c6f545f78455b7c/wheel-0.47.0-py3-none-any.whl", hash = "sha256:212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced", size = 32218, upload-time = "2026-04-22T15:51:26.296Z" },
 ]
 
 [[package]]
