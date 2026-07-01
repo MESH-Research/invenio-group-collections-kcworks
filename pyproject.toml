@@ -69,6 +69,7 @@ entry-points."invenio_base.apps".invenio_group_collections_kcworks = "invenio_gr
 
 [tool.uv.sources]
 invenio-communities = { path = "../invenio-communities/", editable = true }
+invenio-rdm-records = { path = "../invenio-rdm-records", editable = true }
 
 [tool.ruff]
 target-version = "py312"
@@ -234,6 +235,7 @@ push = true
 extra_paths = [
   "../../..",               # kcworks (site/)
   "../invenio-communities",
+  "../invenio-rdm-records",
 ]
 
 [tool.bdist_wheel]
