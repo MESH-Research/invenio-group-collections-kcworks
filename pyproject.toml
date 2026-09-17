@@ -42,6 +42,7 @@ dependencies = [
   "unidecode",
 ]
 optional-dependencies.dev = [
+  "bump-my-version==1.5.1",
   "check-manifest",
   "pip-tools",
   "pytest>=7.3.2",
@@ -213,23 +214,46 @@ output-dir = "translations/"
 input-file = "translations/messages.pot"
 output-dir = "translations/"
 
-[tool.bumpver]
+[tool.bumpversion]
 current_version = "0.1.0-dev1"
-version_pattern = "MAJOR.MINOR.PATCH[-TAGNUM]"
-commit_message = "bump version {old_version} -> {new_version}"
-tag_message = "{new_version}"
-tag_scope = "default"
-pre_commit_hook = ""
-post_commit_hook = ""
-commit = true
-tag = true
-push = true
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(?:-(?P<pre_l>[a-zA-Z]+)(?P<pre_n>\\d+))?"
+serialize = [
+  "{major}.{minor}.{patch}-{pre_l}{pre_n}",
+  "{major}.{minor}.{patch}",
+]
+search = "{current_version}"
+replace = "{new_version}"
+commit = false
+tag = false
+allow_shell_hooks = false
+message = "Bump version: {current_version} → {new_version}"
 
-[tool.bumpver.file_patterns]
-"pyproject.toml" = ['version = "{version}"']
-"README.md" = ["Version {version}"]
-"VERSION" = ['^"{version}"']
-"invenio_group_collections_kcworks/__init__.py" = ['^__version__ = "{version}"']
+[tool.bumpversion.parts.pre_l]
+values = ["dev", "rc", "final"]
+optional_value = "final"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+key_path = "project.version"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+key_path = "tool.bumpversion.current_version"
+
+[[tool.bumpversion.files]]
+filename = "README.md"
+search = "Version {current_version}"
+replace = "Version {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "VERSION"
+search = '"{current_version}"'
+replace = '"{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "invenio_group_collections_kcworks/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
 
 [tool.pylsp.plugins.jedi]
 extra_paths = [
