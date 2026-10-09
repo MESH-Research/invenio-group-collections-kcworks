@@ -12,6 +12,7 @@ import marshmallow as ma
 import requests
 from flask import current_app as app
 from flask import (
+    g,
     jsonify,
 )
 from flask_resources import (
@@ -27,7 +28,8 @@ from flask_resources import (
     resource_requestctx,
     route,
 )
-from invenio_access.permissions import system_identity
+from invenio_oauth2server.decorators import require_api_auth, require_oauth_scopes
+from invenio_records_resources.services.errors import PermissionDeniedError
 from werkzeug.exceptions import (  # Unauthorized,
     BadRequest,
     Forbidden,
@@ -43,6 +45,10 @@ from .errors import (
     CommonsGroupNotFoundError,
 )
 from .proxies import current_group_collections_service
+from .scopes import (
+    group_collections_read_scope,
+    group_collections_write_scope,
+)
 
 
 class GroupCollectionsResourceConfig(ResourceConfig):
@@ -58,13 +64,10 @@ class GroupCollectionsResourceConfig(ResourceConfig):
 
     response_handlers = {"application/json": ResponseHandler(JSONSerializer())}
 
-    request_body_parsers = {
-        "application/json": RequestBodyParser(JSONDeserializer())
-    }
+    request_body_parsers = {"application/json": RequestBodyParser(JSONDeserializer())}
 
 
 class GroupCollectionsResource(Resource):
-
     def __init__(self, config, service):
         super().__init__(config)
         self.service = service
@@ -72,6 +75,10 @@ class GroupCollectionsResource(Resource):
     error_handlers = {
         Forbidden: lambda e: (
             {"message": str(e), "status": 403},
+            403,
+        ),
+        PermissionDeniedError: lambda e: (
+            {"message": str(e) or "Permission denied.", "status": 403},
             403,
         ),
         MethodNotAllowed: lambda e: (
@@ -146,14 +153,12 @@ class GroupCollectionsResource(Resource):
                 validate=ma.validate.Range(min=4, max=1000), load_default=25
             ),
             "sort": ma.fields.String(
-                validate=ma.validate.OneOf(
-                    [
-                        "newest",
-                        "oldest",
-                        "updated-desc",
-                        "updated-asc",
-                    ]
-                ),
+                validate=ma.validate.OneOf([
+                    "newest",
+                    "oldest",
+                    "updated-desc",
+                    "updated-asc",
+                ]),
                 load_default="updated-desc",
             ),
             "restore_deleted": ma.fields.Boolean(load_default=False),
@@ -173,23 +178,29 @@ class GroupCollectionsResource(Resource):
             route("PUT", "/<slug>", self.replace_group_metadata),
         ]
 
-    def replace_group_metadata():
+    @require_api_auth()
+    @require_oauth_scopes(group_collections_write_scope.id)
+    def replace_group_metadata(self):
         raise NotImplementedError(
             "Modification of collection metadata is not supported at "
             "this endpoint. Use the main `communities` API endpoint instead."
         )
 
+    @require_api_auth()
+    @require_oauth_scopes(group_collections_read_scope.id)
     @request_parsed_view_args
     def read(self):
         collection_slug = resource_requestctx.view_args.get("slug")
         if collection_slug:
             collection = current_group_collections_service.read(
-                system_identity, collection_slug
+                g.identity, collection_slug
             )
             return jsonify(collection), 200
         else:
             raise BadRequest("No collection slug provided")
 
+    @require_api_auth()
+    @require_oauth_scopes(group_collections_read_scope.id)
     @request_parsed_args
     def search(self):
         commons_instance = resource_requestctx.args.get("commons_instance")
@@ -199,7 +210,7 @@ class GroupCollectionsResource(Resource):
         sort = resource_requestctx.args.get("sort", "updated-desc")
 
         results = current_group_collections_service.search(
-            system_identity,
+            g.identity,
             commons_instance,
             commons_group_id,
             sort=sort,
@@ -209,18 +220,18 @@ class GroupCollectionsResource(Resource):
 
         return jsonify(results.to_dict()), 200
 
+    @require_api_auth()
+    @require_oauth_scopes(group_collections_write_scope.id)
     @request_parsed_args
     @request_data
     def create(self):
         commons_instance = resource_requestctx.data.get("commons_instance")
         commons_group_id = resource_requestctx.data.get("commons_group_id")
         restore_deleted = resource_requestctx.args.get("restore_deleted")
-        collection_visibility = resource_requestctx.data.get(
-            "collection_visibility"
-        )
+        collection_visibility = resource_requestctx.data.get("collection_visibility")
 
         new_collection = current_group_collections_service.create(
-            system_identity,
+            g.identity,
             commons_group_id,
             commons_instance,
             restore_deleted=restore_deleted,
@@ -236,6 +247,8 @@ class GroupCollectionsResource(Resource):
 
         return jsonify(response_data), 201
 
+    @require_api_auth()
+    @require_oauth_scopes(group_collections_write_scope.id)
     def change_group_ownership(self, collection_slug):
         # Implement the logic for handling PATCH requests to change
         # group ownership
@@ -263,6 +276,8 @@ class GroupCollectionsResource(Resource):
             "are not yet implemented."
         )
 
+    @require_api_auth()
+    @require_oauth_scopes(group_collections_write_scope.id)
     @request_parsed_args
     @request_parsed_view_args
     def delete(self):
@@ -290,7 +305,7 @@ class GroupCollectionsResource(Resource):
             raise BadRequest("No commons_group_id provided")
 
         deleted_collection = current_group_collections_service.delete(
-            system_identity,
+            g.identity,
             collection_slug,
             commons_instance,
             commons_group_id,

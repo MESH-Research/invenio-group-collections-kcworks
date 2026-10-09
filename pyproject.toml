@@ -64,9 +64,12 @@ optional-dependencies.tests = [
 ]
 urls.Homepage = "https://github.com/MESH-Research/invenio-group-collections-kcworks"
 scripts.invenio-group-collections-kcworks = "invenio_group_collections_kcworks.cli:cli"
+entry-points."invenio_access.actions".group_collections_write_action = "invenio_group_collections_kcworks.permissions:group_collections_write_action"
 entry-points."invenio_base.api_apps".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
 entry-points."invenio_base.api_blueprints".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.views:create_api_blueprint"
 entry-points."invenio_base.apps".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
+entry-points."invenio_oauth2server.scopes".group_collections_read = "invenio_group_collections_kcworks.scopes:group_collections_read_scope"
+entry-points."invenio_oauth2server.scopes".group_collections_write = "invenio_group_collections_kcworks.scopes:group_collections_write_scope"
 
 [tool.uv.sources]
 invenio-communities = { path = "../invenio-communities/", editable = true }
@@ -232,13 +235,9 @@ message = "Bump version: {current_version} → {new_version}"
 values = ["dev", "rc", "final"]
 optional_value = "final"
 
-[[tool.bumpversion.files]]
-filename = "pyproject.toml"
-key_path = "project.version"
-
-[[tool.bumpversion.files]]
-filename = "pyproject.toml"
-key_path = "tool.bumpversion.current_version"
+# pyproject.toml project.version and tool.bumpversion.current_version are
+# updated automatically by bump-my-version's update_config_file; listing them
+# here double-applies a whole-file search and fails on the second entry.
 
 [[tool.bumpversion.files]]
 filename = "README.md"

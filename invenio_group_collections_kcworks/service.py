@@ -157,19 +157,26 @@ class GroupCollectionsService(RecordService):
         """Read a collection (community) by its slug.
 
         Raises:
+            PermissionDeniedError: If `identity` lacks `read_group_collection`
+                for this collection's visibility.
             CollectionNotFoundError: If no collection is found in Invenio with
             the given slug.
 
         Returns:
             A CommunityItem object representing the collection.
         """
+        # Resolve without the caller's identity so we can return 403 for
+        # restricted collections instead of collapsing them into 404.
         community_list = current_communities.service.search(
-            identity=identity, q=f"slug:{slug}"
+            identity=system_identity, q=f"slug:{slug}"
         )
 
         if community_list.total == 0:
             raise CollectionNotFoundError(f"No collection found with the slug {slug}")
         result = next(community_list.hits)
+        self.require_permission(
+            identity, "read_group_collection", record=result
+        )
 
         return result
 
@@ -200,6 +207,8 @@ class GroupCollectionsService(RecordService):
         collections belonging to that group will be returned.
 
         Raises:
+            PermissionDeniedError: If `identity` lacks
+                `search_group_collections`.
             CollectionNotFoundError: If no collections are found matching
                 the parameters.
             UnprocessableEntityError: If the query parameters are invalid.
@@ -207,6 +216,7 @@ class GroupCollectionsService(RecordService):
         Returns:
             Returns a CommunityListResult object.
         """
+        self.require_permission(identity, "search_group_collections")
         query_params = r"+_exists_:custom_fields.kcr\:commons_instance "
         if commons_instance:
             query_params += f"+custom_fields.kcr\\:commons_instance:{commons_instance} "
@@ -263,6 +273,7 @@ class GroupCollectionsService(RecordService):
             **kwargs: Additional keyword arguments.
 
         Raises:
+            PermissionDeniedError: If `identity` lacks `create_group_collection`.
             CommonsGroupNotFoundError: If the group is not found on the
                 Commons instance.
             CollectionAlreadyExistsError: If a collection for the group
@@ -275,6 +286,7 @@ class GroupCollectionsService(RecordService):
         Returns:
             The created collection record.
         """
+        self.require_permission(identity, "create_group_collection")
         # make API request to commons instance to get group metadata
         commons_group_name = ""
         commons_group_description = ""
@@ -535,6 +547,7 @@ class GroupCollectionsService(RecordService):
         Returns:
             A CommunityItem object representing the deleted collection.
         """
+        self.require_permission(identity, "delete_group_collection")
         try:
             collection_record = current_communities.service.read(
                 system_identity, collection_slug
@@ -629,7 +642,7 @@ class GroupCollectionsService(RecordService):
             f"group {remote_group_id}"
         )
         model_class = current_communities.service.members.record_cls.model_cls
-        # ``group_id`` stores ``Role.id`` (UUID), not the role name. Match roles
+        # `group_id` stores `Role.id` (UUID), not the role name. Match roles
         # for this Commons group by name prefix, then scope rows to this community.
         role_name_prefix = f"{remote_instance_name}---{remote_group_id}"
         group_role_ids = [
