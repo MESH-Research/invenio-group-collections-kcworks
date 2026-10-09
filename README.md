@@ -1,17 +1,30 @@
 # Invenio Group Collections for Knowledge Commons Works
 
-Version 0.1.0-dev1
+Version 1.0.0
 
-Copyright 2024 Mesh Research
-Contributors: Ian Scott
+Copyright 2024 Mesh Research Contributors: Ian Scott
 
-The package provides integration between Knowledge Commons groups and InvenioRDM collections (communities). It exposes a `group_collections` API endpoint that can be used for automatic creation of an InvenioRDM record collection linked to a group on a remote service. This package is intended for use with the Knowledge Commons Works instance of InvenioRDM, although it could be customized to work with other instances. If there is interest in using this package with other instances, please contact the package maintainer to discuss how the package could be updated to work for your use case.
+The package provides integration between Knowledge Commons groups and InvenioRDM
+collections (communities). It exposes a `group_collections` API endpoint that
+can be used for automatic creation of an InvenioRDM record collection linked to
+a group on a remote service. This package is intended for use with the Knowledge
+Commons Works instance of InvenioRDM, although it could be customized to work
+with other instances. If there is interest in using this package with other
+instances, please contact the package maintainer to discuss how the package
+could be updated to work for your use case.
 
-This package is also intended to be used in conjunction with the `invenio_remote_user_data_kcworks` package, which provides a similar integration between group and user metadata from a remote service and InvenioRDM.
+This package is also intended to be used in conjunction with the
+`invenio_remote_user_data_kcworks` package, which provides a similar integration
+between group and user metadata from a remote service and InvenioRDM.
 
-Updates to external apis (like a search index) for group collection events is not handled in this package but rather in the `invenio_remote_api_provisioner` package. Updates to Commons group metadata in a linked Invenio collection are handled by the `invenio_remote_user_data_kcworks` package.
+Updates to external apis (like a search index) for group collection events is
+not handled in this package but rather in the `invenio_remote_api_provisioner`
+package. Updates to Commons group metadata in a linked Invenio collection are
+handled by the `invenio_remote_user_data_kcworks` package.
 
-(Note: The Knowledge Commons Works instance of InvenioRDM uses the term "collection" in place of the default term "community" employed in standard InvenioRDM installations.)
+(Note: The Knowledge Commons Works instance of InvenioRDM uses the term
+"collection" in place of the default term "community" employed in standard
+InvenioRDM installations.)
 
 ## Installation
 
@@ -21,7 +34,8 @@ From your InvenioRDM instance directory:
     pipenv install invenio-group-collections-kcworks
 ```
 
-This will add the package to your Pipfile and install it in your InvenioRDM instance's virtual environment.
+This will add the package to your Pipfile and install it in your InvenioRDM
+instance's virtual environment.
 
 ## Group Collections Endpoint Usage
 
@@ -29,17 +43,38 @@ This will add the package to your Pipfile and install it in your InvenioRDM inst
 https://example.org/api/group_collections
 ```
 
-The `group_collections` REST API endpoint allows a Commons instance to create, read, modify, or delete a collection in Invenio owned by a Commons group. This endpoint is not configured to receive all of the metadata required to create or modify group collections. Rather, the `group_collections` endpoint receives minimal signals from a Commons Instance and then obtains the full required metadata via an API callback to the Commons instance.
+The `group_collections` REST API endpoint allows a Commons instance to create,
+read, modify, or delete a collection in Invenio owned by a Commons group. This
+endpoint is not configured to receive all of the metadata required to create or
+modify group collections. Rather, the `group_collections` endpoint receives
+minimal signals from a Commons Instance and then obtains the full required
+metadata via an API callback to the Commons instance.
 
 ### Group collection owner
 
-InvenioRDM does not allow groups to be owners of a collection (community). When a collection is created for a group, though, we do not know which of the group's administrators to assign as the individual owner. It is also awkward to change ownership of a collection later on if the group's administrativer personnel change. So the collection is owned by an administrative user who is assigned the role `group-collections-owner`. The group's administrators are then assigned privileges as "managers" of the group collection. This allows them to manage the collection's settings and membership, but not to delete the collection or change its ownership.
+InvenioRDM does not allow groups to be owners of a collection (community). When
+a collection is created for a group, though, we do not know which of the group's
+administrators to assign as the individual owner. It is also awkward to change
+ownership of a collection later on if the group's administrativer personnel
+change. So the collection is owned by an administrative user who is assigned the
+role `group-collections-owner`. The group's administrators are then assigned
+privileges as "managers" of the group collection. This allows them to manage the
+collection's settings and membership, but not to delete the collection or change
+its ownership.
 
-Before the invenio_group_collections_kcworks module can be used, the administrator must create a role called `group-collections-owner` and assign membership in that role to one administrative user account. If multiple user accounts belong to that role, the first user account in the list will be assigned as the owner of group collections. If no user accounts belong to the role, the group collection creation will fail with a NoOwnerAvailable error.
+Before the invenio_group_collections_kcworks module can be used, the
+administrator must create a role called `group-collections-owner` and assign
+membership in that role to one administrative user account. If multiple user
+accounts belong to that role, the first user account in the list will be
+assigned as the owner of group collections. If no user accounts belong to the
+role, the group collection creation will fail with a NoOwnerAvailable error.
 
 ### Endpoint configuration
 
-The configuration variable `GROUP_COLLECTIONS_METADATA_ENDPOINTS` must be provided in the `invenio.cfg` file in order to use this endpoint. This variable should hold a dictionary whose keys are Commons instance names. The value for each key is a dictionary containing the following keys:
+The configuration variable `GROUP_COLLECTIONS_METADATA_ENDPOINTS` must be
+provided in the `invenio.cfg` file in order to use this endpoint. This variable
+should hold a dictionary whose keys are Commons instance names. The value for
+each key is a dictionary containing the following keys:
 
 | key                  | value type       | required | value                                                                                                                                                                                                            |
 | -------------------- | ---------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -63,8 +98,10 @@ GROUP_COLLECTIONS_METADATA_ENDPOINTS = {
 
 A GET request to this endpoint will retrieve metadata on Invenio collections
 that are owned by a Commons group. A request to the bare endpoint without a
-group ID or collection slug will return a list of all collections owned by
-all Commons groups. (Commons Works collections not linked to a Commons group will not be included. If you wish to query all groups, please use the `communities` API endpoint.)
+group ID or collection slug will return a list of all collections owned by all
+Commons groups. (Commons Works collections not linked to a Commons group will
+not be included. If you wish to query all groups, please use the `communities`
+API endpoint.)
 
 #### Query parameters
 
@@ -94,7 +131,11 @@ By default the results are sorted by `updated-desc`
 
 ###### Pagination
 
-Long result sets will be paginated. The response will include urls for the `first`, `last`, `previous`, and `next` pages of results in the `link` property of the response body. A url for the current page of results will also be included in the list as a `self` link. By default the page size is 25, but this can be changed by providing a value for the `size` query parameter.
+Long result sets will be paginated. The response will include urls for the
+`first`, `last`, `previous`, and `next` pages of results in the `link` property
+of the response body. A url for the current page of results will also be
+included in the list as a `self` link. By default the page size is 25, but this
+can be changed by providing a value for the `size` query parameter.
 
 #### Requesting all collections
 
@@ -358,7 +399,9 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
 
 #### Requesting collections for a specific group
 
-Note that if you specify a `commons_group_id` value, you must _also_ provide a `commons_instance` value. This is to avoid confusion if different Commons instances use the same internal id for groups.
+Note that if you specify a `commons_group_id` value, you must _also_ provide a
+`commons_instance` value. This is to avoid confusion if different Commons
+instances use the same internal id for groups.
 
 ###### Request
 
@@ -489,7 +532,13 @@ GET https://example.org/api/group_collections?commons_instance=knowledgeCommons&
 
 #### Requesting a specific collection
 
-While other kinds of requests require query parameters, a request for metadata on a specific Commons Works collection can be made by simply adding the community's slug to the end of the url path. Once again, this will only succeed for collections that are linked to a Commons instance group. Collections that exist independently on Knowledge Commons Works will not be found at the `group_collections` endpoint and should be requested at the `communities` endpoint instead.
+While other kinds of requests require query parameters, a request for metadata
+on a specific Commons Works collection can be made by simply adding the
+community's slug to the end of the url path. Once again, this will only succeed
+for collections that are linked to a Commons instance group. Collections that
+exist independently on Knowledge Commons Works will not be found at the
+`group_collections` endpoint and should be requested at the `communities`
+endpoint instead.
 
 ###### Request
 
@@ -561,38 +610,82 @@ GET https://example.org/api/group_collections/my-collection-slug HTTP/1.1
 
 ### Creating a Collection for a Group (POST)
 
-A POST request to this endpoint creates a new collection in Invenio owned by the specified Commons group. If the collection is successfully created, the response status code will be 201 Created, and the response body will be a JSON object containing the URL slug for the newly created collection.
+A POST request to this endpoint creates a new collection in Invenio owned by the
+specified Commons group. If the collection is successfully created, the response
+status code will be 201 Created, and the response body will be a JSON object
+containing the URL slug for the newly created collection.
 
-The POST request will trigger a callback to the Commons instance to get the metadata for the specified group, using the configuration dictionary declared in the `GROUP_COLLECTIONS_METADATA_ENDPOINTS` config variable, under the key matching the Commons instance's SAML IDP provider name (declared in the `SSO_SAML_IDPS` config variable). This callback request will be sent to the "url" specified in the configuration dictionary (e.g., `GROUP_COLLECTIONS_METADATA_ENDPOINTS["knowledgeCommons"]["url"]`). This request will be authenticated using the environment variable whose name matches the `token_name` from the same configuration dictionary. The metadata from this callback request will then be used to populate the collection metadata in Invenio.
+The POST request will trigger a callback to the Commons instance to get the
+metadata for the specified group, using the configuration dictionary declared in
+the `GROUP_COLLECTIONS_METADATA_ENDPOINTS` config variable, under the key
+matching the Commons instance's SAML IDP provider name (declared in the
+`SSO_SAML_IDPS` config variable). This callback request will be sent to the
+"url" specified in the configuration dictionary (e.g.,
+`GROUP_COLLECTIONS_METADATA_ENDPOINTS["knowledgeCommons"]["url"]`). This request
+will be authenticated using the environment variable whose name matches the
+`token_name` from the same configuration dictionary. The metadata from this
+callback request will then be used to populate the collection metadata in
+Invenio.
 
-If the metadata returned from the Commons instance includes a url for an avatar, that avatar will be downloaded and stored in the Invenio instance's file storage. Since we do not want to use a placeholder avatar for the group, the instance's configuration can include a `placeholder_avatar` key. If the file name or last segment of the supplied avatar url matches this `placeholder_avatar` value, it will be ignored.
+If the metadata returned from the Commons instance includes a url for an avatar,
+that avatar will be downloaded and stored in the Invenio instance's file
+storage. Since we do not want to use a placeholder avatar for the group, the
+instance's configuration can include a `placeholder_avatar` key. If the file
+name or last segment of the supplied avatar url matches this
+`placeholder_avatar` value, it will be ignored.
 
 #### Permissions and access in newly created collections
 
-By default, the newly created collection will have the following access settings:
+By default, the newly created collection will have the following access
+settings:
 
 - Visibility: "restricted"
 - Member policy: "closed"
 - Record policy: "closed"
 - Review policy: "closed"
 
-They will not appear in any search results or be visible to non-members of the collection. Users who are not group members will not be able to request membership, and all submissions to the group will be held for review by the collection curators.
+They will not appear in any search results or be visible to non-members of the
+collection. Users who are not group members will not be able to request
+membership, and all submissions to the group will be held for review by the
+collection curators.
 
 The collection's administrators can change these settings in the Invenio UI.
 
 #### Handling group name changes
 
-Note that when a collection is created for a group, the collection's slug will be generated from the group's name. If the group's name is changed in the Commons instance, the collection's slug will not be automatically updated. This is to avoid breaking links to the collection. If the group's name is changed, the collection's slug will remain the same, but the collection's metadata will be updated to reflect the new group name.
+Note that when a collection is created for a group, the collection's slug will
+be generated from the group's name. If the group's name is changed in the
+Commons instance, the collection's slug will not be automatically updated. This
+is to avoid breaking links to the collection. If the group's name is changed,
+the collection's slug will remain the same, but the collection's metadata will
+be updated to reflect the new group name.
 
 #### Handling collection name collisions
 
-It is possible for two groups on Commons instances to share the same human readable name, even though their ids are different. Knowledge Commons Works _will_ allow multiple collections to share identical human readable names, but group url _slugs_ must be unique across all KC Works collections. So where group names collide, only the first of the identically-named collections will have its slug generated normally. Susequent collections with the same name will have a numerical disambiguator appended to the end of their slugs. So if we have three groups named "Panda Studies," the first collection created for one of the groups will have the slug `panda-studies`. The other collections created by these groups will be assigned the slugs `panda-studies-1` and `panda-studies-2`, in order of their creation in Knowledge Commons Works.
+It is possible for two groups on Commons instances to share the same human
+readable name, even though their ids are different. Knowledge Commons Works
+_will_ allow multiple collections to share identical human readable names, but
+group url _slugs_ must be unique across all KC Works collections. So where group
+names collide, only the first of the identically-named collections will have its
+slug generated normally. Susequent collections with the same name will have a
+numerical disambiguator appended to the end of their slugs. So if we have three
+groups named "Panda Studies," the first collection created for one of the groups
+will have the slug `panda-studies`. The other collections created by these
+groups will be assigned the slugs `panda-studies-1` and `panda-studies-2`, in
+order of their creation in Knowledge Commons Works.
 
 #### Handling deleted group collections
 
-If a group collection is deleted, its slug will be reserved in the Invenio PID store and cannot be re-used for a new collection. If a new collection is created for the same group, the slug will have a numerical disambiguator appended to the end, exactly as in cases of group name collision. E.g., if the group `panda-studies` were deleted earlier, a request to create a new collection for the "Panda Studies" group would be assigned the URL slug `panda-studies-1`. This is to avoid breaking links to the deleted collection.
+If a group collection is deleted, its slug will be reserved in the Invenio PID
+store and cannot be re-used for a new collection. If a new collection is created
+for the same group, the slug will have a numerical disambiguator appended to the
+end, exactly as in cases of group name collision. E.g., if the group
+`panda-studies` were deleted earlier, a request to create a new collection for
+the "Panda Studies" group would be assigned the URL slug `panda-studies-1`. This
+is to avoid breaking links to the deleted collection.
 
-In future it may be possible to restore deleted collections, but this is not currently implemented.
+In future it may be possible to restore deleted collections, but this is not
+currently implemented.
 
 <!-- TODO: Implement collection restoration -->
 
@@ -639,18 +732,32 @@ POST https://example.org/api/group_collections HTTP/1.1
 
 - 400 Bad Request: The request body is missing required fields or contains
   invalid data.
-- 404 Not Found: The specified group could not be found by the callback to the Commons instance.
+- 404 Not Found: The specified group could not be found by the callback to the
+  Commons instance.
 - 403 Forbidden: The request is not authorized to modify the collection.
-- 409 Conflict: A collection already exists in Knowledge Commons Works linked to the specified group.
+- 409 Conflict: A collection already exists in Knowledge Commons Works linked to
+  the specified group.
 
 ### Changing the Group Ownership of a Collection (PATCH)
 
-[!WARNING]
-PATCH requests to change group ownership of the collection are not yet implemented.
+[!WARNING] PATCH requests to change group ownership of the collection are not
+yet implemented.
 
-A PATCH request to this endpoint modifies an existing collection in Invenio by changing the Commons group to which it belongs. This is the _only_ modification that can be made to a collection via this endpoint. Other modifications to Commons group metadata should be handled by signalling the Invenio webhook for commons group metadata updates. Modifications to internal metadata or settings for the Invenio collection should be made view the Invenio "communities" API or the collection settings UI.
+A PATCH request to this endpoint modifies an existing collection in Invenio by
+changing the Commons group to which it belongs. This is the _only_ modification
+that can be made to a collection via this endpoint. Other modifications to
+Commons group metadata should be handled by signalling the Invenio webhook for
+commons group metadata updates. Modifications to internal metadata or settings
+for the Invenio collection should be made view the Invenio "communities" API or
+the collection settings UI.
 
-Note that the collection memberships in Invenio will be automatically transferred to the new Commons group. The corporate roles for the old Commons group will be removed from the collection and corporate roles for the new Commons group will be added to its membership with appropriate permissions. But any individual memberships that have been granted through the Invenio UI will be left unchanged. If the new collection administrators wish to change these individual memberships, they will need to do so through the Invenio UI.
+Note that the collection memberships in Invenio will be automatically
+transferred to the new Commons group. The corporate roles for the old Commons
+group will be removed from the collection and corporate roles for the new
+Commons group will be added to its membership with appropriate permissions. But
+any individual memberships that have been granted through the Invenio UI will be
+left unchanged. If the new collection administrators wish to change these
+individual memberships, they will need to do so through the Invenio UI.
 
 #### Request
 
@@ -690,27 +797,40 @@ PATCH https://example.org/api/group_collections/my-collection-slug HTTP/1.1
   invalid data.
 - 404 Not Found: The collection does not exist.
 - 403 Forbidden: The request is not authorized to modify the collection.
-- 304 Not Modified: The collection is already owned by the specified
-  Commons group.
+- 304 Not Modified: The collection is already owned by the specified Commons
+  group.
 
 ### Deleting a Group's Collection (DELETE)
 
-A DELETE request to this endpoint deletes a collection in Invenio owned by the specified Commons group. Note that the request must include all of:
+A DELETE request to this endpoint deletes a collection in Invenio owned by the
+specified Commons group. Note that the request must include all of:
 
 - the collection slug as the url path parameter
-- the identifier of the Commons instance to which the group belongs, in the `commons_instance` query parameter
-- the Commons identifier of the group which owns the collection, in the `commons_group_id` query parameter
+- the identifier of the Commons instance to which the group belongs, in the
+  `commons_instance` query parameter
+- the Commons identifier of the group which owns the collection, in the
+  `commons_group_id` query parameter
 
-If any of these is missing the request will fail with a `400 Bad Request` error. This is to ensure that collections are not deleted accidentally or by agents without authorization.
+If any of these is missing the request will fail with a `400 Bad Request` error.
+This is to ensure that collections are not deleted accidentally or by agents
+without authorization.
 
-If the collection is successfully deleted, the response status code will be 204 No Content.
+If the collection is successfully deleted, the response status code will be 204
+No Content.
 
-[!NOTE]
-Once a group collection has been deleted, its former URL slug is still registered in Invenio's PID store and reserved for the (now deleted) collection. Subsequent requests to create a collection for the same group cannot re-use the same URL slug. Instead the new slug will have a numerical disambiguator added to the end, exactly as in cases of group name collision. E.g., if the group `panda-studies` were deleted earlier, a request to create a new collection for the "Panda Studies" group would be assigned the URL slug `panda-studies-1`.
+[!NOTE] Once a group collection has been deleted, its former URL slug is still
+registered in Invenio's PID store and reserved for the (now deleted) collection.
+Subsequent requests to create a collection for the same group cannot re-use the
+same URL slug. Instead the new slug will have a numerical disambiguator added to
+the end, exactly as in cases of group name collision. E.g., if the group
+`panda-studies` were deleted earlier, a request to create a new collection for
+the "Panda Studies" group would be assigned the URL slug `panda-studies-1`.
 
-[!NOTE]
-Group collections are soft deleted and can in principle be restored within a short period after the delete signal has been sent. Eventually, though, the soft deleted collection records will be
-automatically purged entirely from the database. There is also no API mechanism for restoring them. So delete operations should be regarded as permanent and irrevocable.
+[!NOTE] Group collections are soft deleted and can in principle be restored
+within a short period after the delete signal has been sent. Eventually, though,
+the soft deleted collection records will be automatically purged entirely from
+the database. There is also no API mechanism for restoring them. So delete
+operations should be regarded as permanent and irrevocable.
 
 #### Request
 
@@ -724,18 +844,26 @@ DELETE https://example.org/api/group_collections/my-collection-slug?commons_inst
 
 #### Unsuccessful response codes
 
-- 400 Bad Request: The request did not include the required parameters or the parameters are not well formed.
-- 403 Forbidden: The requesting agent is not authorized to delete the collection. The collection may not belong to the Commons instance making the request, or it may not belong to the specified Commons group.
+- 400 Bad Request: The request did not include the required parameters or the
+  parameters are not well formed.
+- 403 Forbidden: The requesting agent is not authorized to delete the
+  collection. The collection may not belong to the Commons instance making the
+  request, or it may not belong to the specified Commons group.
 - 404 Not Found: The collection does not exist.
 - 422 UnprocessableEntity: The deletion could not be performed because the
 
 ### Logging
 
-The module will log each POST, PATCH, or DELETE request to the `group_collections` endpoint (as well as any errors) in a dedicated log file, `logs/invenio-group-collections-kcworks.log`.
+The module will log each POST, PATCH, or DELETE request to the
+`group_collections` endpoint (as well as any errors) in a dedicated log file,
+`logs/invenio-group-collections-kcworks.log`.
 
 ### Endpoint security
 
-POST, PUT, and DELETE requests to the endpoint are secured by an oauth token that must be obtained by the Commons instance administrator from the Knowledge Commons Works administrator. The token must be provided in the "Authorization" request header.
+POST, PUT, and DELETE requests to the endpoint are secured by an oauth token
+that must be obtained by the Commons instance administrator from the Knowledge
+Commons Works administrator. The token must be provided in the "Authorization"
+request header.
 
 ## Developing this package
 
@@ -745,11 +873,15 @@ This repository follows [semantic versioning](https://semver.org/).
 
 #### Version history
 
-The version history for this package is available in the [CHANGES.md](./CHANGES.md) file. If you make changes to the code that prompt a version change, you must also update the [CHANGES.md](./CHANGES.md) file to indicate the new version number and the changes made to the code.
+The version history for this package is available in the
+[CHANGES.md](./CHANGES.md) file. If you make changes to the code that prompt a
+version change, you must also update the [CHANGES.md](./CHANGES.md) file to
+indicate the new version number and the changes made to the code.
 
 #### Updating the version number
 
-This project uses the [bumpver](https://pypi.org/project/bumpver/) utility to manage versioning.
+This project uses the [bumpver](https://pypi.org/project/bumpver/) utility to
+manage versioning.
 
 To update the version number, run the following command:
 
@@ -757,13 +889,22 @@ To update the version number, run the following command:
 bumpver update --<part of version to update>
 ```
 
-where `<part of version to update>` is one of `major`, `minor`, `patch`, or `tag-num`.
+where `<part of version to update>` is one of `major`, `minor`, `patch`, or
+`tag-num`.
 
 ### Dependencies
 
-At present this package has no dependencies on other packages that are not available in the Python Package Index and installable via pip.
+At present this package has no dependencies on other packages that are not
+available in the Python Package Index and installable via pip.
 
-**NOTE:** The `invenio-communities` package has currently been forked for use in KCWorks and is not available on the Python Package Index. The fork is available at [MESH-Research/invenio-communities](https://github.com/MESH-Research/invenio-communities). The fork is currently included in the `dependencies` subdirectory of this repository, but is not presently being used because the vanilla version of `invenio-communities` is currently compatible with `invenio-group-collections-kcworks`. This may change in the future.
+**NOTE:** The `invenio-communities` package has currently been forked for use in
+KCWorks and is not available on the Python Package Index. The fork is available
+at
+[MESH-Research/invenio-communities](https://github.com/MESH-Research/invenio-communities).
+The fork is currently included in the `dependencies` subdirectory of this
+repository, but is not presently being used because the vanilla version of
+`invenio-communities` is currently compatible with
+`invenio-group-collections-kcworks`. This may change in the future.
 
 ### Running tests
 

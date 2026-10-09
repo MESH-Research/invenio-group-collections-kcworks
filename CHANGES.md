@@ -1,5 +1,7 @@
 # Changes
 
-Version 0.1.0-dev1
+Version 1.0
 
-- Initial public release.
+- Introduced improved role-based authentication for service methods and oauth
+  token scopes for view access control.
+
