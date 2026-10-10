@@ -64,7 +64,9 @@ scripts.invenio-group-collections-kcworks = "invenio_group_collections_kcworks.c
 entry-points."invenio_access.actions".group_collections_write_action = "invenio_group_collections_kcworks.permissions:group_collections_write_action"
 entry-points."invenio_base.api_apps".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
 entry-points."invenio_base.api_blueprints".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.views:create_api_blueprint"
+entry-points."invenio_base.api_finalize_app".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:api_finalize_app"
 entry-points."invenio_base.apps".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:InvenioGroupCollections"
+entry-points."invenio_base.finalize_app".invenio_group_collections_kcworks = "invenio_group_collections_kcworks.ext:finalize_app"
 entry-points."invenio_oauth2server.scopes".group_collections_read = "invenio_group_collections_kcworks.scopes:group_collections_read_scope"
 entry-points."invenio_oauth2server.scopes".group_collections_write = "invenio_group_collections_kcworks.scopes:group_collections_write_scope"
 

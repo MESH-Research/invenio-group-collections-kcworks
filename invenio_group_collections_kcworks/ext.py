@@ -16,6 +16,7 @@ from invenio_group_collections_kcworks.views import (
 )
 
 from . import config
+from .roles import ensure_service_capabilities
 from .service import (
     GroupCollectionsService,
 )
@@ -66,3 +67,19 @@ class InvenioGroupCollections:
         self.group_collections_resource = GroupCollectionsResource(
             GroupCollectionsResourceConfig(), service=self.collections_service
         )
+
+
+def finalize_app(app) -> None:
+    """UI finalize hook; registered on `invenio_base.finalize_app`.
+
+    Ensures the group-collections-write capability role and service account.
+    """
+    ensure_service_capabilities()
+
+
+def api_finalize_app(app) -> None:
+    """API finalize hook; registered on `invenio_base.api_finalize_app`.
+
+    Ensures the group-collections-write capability role and service account.
+    """
+    ensure_service_capabilities()
