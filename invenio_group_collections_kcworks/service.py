@@ -167,15 +167,19 @@ class GroupCollectionsService(RecordService):
         """
         # Resolve without the caller's identity so we can return 403 for
         # restricted collections instead of collapsing them into 404.
+        # `CommunityListResult.hits` yields schema projections (dicts), not
+        # Community / CommunityItem objects; permission generators need a
+        # record with `.id` / `.access`, so load via communities `read`.
         community_list = current_communities.service.search(
             identity=system_identity, q=f"slug:{slug}"
         )
 
         if community_list.total == 0:
             raise CollectionNotFoundError(f"No collection found with the slug {slug}")
-        result = next(community_list.hits)
+        hit = next(community_list.hits)
+        result = current_communities.service.read(system_identity, hit["id"])
         self.require_permission(
-            identity, "read_group_collection", record=result
+            identity, "read_group_collection", record=result._record
         )
 
         return result
