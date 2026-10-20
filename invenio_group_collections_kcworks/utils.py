@@ -19,6 +19,23 @@ from invenio_communities.proxies import current_communities
 from unidecode import unidecode
 
 
+def safe_response_snippet(text: str | None, max_len: int = 200) -> str:
+    """Return a truncated response body safe for application logs.
+
+    Args:
+        text: Raw HTTP response body text.
+        max_len: Maximum characters to retain.
+
+    Returns:
+        Truncated text with an ellipsis marker when shortened.
+    """
+    if not text:
+        return ""
+    if len(text) <= max_len:
+        return text
+    return f"{text[:max_len]}..."
+
+
 def get_configured_remote_group_role_labels(idp: str) -> frozenset[str]:
     """Return every remote group-role label listed under ``group_roles`` for IDP.
 

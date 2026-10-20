@@ -50,6 +50,7 @@ from .utils import (
     add_user_to_community,
     make_base_group_slug,
     map_remote_roles_to_permissions,
+    safe_response_snippet,
 )
 
 
@@ -124,28 +125,35 @@ class GroupCollectionsService(RecordService):
         elif avatar_response.status_code in [400, 405, 406, 412, 413]:
             app.logger.error(
                 "Request was not accepted when trying to access "
-                f"the provided avatar at {commons_avatar_url}"
+                f"the provided avatar at {commons_avatar_url} "
+                f"(status={avatar_response.status_code}, "
+                f"body={safe_response_snippet(avatar_response.text)!r})"
             )
-            app.logger.error(f"Response: {avatar_response.text}")
         elif avatar_response.status_code in [401, 403, 407]:
             app.logger.error(
-                f"Access the provided avatar was not allowed at {commons_avatar_url}"
+                f"Access the provided avatar was not allowed at {commons_avatar_url} "
+                f"(status={avatar_response.status_code}, "
+                f"body={safe_response_snippet(avatar_response.text)!r})"
             )
-            app.logger.error(f"Response: {avatar_response.text}")
         elif avatar_response.status_code in [404, 410]:
-            app.logger.error(f"Provided avatar was not found at {commons_avatar_url}")
-            app.logger.error(f"Response: {avatar_response.text}")
+            app.logger.error(
+                f"Provided avatar was not found at {commons_avatar_url} "
+                f"(status={avatar_response.status_code}, "
+                f"body={safe_response_snippet(avatar_response.text)!r})"
+            )
         elif avatar_response.status_code == 403:
             app.logger.error(
-                f"Access to the provided avatar was forbidden at {commons_avatar_url}"
+                f"Access to the provided avatar was forbidden at {commons_avatar_url} "
+                f"(status={avatar_response.status_code}, "
+                f"body={safe_response_snippet(avatar_response.text)!r})"
             )
-            app.logger.error(f"Response: {avatar_response.text}")
         elif avatar_response.status_code in [500, 502, 503, 504, 509, 511]:
             app.logger.error(
                 f"Connection failed when trying to access the "
-                f"provided avatar at {commons_avatar_url}"
+                f"provided avatar at {commons_avatar_url} "
+                f"(status={avatar_response.status_code}, "
+                f"body={safe_response_snippet(avatar_response.text)!r})"
             )
-            app.logger.error(f"Response: {avatar_response.text}")
 
         return success
 
@@ -348,20 +356,18 @@ class GroupCollectionsService(RecordService):
         elif meta_response.status_code == 404:
             app.logger.error(
                 f"Failed to get metadata for group {commons_group_id} on "
-                f"{instance_name}"
+                f"{instance_name} (status={meta_response.status_code}, "
+                f"body={safe_response_snippet(meta_response.text)!r})"
             )
-            app.logger.error(f"Response: {meta_response.text}")
-            app.logger.error(headers)
             raise CommonsGroupNotFoundError(
                 f"No such group {commons_group_id} could be found on {instance_name}"
             )
         else:
             app.logger.error(
                 f"Failed to get metadata for group {commons_group_id} on "
-                f"{instance_name}"
+                f"{instance_name} (status={meta_response.status_code}, "
+                f"body={safe_response_snippet(meta_response.text)!r})"
             )
-            app.logger.error(f"Response: {meta_response.text}")
-            app.logger.error(headers)
             raise UnprocessableEntity(
                 f"Something went wrong requesting group {commons_group_id} "
                 f"on {instance_name}"
