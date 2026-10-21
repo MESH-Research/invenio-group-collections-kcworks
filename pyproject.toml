@@ -26,6 +26,9 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
+  "pygments>=2.20.0",
+  "werkzeug>=3.1.9",
+  "setuptools>=83.0.0",
   "alembic",
   "click>=7",
   "docker-services-cli",
@@ -33,6 +36,7 @@ dependencies = [
   "invenio-app-rdm[opensearch2]<14",
   "invenio-cli",
   "invenio-communities",
+  "mako>=1.4.3",
   "opensearch-dsl",
   "psycopg2-binary",
   "standard-pkg-resources",
@@ -41,7 +45,6 @@ dependencies = [
 optional-dependencies.dev = [
   "bump-my-version==1.5.1",
   "check-manifest",
-  "pip-tools",
   "pytest>=7.3.2",
   "pytest-invenio",
   "pytest-runner",
