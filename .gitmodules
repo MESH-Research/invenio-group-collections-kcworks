@@ -2,3 +2,7 @@
 	path = invenio_group_collections_kcworks/dependencies/invenio-communities
 	url = https://github.com/MESH-Research/invenio-communities.git
 	branch = local-working
+[submodule "tests/fixtures"]
+	path = tests/fixtures
+	url = https://github.com/MESH-Research/kcworks-test-fixtures.git
+	branch = main

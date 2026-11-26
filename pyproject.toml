@@ -61,6 +61,7 @@ optional-dependencies.tests = [
   "requests-mock",
   "ruff>=0.3",
   "selenium",
+  "ty",
 ]
 urls.Homepage = "https://github.com/MESH-Research/invenio-group-collections-kcworks"
 scripts.invenio-group-collections-kcworks = "invenio_group_collections_kcworks.cli:cli"
@@ -81,22 +82,11 @@ sources.invenio-rdm-records = { path = "../invenio-rdm-records", editable = true
 target-version = "py312"
 line-length = 88
 exclude = [
-  "**/*.ipynb",                                                  # Exclude Jupyter notebook files
+  "**/*.ipynb", # Exclude Jupyter notebook files
   "app_data",
   "docs",
   "node_modules",
   "scripts",
-  "site/kcworks/dependencies/invenio-communities",
-  "site/kcworks/dependencies/invenio-group-collections-kcworks",
-  "site/kcworks/dependencies/invenio-modular-deposit-form",
-  "site/kcworks/dependencies/invenio-modular-detail-page",
-  "site/kcworks/dependencies/invenio-rdm-records",
-  "site/kcworks/dependencies/invenio-record-importer-kcworks",
-  "site/kcworks/dependencies/invenio-remote-api-provisioner",
-  "site/kcworks/dependencies/invenio-remote-user-data-kcworks",
-  "site/kcworks/dependencies/invenio-stats-dashboard",
-  "site/kcworks/dependencies/invenio-vocabularies",
-  "site/kcworks/services/search/index_templates",
   "tests/helpers",
 ]
 # temporarily removed C for complexity checks
@@ -110,13 +100,8 @@ lint.ignore = [
   "W3", # Blank line warnings
 ]
 lint.per-file-ignores."__init__.py" = ["D104", "E402", "F401"]
-lint.per-file-ignores."tests/api/test_stats.py" = ["C416"]
 # Ensure consistent import sorting - explicitly declare tests as first-party
-lint.isort.known-first-party = [
-  "invenio_stats_dashboard",
-  "invenio_record_importer_kcworks",
-  "tests",
-]
+lint.isort.known-first-party = ["invenio_group_collections_kcworks", "tests"]
 lint.pydocstyle.convention = "google"
 lint.preview = true
 
@@ -131,10 +116,7 @@ use_parentheses = true
 ensure_newline_before_comments = true
 split_on_trailing_comma = true
 skip = [
-  "site/kcworks/dependencies/invenio-rdm-records",
-  "site/kcworks/dependencies/invenio-vocabularies",
-  "site/kcworks/dependencies/invenio-communities",
-  "__pycache__",                                    # Skip cache directories
+  "__pycache__", # Skip cache directories
   # ".venv",  # Skip virtual environment
   # "node_modules",  # Skip node modules
 ]
@@ -162,40 +144,79 @@ ignore = [
   "*.gitkeep",
 ]
 
-[tool.mypy]
-python_version = "3.12"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
-check_untyped_defs = true
-disallow_untyped_decorators = false
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = false
-warn_no_return = false
-ignore_missing_imports = true
-follow_imports = "skip"
-allow_untyped_globals = true
-exclude = ["^tests/"]
+[tool.ty]
+analysis = {}
+# Type checking with ty (replaces mypy). Mirrors the parent KCWorks
+# project's [tool.ty] settings; paths adapted to this submodule's layout.
+environment.python-version = "3.12"
+# Rule severities (ty uses rule names; mypy options translated below)
+# warn_redundant_casts = true
+rules.redundant-cast = "warn"
+# warn_unused_ignores = false → don't warn about unused type: ignore
+rules.unused-ignore-comment = "ignore"
+rules.unused-type-ignore-comment = "ignore"
+# ignore_missing_imports = true → suppress import-not-found
+rules.import-not-found = "ignore"
+# allow_untyped_globals = true → don't error on undeclared globals
+rules.unresolved-global = "ignore"
+# Don't type-check tests.
+src.exclude = ["tests"]
 
 [tool.pytest]
+ini_options.python_files = ["test_*.py", "*_integration.py", "integration.py"]
 ini_options.addopts = """
 --ruff --doctest-modules
---log-cli-level=DEBUG
---ignore=app_data
 --ignore=docs
 --ignore=node_modules
 --ignore=scripts
 --ignore=tests/helpers
+--ignore=tests/fixtures
 --cov=invenio_group_collections_kcworks
 --cov-report=term-missing
 """
-ini_options.testpaths = ["tests", "invenio_group_collections_kcworks"]
 ini_options.norecursedirs = []
+ini_options.log_cli = true
 ini_options.log_cli_level = "DEBUG"
 ini_options.isort_show_files = true
-ini_options.plugins = []
+ini_options.plugins = [
+  "celery.contrib.pytest",
+  "tests.fixtures.app",
+  "tests.fixtures.app_config",
+  "tests.fixtures.bootstrap",
+  "tests.fixtures.celery",
+  "tests.fixtures.cli",
+  "tests.fixtures.communities",
+  "tests.fixtures.community_events",
+  "tests.fixtures.custom_fields",
+  "tests.fixtures.files",
+  "tests.fixtures.fixtures",
+  "tests.fixtures.frontend",
+  "tests.fixtures.identifiers",
+  "tests.fixtures.idms",
+  "tests.fixtures.indexer_queues",
+  "tests.fixtures.logging",
+  "tests.fixtures.mail",
+  "tests.fixtures.names",
+  "tests.fixtures.records",
+  "tests.fixtures.roles",
+  "tests.fixtures.search",
+  "tests.fixtures.search_provisioning",
+  "tests.fixtures.uow",
+  "tests.fixtures.users",
+  "tests.fixtures.vocabularies.affiliations",
+  "tests.fixtures.vocabularies.community_types",
+  "tests.fixtures.vocabularies.date_types",
+  "tests.fixtures.vocabularies.descriptions",
+  "tests.fixtures.vocabularies.funding_and_awards",
+  "tests.fixtures.vocabularies.languages",
+  "tests.fixtures.vocabularies.licenses",
+  "tests.fixtures.vocabularies.resource_types",
+  "tests.fixtures.vocabularies.roles",
+  "tests.fixtures.vocabularies.subjects",
+  "tests.fixtures.vocabularies.title_types",
+  "tests.pytest_plugins.pytest_live_status",
+]
+ini_options.testpaths = ["tests", "invenio_group_collections_kcworks"]
 
 [tool.coverage]
 run.omit = []

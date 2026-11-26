@@ -8,13 +8,18 @@
 
 """Views for Commons group collections API endpoints."""
 
+from typing import Any, NoReturn
+
 import marshmallow as ma
 import requests
-from flask import current_app as app
 from flask import (
+    Blueprint,
+    Flask,
+    Response,
     g,
     jsonify,
 )
+from flask import current_app as app
 from flask_resources import (
     JSONDeserializer,
     JSONSerializer,
@@ -28,6 +33,7 @@ from flask_resources import (
     resource_requestctx,
     route,
 )
+from invenio_communities.errors import CommunityDeletedError
 from invenio_oauth2server.decorators import require_api_auth, require_oauth_scopes
 from invenio_records_resources.services.errors import PermissionDeniedError
 from werkzeug.exceptions import (  # Unauthorized,
@@ -49,9 +55,12 @@ from .scopes import (
     group_collections_read_scope,
     group_collections_write_scope,
 )
+from .service import GroupCollectionsService
 
 
 class GroupCollectionsResourceConfig(ResourceConfig):
+    """Configuration for the group collections API resource."""
+
     blueprint_name = "group_collections"
 
     url_prefix = "/group_collections"
@@ -68,7 +77,12 @@ class GroupCollectionsResourceConfig(ResourceConfig):
 
 
 class GroupCollectionsResource(Resource):
-    def __init__(self, config, service):
+    """Resource for Commons group collections API endpoints."""
+
+    def __init__(
+        self, config: GroupCollectionsResourceConfig, service: GroupCollectionsService
+    ) -> None:
+        """Constructor."""
         super().__init__(config)
         self.service = service
 
@@ -117,6 +131,10 @@ class GroupCollectionsResource(Resource):
             {"message": str(e), "status": 404},
             404,
         ),
+        CommunityDeletedError: lambda e: (
+            {"message": "The collection has been deleted.", "status": 410},
+            410,
+        ),
         requests.exceptions.ConnectionError: lambda e: (
             {"message": str(e), "status": 503},
             503,
@@ -164,23 +182,35 @@ class GroupCollectionsResource(Resource):
             "restore_deleted": ma.fields.Boolean(load_default=False),
         },
         location="args",
+        unknown=ma.RAISE,
     )
 
-    def create_url_rules(self):
-        """Create the URL rules for the record resource."""
+    def create_url_rules(self) -> list[dict[str, Any]]:
+        """Create the URL rules for the record resource.
+
+        Returns:
+            The list of Flask route rules for this resource.
+        """
         return [
             route("POST", "/", self.create),
             route("GET", "/", self.search),
             route("GET", "/<slug>", self.read),
             route("DELETE", "/", self.failed_delete),
             route("DELETE", "/<slug>", self.delete),
+            route("PATCH", "/<slug>/associate", self.associate),
+            route("PATCH", "/<slug>/transfer", self.transfer),
             route("PATCH", "/<slug>", self.change_group_ownership),
             route("PUT", "/<slug>", self.replace_group_metadata),
         ]
 
     @require_api_auth()
     @require_oauth_scopes(group_collections_write_scope.id)
-    def replace_group_metadata(self):
+    def replace_group_metadata(self) -> NoReturn:
+        """Reject metadata modification at this endpoint.
+
+        Raises:
+            NotImplementedError: Always; use the main `communities` API instead.
+        """
         raise NotImplementedError(
             "Modification of collection metadata is not supported at "
             "this endpoint. Use the main `communities` API endpoint instead."
@@ -189,21 +219,36 @@ class GroupCollectionsResource(Resource):
     @require_api_auth()
     @require_oauth_scopes(group_collections_read_scope.id)
     @request_parsed_view_args
-    def read(self):
+    def read(self) -> tuple[Response, int]:
+        """Read a group collection by slug.
+
+        Returns:
+            JSON collection payload and HTTP 200.
+
+        Raises:
+            BadRequest: If no collection slug is provided.
+        """
         collection_slug = resource_requestctx.view_args.get("slug")
         if collection_slug:
             collection = current_group_collections_service.read(
                 g.identity, collection_slug
             )
-            return jsonify(collection), 200
+            return jsonify(collection.to_dict()), 200
         else:
             raise BadRequest("No collection slug provided")
 
     @require_api_auth()
     @require_oauth_scopes(group_collections_read_scope.id)
     @request_parsed_args
-    def search(self):
-        commons_instance = resource_requestctx.args.get("commons_instance")
+    def search(self) -> tuple[Response, int]:
+        """Search group collections.
+
+        Returns:
+            JSON search results and HTTP 200.
+        """
+        commons_instance = (
+            resource_requestctx.args.get("commons_instance") or "knowledgeCommons"
+        )
         commons_group_id = resource_requestctx.args.get("commons_group_id")
         page = resource_requestctx.args.get("page")
         size = resource_requestctx.args.get("size")
@@ -224,8 +269,15 @@ class GroupCollectionsResource(Resource):
     @require_oauth_scopes(group_collections_write_scope.id)
     @request_parsed_args
     @request_data
-    def create(self):
-        commons_instance = resource_requestctx.data.get("commons_instance")
+    def create(self) -> tuple[Response, int]:
+        """Create a group collection for a Commons group.
+
+        Returns:
+            JSON create response and HTTP 201.
+        """
+        commons_instance = (
+            resource_requestctx.data.get("commons_instance") or "knowledgeCommons"
+        )
         commons_group_id = resource_requestctx.data.get("commons_group_id")
         restore_deleted = resource_requestctx.args.get("restore_deleted")
         collection_visibility = resource_requestctx.data.get("collection_visibility")
@@ -249,45 +301,125 @@ class GroupCollectionsResource(Resource):
 
     @require_api_auth()
     @require_oauth_scopes(group_collections_write_scope.id)
-    def change_group_ownership(self, collection_slug):
-        # Implement the logic for handling PATCH requests to change
-        # group ownership
-        # request_data = request.get_json()
-        # old_commons_group_id = request_data.get("old_commons_group_id")
-        # new_commons_group_id = request_data.get("new_commons_group_id")
-        # new_commons_group_name = request_data.get("new_commons_group_name")
-        # new_commons_group_visibility = request_data.get(
-        #     "new_commons_group_visibility"
-        # )
+    @request_parsed_view_args
+    @request_data
+    def associate(self) -> tuple[Response, int]:
+        """Associate an existing collection with a KC group.
 
-        # Implement logic to modify an existing collection
-        # ...
+        Returns:
+            JSON associate response and HTTP 200.
 
-        # Construct the response
-        # response_data = {
-        #     "collection": collection_slug,
-        #     "old_commons_group_id": old_commons_group_id,
-        #     "new_commons_group_id": new_commons_group_id,
-        # }
+        Raises:
+            BadRequest: If no collection slug is provided.
+        """
+        collection_slug = resource_requestctx.view_args.get("slug")
+        if not collection_slug:
+            raise BadRequest("No collection slug provided")
 
-        # return jsonify(response_data), 200
+        commons_instance = (
+            resource_requestctx.data.get("commons_instance") or "knowledgeCommons"
+        )
+        commons_group_id = resource_requestctx.data.get("commons_group_id")
+        collection_visibility = resource_requestctx.data.get(
+            "collection_visibility"
+        )
+
+        updated = current_group_collections_service.associate(
+            g.identity,
+            collection_slug,
+            commons_group_id,
+            commons_instance,
+            collection_visibility=collection_visibility,
+        )
+        return (
+            jsonify({
+                "commons_group_id": commons_group_id,
+                "collection": updated.data["slug"],
+                "collection_id": updated.data["id"],
+            }),
+            200,
+        )
+
+    @require_api_auth()
+    @require_oauth_scopes(group_collections_write_scope.id)
+    @request_parsed_view_args
+    @request_data
+    def transfer(self) -> tuple[Response, int]:
+        """Transfer a linked collection to a different KC group.
+
+        Returns:
+            JSON transfer response and HTTP 200.
+
+        Raises:
+            BadRequest: If no collection slug is provided.
+        """
+        collection_slug = resource_requestctx.view_args.get("slug")
+        if not collection_slug:
+            raise BadRequest("No collection slug provided")
+
+        commons_instance = (
+            resource_requestctx.data.get("commons_instance") or "knowledgeCommons"
+        )
+        commons_group_id = resource_requestctx.data.get("commons_group_id")
+        old_commons_instance = resource_requestctx.data.get(
+            "old_commons_instance"
+        )
+        old_commons_group_id = resource_requestctx.data.get(
+            "old_commons_group_id"
+        )
+        collection_visibility = resource_requestctx.data.get(
+            "collection_visibility"
+        )
+
+        updated = current_group_collections_service.transfer(
+            g.identity,
+            collection_slug,
+            commons_group_id,
+            commons_instance,
+            old_commons_group_id=old_commons_group_id,
+            old_commons_instance=old_commons_instance,
+            collection_visibility=collection_visibility,
+        )
+        return (
+            jsonify({
+                "commons_group_id": commons_group_id,
+                "old_commons_group_id": old_commons_group_id,
+                "collection": updated.data["slug"],
+                "collection_id": updated.data["id"],
+            }),
+            200,
+        )
+
+    @require_api_auth()
+    @require_oauth_scopes(group_collections_write_scope.id)
+    def change_group_ownership(self) -> NoReturn:
+        """Legacy PATCH /<slug> — use /associate or /transfer instead."""
         raise NotImplementedError(
-            "PATCH requests to change group ownership of a collection "
-            "are not yet implemented."
+            "PATCH /group_collections/<slug> is not supported. "
+            "Use PATCH /group_collections/<slug>/associate or "
+            "PATCH /group_collections/<slug>/transfer."
         )
 
     @require_api_auth()
     @require_oauth_scopes(group_collections_write_scope.id)
     @request_parsed_args
     @request_parsed_view_args
-    def delete(self):
+    def delete(self) -> tuple[str, int]:
         """Delete a group collection and delete the group roles.
 
         This is a soft delete operation. The collection is marked as deleted
         and a tombstone record is created. The group roles are also deleted.
+
+        Returns:
+            Success message and HTTP 204.
+
+        Raises:
+            BadRequest: If the collection slug or `commons_group_id` is missing.
         """
         collection_slug = resource_requestctx.view_args.get("slug")
-        commons_instance = resource_requestctx.args.get("commons_instance")
+        commons_instance = (
+            resource_requestctx.args.get("commons_instance") or "knowledgeCommons"
+        )
         commons_group_id = resource_requestctx.args.get("commons_group_id")
         app.logger.info(
             f"Attempting to delete collection {collection_slug} for "
@@ -297,9 +429,6 @@ class GroupCollectionsResource(Resource):
         if not collection_slug:
             app.logger.error("No collection slug provided. Could not delete.")
             raise BadRequest("No collection slug provided")
-        elif not commons_instance:
-            app.logger.error("No commons_instance provided. Could not delete.")
-            raise BadRequest("No commons_instance provided")
         elif not commons_group_id:
             app.logger.error("No commons_group_id provided. Could not delete.")
             raise BadRequest("No commons_group_id provided")
@@ -320,14 +449,24 @@ class GroupCollectionsResource(Resource):
             204,
         )
 
-    def failed_delete(self):
-        """Error response for missing collection slug."""
+    def failed_delete(self) -> NoReturn:
+        """Error response for missing collection slug.
+
+        Raises:
+            BadRequest: Always, because no collection slug was provided.
+        """
         raise BadRequest("No collection slug provided")
 
 
-def create_api_blueprint(app):
-    """Register blueprint on api app."""
+def create_api_blueprint(app: Flask) -> Blueprint:
+    """Register blueprint on api app.
+
+    Returns:
+        The registered API blueprint.
+    """
     ext = app.extensions["invenio-group-collections-kcworks"]
     blueprint = ext.group_collections_resource.as_blueprint()
 
     return blueprint
+
+
