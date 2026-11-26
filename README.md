@@ -1,6 +1,6 @@
 # Invenio Group Collections for Knowledge Commons Works
 
-Version 1.0.0
+Version 1.1.0
 
 Copyright 2024 Mesh Research Contributors: Ian Scott
 
